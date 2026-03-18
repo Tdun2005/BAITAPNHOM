@@ -1,0 +1,1246 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Tài khoản - SmartBusAI</title>
+<style>
+
+/* =====================================================
+   VARIABLES
+===================================================== */
+:root{
+  --neon:#00ffe0; --neon2:#00a8ff; --purple:#6c5ce7;
+  --green:#1abc9c; --red:#e74c3c;
+  --glass:rgba(255,255,255,0.07);
+  --glass-light:rgba(255,255,255,0.96);
+  --border:rgba(255,255,255,0.12);
+}
+
+/* =====================================================
+   RESET
+===================================================== */
+*{ box-sizing:border-box; margin:0; padding:0; font-family:"Segoe UI",Arial,sans-serif; }
+
+html{
+  background:
+    radial-gradient(ellipse at 15% 20%, rgba(0,255,224,0.07) 0%, transparent 45%),
+    radial-gradient(ellipse at 85% 75%, rgba(108,92,231,0.10) 0%, transparent 45%),
+    radial-gradient(ellipse at 50% 10%,  rgba(0,164,255,0.06) 0%, transparent 55%),
+    linear-gradient(160deg,#060b18 0%,#0c1b2a 35%,#112030 65%,#060b18 100%);
+  background-attachment:fixed; min-height:100vh;
+}
+
+body{
+  color:#fff; background:transparent; overflow-x:hidden;
+  animation:fadeIn .35s ease;
+}
+@keyframes fadeIn{ from{opacity:0} to{opacity:1} }
+
+/* ─── Galaxy canvas ─── */
+#galaxyCanvas{ position:fixed; inset:0; z-index:-3; pointer-events:none; }
+
+/* ─── Nebula glow ─── */
+.nebula{
+  position:fixed; inset:0; z-index:-2; pointer-events:none;
+  background:
+    radial-gradient(circle at 20% 30%, rgba(0,255,200,0.07) 0%, transparent 40%),
+    radial-gradient(circle at 78% 68%, rgba(108,92,231,0.08) 0%, transparent 40%),
+    radial-gradient(circle at 55% 88%, rgba(0,140,255,0.05) 0%, transparent 38%);
+}
+
+/* ─── Shooting stars ─── */
+.star{ position:fixed; width:2px; height:70px;
+  background:linear-gradient(rgba(255,255,255,.9),transparent);
+  transform:rotate(42deg); animation:shoot 18s linear infinite;
+  pointer-events:none; z-index:-1; will-change:transform,opacity; }
+.star:nth-child(1){ top:6%;  left:12%; animation-delay:0s; }
+.star:nth-child(2){ top:30%; left:58%; animation-delay:5s; }
+.star:nth-child(3){ top:62%; left:78%; animation-delay:10s; }
+.star:nth-child(4){ top:80%; left:30%; animation-delay:14s; }
+@keyframes shoot{
+  0%  { transform:translate3d(0,0,0) rotate(42deg); opacity:1; }
+  100%{ transform:translate3d(700px,700px,0) rotate(42deg); opacity:0; }
+}
+
+/* ─── Planets ─── */
+.planet{ position:fixed; border-radius:50%; pointer-events:none; z-index:-1; }
+.planet1{ width:160px; height:160px; top:70px; right:70px;
+  background:radial-gradient(circle at 30% 30%,#fff,#6c5ce7 45%,#2c5364 78%);
+  box-shadow:0 0 65px rgba(108,92,231,.65),0 0 130px rgba(108,92,231,.28); }
+.planet2{ width:80px; height:80px; bottom:130px; left:70px;
+  background:radial-gradient(circle at 38% 38%,#fff,#00d4ff 55%,#001a33 85%);
+  box-shadow:0 0 45px rgba(0,212,255,.65);
+  animation:float 11s ease-in-out infinite; }
+@keyframes float{ 0%,100%{transform:translateY(0)} 50%{transform:translateY(-20px)} }
+
+/* =====================================================
+   PAGE TRANSITION
+===================================================== */
+a[href]{ cursor:pointer; }
+
+/* =====================================================
+   HEADER
+===================================================== */
+header{
+  background:rgba(8,14,26,0.72);
+  backdrop-filter:blur(14px); -webkit-backdrop-filter:blur(14px);
+  border-bottom:1px solid var(--border);
+  padding:14px 80px;
+  display:flex; justify-content:space-between; align-items:center;
+  position:sticky; top:0; z-index:3000;
+  box-shadow:0 4px 28px rgba(0,255,224,0.06);
+  min-height:60px;
+}
+
+.logo{
+  font-size:21px; font-weight:700; letter-spacing:1px;
+  background:linear-gradient(90deg,#00ffe0,#00a8ff);
+  -webkit-background-clip:text; -webkit-text-fill-color:transparent;
+  display:flex; align-items:center; gap:8px; white-space:nowrap;
+}
+
+.header-nav{ display:flex; gap:10px; align-items:center; margin-left:auto; }
+
+.header-nav a{
+  padding:8px 18px; border-radius:22px;
+  background:rgba(255,255,255,0.07);
+  text-decoration:none; color:#c2e8ff;
+  font-weight:600; font-size:13.5px;
+  border:1px solid rgba(255,255,255,0.11);
+  transition:all .22s;
+  display:flex; align-items:center; gap:5px; white-space:nowrap;
+}
+.header-nav a:hover{ background:#1abc9c; color:#fff; border-color:transparent; box-shadow:0 0 18px rgba(26,188,156,.5); }
+
+.btn-logout{
+  padding:8px 18px; border-radius:22px;
+  background:linear-gradient(135deg,rgba(231,76,60,0.85),rgba(192,57,43,0.85));
+  border:none; color:#fff; font-weight:700; font-size:13.5px;
+  cursor:pointer; transition:transform .22s, box-shadow .22s;
+  display:flex; align-items:center; gap:5px; white-space:nowrap;
+}
+.btn-logout:hover{ transform:translateY(-2px); box-shadow:0 8px 22px rgba(231,76,60,.4); }
+
+/* =====================================================
+   HERO STRIP
+===================================================== */
+.hero-strip{
+  max-width:1200px; margin:30px auto 0; padding:0 24px;
+  display:flex; align-items:center; gap:24px;
+}
+
+.avatar-wrap{ position:relative; flex-shrink:0; }
+.avatar-wrap img{
+  width:96px; height:96px; border-radius:50%;
+  object-fit:cover;
+  border:3px solid rgba(0,255,224,.5);
+  box-shadow:0 0 22px rgba(0,255,224,.28),0 6px 20px rgba(0,0,0,.40);
+  cursor:pointer; transition:transform .28s, box-shadow .28s;
+}
+.avatar-wrap img:hover{ transform:scale(1.07); box-shadow:0 0 38px rgba(0,255,224,.55),0 10px 26px rgba(0,0,0,.5); }
+.avatar-edit{
+  position:absolute; bottom:0; right:0;
+  width:26px; height:26px; border-radius:50%;
+  background:var(--green); border:2px solid #06101e;
+  display:flex; align-items:center; justify-content:center;
+  font-size:12px; cursor:pointer; transition:transform .2s;
+  box-shadow:0 2px 8px rgba(0,0,0,.35);
+}
+.avatar-edit:hover{ transform:scale(1.18); }
+
+.hero-text{ flex:1; }
+.hero-name{ font-size:24px; font-weight:700; color:#fff; line-height:1.2; }
+.hero-email{ font-size:13px; color:#7ab4c9; margin-top:3px; }
+
+.hero-badges{ display:flex; gap:7px; margin-top:9px; flex-wrap:wrap; }
+.hbadge{
+  font-size:10.5px; font-weight:700; padding:3px 10px;
+  border-radius:20px; border:1px solid; white-space:nowrap;
+}
+.hb-member  { background:rgba(0,255,224,.10); border-color:rgba(0,255,224,.35); color:#00ffe0; }
+.hb-verified{ background:rgba(46,204,113,.12); border-color:rgba(46,204,113,.40); color:#2ecc71; }
+.hb-trips   { background:rgba(0,168,255,.10); border-color:rgba(0,168,255,.35); color:#00a8ff; }
+
+.hero-stats{ display:flex; gap:28px; margin-top:14px; }
+.hstat{ display:flex; flex-direction:column; align-items:center; gap:2px; }
+.hstat-num{ font-size:20px; font-weight:800; color:var(--neon); line-height:1; }
+.hstat-lbl{ font-size:10px; color:#7ab4c9; font-weight:500; white-space:nowrap; }
+
+/* =====================================================
+   TAB SWITCHER
+===================================================== */
+.tabs{
+  max-width:1200px; margin:24px auto 0; padding:0 24px;
+  display:flex; gap:10px;
+}
+
+.tab{
+  display:flex; align-items:center; gap:8px;
+  padding:11px 26px; border-radius:14px;
+  border:1px solid var(--border); background:var(--glass);
+  color:#9bb8ca; font-weight:600; font-size:14px;
+  cursor:pointer;
+  backdrop-filter:blur(8px); -webkit-backdrop-filter:blur(8px);
+  transition:all .25s;
+}
+.tab:hover{ background:rgba(255,255,255,.10); color:#fff; }
+.tab.active{
+  background:rgba(0,255,224,.12);
+  border-color:rgba(0,255,224,.40);
+  color:#00ffe0;
+  box-shadow:0 0 18px rgba(0,255,224,.13);
+}
+.tab-pip{
+  width:7px; height:7px; border-radius:50%;
+  background:currentColor; opacity:.6; flex-shrink:0;
+}
+.tab.active .tab-pip{ opacity:1; }
+
+/* =====================================================
+   SCREEN WRAPPER
+===================================================== */
+.screen{
+  max-width:1200px; margin:20px auto 70px; padding:0 24px;
+  display:none;
+}
+.screen.active{ display:block; }
+
+/* =====================================================
+   GLASS CARD BASE
+===================================================== */
+.gc{
+  background:var(--glass);
+  backdrop-filter:blur(14px); -webkit-backdrop-filter:blur(14px);
+  border:1px solid var(--border);
+  border-radius:20px;
+  box-shadow:0 8px 32px rgba(0,0,0,.35);
+}
+
+/* =====================================================
+   SCREEN A — PROFILE
+===================================================== */
+.profile-grid{
+  display:grid;
+  grid-template-columns:280px 1fr;
+  gap:20px; align-items:start;
+}
+
+/* ─── Sidebar ─── */
+.sidebar{ display:flex; flex-direction:column; gap:16px; }
+
+.sb-card{ padding:20px; }
+
+.sb-avt{ text-align:center; margin-bottom:4px; }
+.sb-avt img{
+  width:84px; height:84px; border-radius:50%; object-fit:cover;
+  border:3px solid rgba(0,255,224,.45);
+  box-shadow:0 0 18px rgba(0,255,224,.22),0 5px 16px rgba(0,0,0,.40);
+  cursor:pointer; transition:transform .25s, box-shadow .25s;
+}
+.sb-avt img:hover{ transform:scale(1.06); box-shadow:0 0 30px rgba(0,255,224,.45); }
+.sb-name{ text-align:center; font-size:15px; font-weight:700; margin-top:10px; color:#fff; }
+.sb-role{ text-align:center; font-size:12px; color:#7ab4c9; margin-top:2px; }
+
+.quick-info{ display:flex; flex-direction:column; gap:9px; margin-top:14px; }
+.qi{
+  display:flex; align-items:center; gap:9px;
+  font-size:12.5px; color:#9bb8ca;
+}
+.qi-icon{
+  width:28px; height:28px; border-radius:7px; flex-shrink:0;
+  background:rgba(0,255,224,.09); border:1px solid rgba(0,255,224,.14);
+  display:flex; align-items:center; justify-content:center; font-size:13px;
+}
+.qi-val{ font-weight:600; color:#d8f0ff; }
+
+/* tips card */
+.tips-title{ font-size:12.5px; font-weight:700; color:var(--neon); margin-bottom:11px; }
+.tip{
+  display:flex; align-items:center; gap:9px; font-size:12px; color:#9bb8ca;
+  padding:8px 10px; border-radius:10px;
+  background:rgba(0,255,224,.04); border:1px solid rgba(0,255,224,.09);
+  margin-bottom:7px;
+}
+.tip:last-child{ margin-bottom:0; }
+.tip-ico{ font-size:15px; flex-shrink:0; }
+
+/* ─── Form card ─── */
+.form-card{ padding:26px; }
+
+.fsec{
+  font-size:12px; font-weight:700; color:var(--neon);
+  text-transform:uppercase; letter-spacing:.6px;
+  margin:20px 0 12px; padding-bottom:8px;
+  border-bottom:1px solid rgba(0,255,224,.14);
+  display:flex; align-items:center; gap:7px;
+}
+.fsec:first-child{ margin-top:0; }
+
+.fgrid{ display:grid; grid-template-columns:1fr 1fr; gap:13px; }
+.fgrid.full{ grid-template-columns:1fr; margin-top:13px; }
+
+.field{ display:flex; flex-direction:column; gap:5px; }
+.field label{
+  font-size:11.5px; font-weight:600; color:#7ab4c9;
+  text-transform:uppercase; letter-spacing:.4px;
+}
+.field input,
+.field select{
+  padding:10px 13px; border-radius:11px;
+  border:1px solid rgba(255,255,255,.13);
+  background:rgba(255,255,255,.07);
+  color:#fff; font-weight:500; font-size:13.5px;
+  transition:border .2s, box-shadow .2s, background .2s;
+}
+.field input::placeholder{ color:#5a7a8a; }
+.field input:focus,
+.field select:focus{
+  outline:none; border-color:var(--neon);
+  background:rgba(0,255,224,.06);
+  box-shadow:0 0 0 3px rgba(0,255,224,.12);
+}
+.field select option{ background:#132030; color:#fff; }
+
+/* ─── Action buttons (keep original positions, but beautiful) ─── */
+.form-actions{ margin-top:22px; display:flex; gap:12px; }
+
+.save-btn{
+  flex:1; padding:13px 0; border:none; border-radius:14px;
+  background:linear-gradient(135deg,#1abc9c,#16a085);
+  color:#fff; font-weight:700; font-size:15px; cursor:pointer;
+  box-shadow:0 6px 20px rgba(26,188,156,.35);
+  transition:transform .22s, box-shadow .22s;
+  display:flex; align-items:center; justify-content:center; gap:7px;
+}
+.save-btn:hover{ transform:translateY(-3px); box-shadow:0 10px 28px rgba(26,188,156,.52); }
+.save-btn:active{ transform:scale(.97); }
+
+.delete-btn{
+  flex:1; padding:13px 0; border-radius:14px;
+  background:transparent;
+  border:1px solid rgba(231,76,60,.45);
+  color:#e74c3c; font-weight:700; font-size:15px; cursor:pointer;
+  transition:all .22s;
+  display:flex; align-items:center; justify-content:center; gap:7px;
+}
+.delete-btn:hover{
+  background:linear-gradient(135deg,#e74c3c,#c0392b);
+  color:#fff; border-color:transparent;
+  transform:translateY(-3px); box-shadow:0 10px 28px rgba(231,76,60,.42);
+}
+
+/* =====================================================
+   SCREEN B — BOOKINGS
+===================================================== */
+.bk-header{
+  display:flex; justify-content:space-between; align-items:center;
+  margin-bottom:18px; flex-wrap:wrap; gap:10px;
+}
+.bk-title{
+  font-size:19px; font-weight:700; color:#fff;
+  display:flex; align-items:center; gap:8px;
+}
+
+.bk-filters{ display:flex; gap:7px; flex-wrap:wrap; }
+.fchip{
+  padding:6px 14px; border-radius:20px; font-size:12px; font-weight:600;
+  border:1px solid var(--border); background:var(--glass);
+  color:#9bb8ca; cursor:pointer; transition:all .2s;
+}
+.fchip.on{ background:rgba(0,255,224,.12); border-color:rgba(0,255,224,.40); color:#00ffe0; }
+.fchip:hover{ background:rgba(255,255,255,.09); color:#fff; }
+
+/* stat mini-cards */
+.bk-stats{ display:flex; gap:14px; margin-bottom:18px; flex-wrap:wrap; }
+.bkstat{
+  flex:1; min-width:130px; padding:15px 18px;
+  display:flex; align-items:center; gap:12px;
+}
+.bkstat-ico{ font-size:24px; flex-shrink:0; }
+.bkstat-lbl{ font-size:10px; color:#7ab4c9; font-weight:600; text-transform:uppercase; letter-spacing:.4px; }
+.bkstat-num{ font-size:20px; font-weight:800; line-height:1; margin-top:2px; }
+
+/* booking cards */
+#bookingList{ display:flex; flex-direction:column; gap:14px; }
+
+.booking-card{
+  padding:20px 22px;
+  transition:transform .28s cubic-bezier(.22,.61,.36,1), box-shadow .28s;
+  contain:layout style;
+}
+.booking-card:hover{
+  transform:translateY(-5px);
+  box-shadow:0 18px 48px rgba(0,0,0,.45),0 0 22px rgba(0,255,224,.07);
+}
+
+.bk-top{ display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:13px; }
+
+.bk-route{
+  font-size:16px; font-weight:700; color:#fff;
+  display:flex; align-items:center; gap:9px;
+}
+.bk-arrow{ color:var(--neon); font-size:13px; }
+
+.status{ padding:4px 11px; border-radius:20px; font-size:11px; font-weight:700; letter-spacing:.3px; }
+.PAID    { background:rgba(46,204,113,.16); border:1px solid rgba(46,204,113,.40); color:#2ecc71; }
+.PENDING { background:rgba(243,156,18,.16); border:1px solid rgba(243,156,18,.40); color:#f39c12; }
+.CANCELED{ background:rgba(231,76,60,.16);  border:1px solid rgba(231,76,60,.40);  color:#e74c3c; }
+
+.bk-meta{
+  display:grid; grid-template-columns:repeat(3,1fr); gap:9px; margin-bottom:14px;
+}
+.bkm{
+  background:rgba(255,255,255,.04); border-radius:10px; padding:9px 11px;
+}
+.bkm-lbl{ font-size:10px; color:#7ab4c9; font-weight:600; text-transform:uppercase; letter-spacing:.3px; }
+.bkm-val{ font-size:12.5px; font-weight:700; color:#d8f0ff; margin-top:2px; }
+
+.bk-btns{ display:flex; gap:9px; }
+
+.cancel-btn{
+  padding:7px 18px; border-radius:10px;
+  background:rgba(231,76,60,.14); border:1px solid rgba(231,76,60,.35);
+  color:#e74c3c; font-weight:700; font-size:12.5px; cursor:pointer;
+  transition:all .2s; display:flex; align-items:center; gap:5px;
+}
+.cancel-btn:hover{
+  background:linear-gradient(135deg,#e74c3c,#c0392b);
+  color:#fff; border-color:transparent;
+  transform:translateY(-2px); box-shadow:0 6px 16px rgba(231,76,60,.35);
+}
+
+.detail-btn{
+  padding:7px 18px; border-radius:10px;
+  background:rgba(0,255,224,.09); border:1px solid rgba(0,255,224,.24);
+  color:var(--neon); font-weight:700; font-size:12.5px; cursor:pointer;
+  transition:all .2s; display:flex; align-items:center; gap:5px;
+}
+.detail-btn:hover{ background:rgba(0,255,224,.18); transform:translateY(-2px); }
+
+.pay-btn{
+  padding:7px 18px; border-radius:10px;
+  background:linear-gradient(135deg,rgba(243,156,18,.22),rgba(230,126,34,.22));
+  border:1px solid rgba(243,156,18,.45);
+  color:#f39c12; font-weight:700; font-size:12.5px; cursor:pointer;
+  transition:all .2s; display:flex; align-items:center; gap:5px;
+}
+.pay-btn:hover{
+  background:linear-gradient(135deg,#f39c12,#e67e22);
+  color:#fff; border-color:transparent;
+  transform:translateY(-2px); box-shadow:0 6px 16px rgba(243,156,18,.40);
+}
+
+/* ── PAYMENT MODAL ── */
+#payModal{
+  display:none; position:fixed; inset:0; z-index:4000;
+  background:rgba(3,8,20,.82); backdrop-filter:blur(6px);
+  align-items:center; justify-content:center;
+}
+#payModal.open{ display:flex; }
+.pay-modal-box{
+  background:#0b1628; border:1px solid rgba(243,156,18,.3);
+  border-radius:22px; width:100%; max-width:360px; padding:28px 26px;
+  box-shadow:0 20px 60px rgba(0,0,0,.6);
+  animation:pmIn .22s ease; color:#fff;
+}
+@keyframes pmIn{ from{transform:translateY(18px);opacity:0} to{transform:none;opacity:1} }
+.pay-modal-box h3{ font-size:17px; font-weight:800; color:#f39c12; margin-bottom:6px; }
+.pay-modal-box p{ font-size:13px; color:#9ab4cc; line-height:1.5; margin-bottom:18px; }
+.pay-option{
+  display:flex; align-items:center; gap:12px;
+  padding:12px 14px; border-radius:12px; cursor:pointer;
+  border:2px solid rgba(255,255,255,.08); background:rgba(255,255,255,.04);
+  margin-bottom:10px; transition:all .2s;
+}
+.pay-option:hover{ border-color:rgba(243,156,18,.45); background:rgba(243,156,18,.07); }
+.pay-option.selected{ border-color:#f39c12; background:rgba(243,156,18,.12); }
+.pay-option-ico{ font-size:24px; flex-shrink:0; }
+.pay-option-name{ font-size:14px; font-weight:700; }
+.pay-option-desc{ font-size:11px; color:#7ab4c8; margin-top:1px; }
+.pay-confirm-btn{
+  width:100%; padding:13px; border:none; border-radius:12px; cursor:pointer;
+  background:linear-gradient(135deg,#f39c12,#e67e22); color:#fff;
+  font-size:14px; font-weight:800; font-family:"Segoe UI",Arial,sans-serif;
+  box-shadow:0 0 18px rgba(243,156,18,.35); transition:transform .2s,box-shadow .2s;
+  margin-top:6px;
+}
+.pay-confirm-btn:hover{ transform:translateY(-2px); box-shadow:0 0 28px rgba(243,156,18,.55); }
+.pay-confirm-btn:disabled{ opacity:.5; cursor:not-allowed; transform:none; }
+.pay-cancel-link{
+  display:block; text-align:center; margin-top:12px;
+  font-size:13px; color:#5a7a8a; cursor:pointer; transition:color .2s;
+}
+.pay-cancel-link:hover{ color:#c8e8f0; }
+
+.empty{
+  text-align:center; padding:55px 20px; color:#5a7a8a;
+}
+.empty-ico{ font-size:54px; margin-bottom:12px; }
+
+/* =====================================================
+   AI SYSTEM
+===================================================== */
+#aiOverlay{
+  position:fixed; inset:0;
+  background:rgba(0,0,0,.78);
+  z-index:2000; display:none;
+  pointer-events:none;
+}
+
+.ai-highlight{
+  position:relative; z-index:3001 !important;
+  border-radius:18px;
+  animation:glowPulse 1.6s infinite alternate;
+}
+@keyframes glowPulse{
+  from{ box-shadow:0 0 0 4px #00ffe0,0 0 22px rgba(0,255,200,.7),0 0 55px rgba(0,255,200,.5); }
+  to  { box-shadow:0 0 0 6px #00ffe0,0 0 50px rgba(0,255,200,1),0 0 110px rgba(0,255,200,.75); }
+}
+
+#aiBox{
+  position:fixed; bottom:28px; right:28px; width:340px;
+  background:rgba(255,255,255,.96);
+  backdrop-filter:blur(14px); -webkit-backdrop-filter:blur(14px);
+  border-radius:20px; padding:22px;
+  box-shadow:0 22px 60px rgba(0,0,0,.38);
+  z-index:3002; display:none;
+  animation:popIn .28s ease;
+  color:#2c3e50;
+}
+@keyframes popIn{ from{opacity:0;transform:translateY(12px)} to{opacity:1;transform:translateY(0)} }
+#aiBox h4{ color:#0f3d4c; margin-bottom:8px; font-size:14.5px; }
+#aiBox p{ font-size:13px; color:#546e7a; line-height:1.65; margin-bottom:14px; }
+
+.ai-btns{ display:flex; gap:8px; }
+.ai-btn{ padding:8px 16px; border:none; border-radius:10px; font-weight:700; font-size:13px; cursor:pointer; transition:transform .18s, box-shadow .18s; }
+.ai-btn:hover{ transform:translateY(-2px); box-shadow:0 4px 12px rgba(0,0,0,.18); }
+.ai-next{ background:#1abc9c; color:#fff; }
+.ai-skip{ background:#e74c3c; color:#fff; }
+
+/* Floating AI buttons */
+.ai-float{
+  position:fixed; bottom:28px; width:50px; height:50px;
+  border-radius:50%; border:none;
+  display:flex; align-items:center; justify-content:center;
+  font-size:22px; cursor:pointer; z-index:1000;
+  box-shadow:0 0 20px rgba(0,255,224,.55),0 6px 18px rgba(0,0,0,.35);
+  transition:transform .25s, box-shadow .25s;
+  will-change:transform;
+}
+.ai-float:hover{
+  transform:scale(1.12);
+  box-shadow:0 0 32px rgba(0,255,224,.75),0 10px 24px rgba(0,0,0,.4);
+}
+#aiBtn1{ left:28px;  background:linear-gradient(135deg,#00ffe0,#00c9a7); }
+#aiBtn2{ left:90px;  background:linear-gradient(135deg,#00a8ff,#0078d4); }
+</style>
+<script src="/js/api.js"></script>
+</head>
+
+<body>
+
+<!-- ── Galaxy ── -->
+<canvas id="galaxyCanvas"></canvas>
+<div class="nebula"></div>
+<div class="planet planet1"></div>
+<div class="planet planet2"></div>
+<div class="star"></div><div class="star"></div>
+<div class="star"></div><div class="star"></div>
+
+<!-- ══════════════ HEADER ══════════════ -->
+<header>
+  <div class="logo">
+    <svg width="22" height="22" viewBox="0 0 24 24" fill="none">
+      <rect x="2" y="6" width="20" height="14" rx="4" fill="#00ffe0" opacity=".9"/>
+      <circle cx="7" cy="20" r="2.5" fill="#00a8ff"/>
+      <circle cx="17" cy="20" r="2.5" fill="#00a8ff"/>
+      <rect x="5" y="9" width="4" height="3" rx="1" fill="#0a0f1e"/>
+      <rect x="10" y="9" width="4" height="3" rx="1" fill="#0a0f1e"/>
+      <rect x="15" y="9" width="4" height="3" rx="1" fill="#0a0f1e"/>
+    </svg>
+    SmartBusAI
+  </div>
+  <div class="header-nav">
+    <a href="index.html">
+      <svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor"><path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/></svg>
+      Trang chủ
+    </a>
+    <a href="booking.html">
+      <svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor"><path d="M20 4H4c-1.11 0-2 .89-2 2v12c0 1.11.89 2 2 2h16c1.11 0 2-.89 2-2V6c0-1.11-.89-2-2-2zm0 14H4V8h16v10z"/></svg>
+      Vé của tôi
+    </a>
+    <button class="btn-logout" onclick="logout()">
+      <svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor"><path d="M17 7l-1.41 1.41L18.17 11H8v2h10.17l-2.58 2.58L17 17l5-5-5-5zM4 5h8V3H4c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h8v-2H4V5z"/></svg>
+      Đăng xuất
+    </button>
+  </div>
+</header>
+
+<!-- ══════════════ HERO STRIP ══════════════ -->
+<div class="hero-strip">
+  <div class="avatar-wrap">
+    <img id="heroAvt" src="images/default-avatar.png" alt="Avatar" onclick="document.getElementById('avatarInput').click()">
+    <div class="avatar-edit" onclick="document.getElementById('avatarInput').click()" title="Đổi ảnh">✏️</div>
+    <input type="file" id="avatarInput" hidden accept="image/*">
+  </div>
+  <div class="hero-text">
+    <div class="hero-name" id="heroName">Đang tải…</div>
+    <div class="hero-email" id="heroEmail"></div>
+    <div class="hero-badges">
+      <span class="hbadge hb-member">🌟 Thành viên</span>
+      <span class="hbadge hb-verified">✔ Đã xác minh</span>
+      <span class="hbadge hb-trips" id="heroBadgeTrips">0 chuyến</span>
+    </div>
+    <div class="hero-stats">
+      <div class="hstat"><span class="hstat-num" id="hStatTrips">0</span><span class="hstat-lbl">Chuyến đi</span></div>
+      <div class="hstat"><span class="hstat-num" id="hStatSpent">0</span><span class="hstat-lbl">VNĐ chi tiêu</span></div>
+      <div class="hstat"><span class="hstat-num" id="hStatPts">0</span><span class="hstat-lbl">Điểm tích lũy</span></div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════ TABS ══════════════ -->
+<div class="tabs">
+  <button class="tab active" id="tabBtnA" onclick="switchTab('A')">
+    <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.58-7 8-7s8 3 8 7"/></svg>
+    <div class="tab-pip"></div>
+    Thông tin cá nhân
+  </button>
+  <button class="tab" id="tabBtnB" onclick="switchTab('B')">
+    <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor"><path d="M20 4H4c-1.11 0-2 .89-2 2v12c0 1.11.89 2 2 2h16c1.11 0 2-.89 2-2V6c0-1.11-.89-2-2-2zm0 14H4V8h16v10z"/></svg>
+    <div class="tab-pip"></div>
+    Vé đã đặt
+  </button>
+</div>
+
+<!-- ══════════════ SCREEN A: PROFILE ══════════════ -->
+<div class="screen active" id="screenA">
+  <div class="profile-grid">
+
+    <!-- sidebar -->
+    <div class="sidebar">
+
+      <div class="gc sb-card">
+        <div class="sb-avt">
+          <img id="sbAvt" src="images/default-avatar.png" alt="Avatar" onclick="document.getElementById('avatarInput').click()">
+        </div>
+        <div class="sb-name" id="sbName">Đang tải…</div>
+        <div class="sb-role">Hành khách</div>
+        <div class="quick-info">
+          <div class="qi"><div class="qi-icon">📱</div>SĐT: <span class="qi-val" id="qPhone">—</span></div>
+          <div class="qi"><div class="qi-icon">🗓</div>Sinh: <span class="qi-val" id="qBirth">—</span></div>
+          <div class="qi"><div class="qi-icon">⚧</div>GT: <span class="qi-val" id="qGender">—</span></div>
+          <div class="qi"><div class="qi-icon">📍</div>Tỉnh: <span class="qi-val" id="qProv">—</span></div>
+        </div>
+      </div>
+
+      <div class="gc sb-card">
+        <div class="tips-title">💡 Lợi ích tài khoản</div>
+        <div class="tip"><span class="tip-ico">🎫</span>Xem lịch sử vé mọi lúc</div>
+        <div class="tip"><span class="tip-ico">⚡</span>Đặt vé nhanh hơn 3×</div>
+        <div class="tip"><span class="tip-ico">🔔</span>Thông báo chuyến sắp tới</div>
+        <div class="tip"><span class="tip-ico">🌟</span>Tích điểm đổi ưu đãi</div>
+        <div class="tip"><span class="tip-ico">🔒</span>Bảo mật SSL 256-bit</div>
+      </div>
+
+    </div>
+
+    <!-- form -->
+    <div class="gc form-card">
+
+      <div class="fsec">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.58-7 8-7s8 3 8 7"/></svg>
+        Thông tin cơ bản
+      </div>
+
+      <div class="fgrid">
+        <div class="field"><label>Họ và tên</label><input id="full_name" placeholder="Nguyễn Văn A"></div>
+        <div class="field"><label>Email</label><input id="email" type="email" placeholder="email@example.com"></div>
+        <div class="field"><label>Số điện thoại</label><input id="phone" placeholder="0901234567"></div>
+        <div class="field"><label>Giới tính</label>
+          <select id="gender">
+            <option value="Nam">Nam</option>
+            <option value="Nữ">Nữ</option>
+            <option value="Khác">Khác</option>
+          </select>
+        </div>
+        <div class="field"><label>Ngày sinh</label><input type="date" id="birth_date"></div>
+      </div>
+
+      <div class="fsec" style="margin-top:20px;">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/></svg>
+        Địa chỉ
+      </div>
+
+      <div class="fgrid">
+        <div class="field"><label>Tỉnh / Thành phố</label><input id="province" placeholder="Hà Nội"></div>
+        <div class="field"><label>Quận / Huyện</label><input id="district" placeholder="Cầu Giấy"></div>
+      </div>
+      <div class="fgrid full">
+        <div class="field"><label>Địa chỉ chi tiết</label><input id="address_detail" placeholder="Số nhà, tên đường…"></div>
+      </div>
+
+      <!-- Original button positions preserved — side by side, full width -->
+      <div class="form-actions">
+        <button class="save-btn" onclick="updateProfile()">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M17 3H5c-1.11 0-2 .9-2 2v14c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V7l-4-4zm-5 16c-1.66 0-3-1.34-3-3s1.34-3 3-3 3 1.34 3 3-1.34 3-3 3zm3-10H5V5h10v4z"/></svg>
+          Lưu thay đổi
+        </button>
+        <button class="delete-btn" onclick="deleteAccount()">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z"/></svg>
+          Xoá tài khoản
+        </button>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════ SCREEN B: BOOKINGS ══════════════ -->
+<div class="screen" id="screenB">
+
+  <!-- stat mini-bar -->
+  <div class="bk-stats">
+    <div class="gc bkstat">
+      <div class="bkstat-ico">🎫</div>
+      <div><div class="bkstat-lbl">Tổng vé</div><div class="bkstat-num" id="bsTotal" style="color:var(--neon)">0</div></div>
+    </div>
+    <div class="gc bkstat">
+      <div class="bkstat-ico">✅</div>
+      <div><div class="bkstat-lbl">Đã thanh toán</div><div class="bkstat-num" id="bsPaid" style="color:#2ecc71">0</div></div>
+    </div>
+    <div class="gc bkstat">
+      <div class="bkstat-ico">⏳</div>
+      <div><div class="bkstat-lbl">Chờ thanh toán</div><div class="bkstat-num" id="bsPending" style="color:#f39c12">0</div></div>
+    </div>
+    <div class="gc bkstat">
+      <div class="bkstat-ico">💰</div>
+      <div><div class="bkstat-lbl">Tổng chi tiêu</div><div class="bkstat-num" id="bsSpent" style="color:#f39c12;font-size:14px">0 VNĐ</div></div>
+    </div>
+    <div class="gc bkstat">
+      <div class="bkstat-ico">🛡</div>
+      <div><div class="bkstat-lbl">Bảo hành hoàn vé</div><div style="font-size:13px;font-weight:700;color:var(--neon);margin-top:2px;">Trong 24h</div></div>
+    </div>
+  </div>
+
+  <div class="bk-header">
+    <div class="bk-title">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="#00ffe0"><path d="M20 4H4c-1.11 0-2 .89-2 2v12c0 1.11.89 2 2 2h16c1.11 0 2-.89 2-2V6c0-1.11-.89-2-2-2zm0 14H4V8h16v10z"/></svg>
+      Lịch sử đặt vé
+    </div>
+    <div class="bk-filters">
+      <div class="fchip on"  onclick="filterBk('ALL',this)">Tất cả</div>
+      <div class="fchip" onclick="filterBk('PAID',this)">Đã thanh toán</div>
+      <div class="fchip" onclick="filterBk('PENDING',this)">Chờ thanh toán</div>
+      <div class="fchip" onclick="filterBk('CANCELED',this)">Đã huỷ</div>
+    </div>
+  </div>
+
+  <div id="bookingList">
+    <div class="empty"><div class="empty-ico">⏳</div><p>Đang tải vé…</p></div>
+  </div>
+
+</div>
+
+<!-- ── AI overlay ── -->
+<div id="aiOverlay"></div>
+<div id="aiBox">
+  <h4 id="aiTitle">🤖 SmartBusAI hướng dẫn</h4>
+  <p id="aiContent">…</p>
+  <div class="ai-btns">
+    <button class="ai-btn ai-next" onclick="aiNext()">Tiếp →</button>
+    <button class="ai-btn ai-skip" onclick="aiEnd()">Thoát</button>
+  </div>
+</div>
+
+<!-- Profile AI button -->
+<button class="ai-float" id="aiBtn1" onclick="startTour('A')" title="Hướng dẫn Thông tin cá nhân">👤</button>
+<!-- Bookings AI button -->
+<button class="ai-float" id="aiBtn2" onclick="startTour('B')" title="Hướng dẫn Vé đã đặt" style="display:none;">🎫</button>
+
+<!-- ══════════════ SCRIPTS ══════════════ -->
+<script>
+
+/* ── GALAXY CANVAS ── */
+(function(){
+  const cv=document.getElementById("galaxyCanvas"), ctx=cv.getContext("2d");
+  function resize(){ cv.width=innerWidth; cv.height=innerHeight; draw(); }
+  function draw(){
+    ctx.clearRect(0,0,cv.width,cv.height);
+    // deep space gradient
+    const g=ctx.createRadialGradient(cv.width*.5,cv.height*.35,0,cv.width*.5,cv.height*.35,cv.width*.75);
+    g.addColorStop(0,"#0d1e30"); g.addColorStop(.5,"#081428"); g.addColorStop(1,"#040a14");
+    ctx.fillStyle=g; ctx.fillRect(0,0,cv.width,cv.height);
+    // faint milky-way band
+    const band=ctx.createLinearGradient(0,cv.height*.2,cv.width,cv.height*.7);
+    band.addColorStop(0,"transparent");
+    band.addColorStop(.45,"rgba(80,120,180,0.07)");
+    band.addColorStop(.55,"rgba(90,140,210,0.09)");
+    band.addColorStop(1,"transparent");
+    ctx.fillStyle=band; ctx.fillRect(0,0,cv.width,cv.height);
+    // stars
+    const rng=mb32(cv.width*cv.height);
+    const n=Math.min(320,Math.floor(cv.width*cv.height/4800));
+    for(let i=0;i<n;i++){
+      const x=rng()*cv.width, y=rng()*cv.height;
+      const r=rng()*1.4+.18, a=rng()*.7+.22;
+      const hue=rng()<.13?180:rng()<.10?265:0;
+      ctx.beginPath(); ctx.arc(x,y,r,0,Math.PI*2);
+      ctx.fillStyle=hue===180?`rgba(0,255,224,${a*.55})`:hue===265?`rgba(170,145,255,${a*.45})`:`rgba(255,255,255,${a})`;
+      ctx.fill();
+    }
+    // distant nebula smudges
+    const smudges=[
+      {x:.18,y:.28,rx:.14,ry:.09,c:"rgba(0,180,200,0.055)"},
+      {x:.72,y:.62,rx:.13,ry:.08,c:"rgba(120,80,220,0.055)"},
+      {x:.50,y:.78,rx:.10,ry:.06,c:"rgba(0,100,200,0.045)"},
+    ];
+    smudges.forEach(s=>{
+      const eg=ctx.createRadialGradient(s.x*cv.width,s.y*cv.height,0,s.x*cv.width,s.y*cv.height,s.rx*cv.width);
+      eg.addColorStop(0,s.c); eg.addColorStop(1,"transparent");
+      ctx.fillStyle=eg; ctx.fillRect(0,0,cv.width,cv.height);
+    });
+  }
+  function mb32(seed){ let s=seed>>>0; return()=>{ s+=0x6D2B79F5;let t=Math.imul(s^s>>>15,1|s);t^=t+Math.imul(t^t>>>7,61|t);return((t^t>>>14)>>>0)/4294967296; }; }
+  resize();
+  let rt; window.addEventListener("resize",()=>{clearTimeout(rt);rt=setTimeout(resize,220);});
+})();
+
+/* ── PAGE TRANSITION ── */
+document.addEventListener("click",function(e){
+  const a=e.target.closest("a[href]");
+  if(!a) return;
+  const h=a.getAttribute("href");
+  if(!h||h.startsWith("#")||h.startsWith("http")) return;
+  e.preventDefault();
+  document.body.style.transition="opacity .22s";
+  document.body.style.opacity="0";
+  setTimeout(()=>{window.location.href=h;},230);
+});
+
+/* ── AUTH ── */
+const userId=localStorage.getItem("user_id");
+if(!userId){ alert("Vui lòng đăng nhập"); window.location="../auth/login.html"; }
+
+/* ── TAB SWITCH ── */
+let currentTab="A";
+function switchTab(t){
+  currentTab=t;
+  document.querySelectorAll(".screen").forEach(s=>s.classList.remove("active"));
+  document.querySelectorAll(".tab").forEach(b=>b.classList.remove("active"));
+  document.getElementById("screen"+t).classList.add("active");
+  document.getElementById("tabBtn"+t).classList.add("active");
+  document.getElementById("aiBtn1").style.display = t==="A"?"flex":"none";
+  document.getElementById("aiBtn2").style.display = t==="B"?"flex":"none";
+  aiEnd();
+}
+
+/* ── HELPERS ── */
+function fmt(n){ return Number(n).toLocaleString("vi-VN"); }
+function fmtDT(s){ const d=new Date(s); return isNaN(d)?"—":d.toLocaleString("vi-VN",{day:"2-digit",month:"2-digit",year:"numeric",hour:"2-digit",minute:"2-digit"}); }
+
+/* ── LOAD PROFILE ── */
+async function loadProfile(){
+  try{
+    const res=await fetch(`/api/users/${userId}`);
+    if(!res.ok) throw new Error();
+    const u=await res.json();
+
+    document.getElementById("full_name").value     = u.full_name||"";
+    document.getElementById("email").value          = u.email||"";
+    document.getElementById("phone").value          = u.phone||"";
+    document.getElementById("gender").value         = u.gender||"Nam";
+    document.getElementById("birth_date").value     = u.birth_date?u.birth_date.split("T")[0]:"";
+    document.getElementById("province").value       = u.province||"";
+    document.getElementById("district").value       = u.district||"";
+    document.getElementById("address_detail").value = u.address_detail||"";
+
+    const nm=u.full_name||"Người dùng";
+    document.getElementById("heroName").textContent  = nm;
+    document.getElementById("heroEmail").textContent = u.email||"";
+    document.getElementById("sbName").textContent    = nm;
+    document.getElementById("qPhone").textContent   = u.phone||"—";
+    document.getElementById("qBirth").textContent   = u.birth_date?u.birth_date.split("T")[0]:"—";
+    document.getElementById("qGender").textContent  = u.gender||"—";
+    document.getElementById("qProv").textContent    = u.province||"—";
+
+    if(u.avatar){
+      document.getElementById("heroAvt").src = u.avatar;
+      document.getElementById("sbAvt").src   = u.avatar;
+    }
+  }catch(e){ console.error(e); }
+}
+
+/* ── AVATAR PREVIEW ── */
+document.getElementById("avatarInput").addEventListener("change",function(){
+  const file=this.files[0]; if(!file) return;
+  const r=new FileReader();
+  r.onload=e=>{
+    document.getElementById("heroAvt").src = e.target.result;
+    document.getElementById("sbAvt").src   = e.target.result;
+  };
+  r.readAsDataURL(file);
+});
+
+/* ── UPDATE PROFILE ── */
+async function updateProfile(){
+  const fn=document.getElementById("full_name").value.trim();
+  const em=document.getElementById("email").value.trim();
+  const ph=document.getElementById("phone").value.trim();
+  if(!fn){ alert("Vui lòng nhập họ tên"); return; }
+  if(!em.includes("@")){ alert("Email không hợp lệ"); return; }
+  if(ph.length<9){ alert("SĐT không hợp lệ"); return; }
+
+  try{
+    const res=await fetch(`/api/users/${userId}`,{
+      method:"PUT",
+      headers:{"Content-Type":"application/json"},
+      body:JSON.stringify({
+        full_name:fn, email:em, phone:ph,
+        gender:document.getElementById("gender").value,
+        birth_date:document.getElementById("birth_date").value,
+        province:document.getElementById("province").value,
+        district:document.getElementById("district").value,
+        address_detail:document.getElementById("address_detail").value
+      })
+    });
+    const data=await res.json();
+    if(res.ok){
+      alert("Cập nhật thành công 🎉");
+      document.getElementById("heroName").textContent  = fn;
+      document.getElementById("sbName").textContent    = fn;
+      document.getElementById("heroEmail").textContent = em;
+      document.getElementById("qPhone").textContent   = ph;
+      document.getElementById("qGender").textContent  = document.getElementById("gender").value;
+      document.getElementById("qBirth").textContent   = document.getElementById("birth_date").value||"—";
+      document.getElementById("qProv").textContent    = document.getElementById("province").value||"—";
+    }else alert(data.message||"Cập nhật thất bại");
+  }catch(e){ alert("Lỗi server"); }
+}
+
+/* ── DELETE ── */
+async function deleteAccount(){
+  if(!confirm("Bạn chắc chắn muốn xoá tài khoản?")) return;
+  try{
+    const res=await fetch(`/api/users/${userId}`,{method:"DELETE"});
+    if(res.ok){ localStorage.clear(); window.location="../auth/register.html"; }
+    else alert("Xoá thất bại");
+  }catch(e){ alert("Lỗi server"); }
+}
+
+/* ── LOGOUT ── */
+function logout(){
+  localStorage.removeItem("user_id");
+  window.location="../auth/login.html";
+}
+
+/* ── BOOKINGS ── */
+let allBk=[];
+
+async function loadBookings(){
+  try{
+    const res=await fetch(`/api/bookings/user/${userId}`);
+    allBk=await res.json()||[];
+    renderBk(allBk);
+
+    const paid=allBk.filter(b=>b.status==="PAID").length;
+    const pend=allBk.filter(b=>b.status==="PENDING").length;
+    const spent=allBk.filter(b=>b.status==="PAID").reduce((s,b)=>s+Number(b.total_amount),0);
+    document.getElementById("bsTotal").textContent   = allBk.length;
+    document.getElementById("bsPaid").textContent    = paid;
+    document.getElementById("bsPending").textContent = pend;
+    document.getElementById("bsSpent").textContent   = fmt(spent)+" VNĐ";
+    document.getElementById("hStatTrips").textContent = allBk.length;
+    document.getElementById("hStatSpent").textContent = fmt(spent);
+    document.getElementById("hStatPts").textContent   = Math.floor(spent/10000);
+    document.getElementById("heroBadgeTrips").textContent = allBk.length+" chuyến";
+  }catch(e){
+    document.getElementById("bookingList").innerHTML=
+      `<div class="empty"><div class="empty-ico">⚠️</div><p>Không tải được lịch sử vé</p></div>`;
+  }
+}
+
+function statusLabel(s){
+  return s==="PAID"?"✅ Đã thanh toán":s==="PENDING"?"⏳ Chờ thanh toán":"❌ Đã huỷ";
+}
+
+function renderBk(list){
+  const el=document.getElementById("bookingList");
+  if(!list||!list.length){
+    el.innerHTML=`<div class="empty"><div class="empty-ico">🎫</div><p>Chưa có vé nào</p></div>`;
+    return;
+  }
+  el.innerHTML="";
+  const frag=document.createDocumentFragment();
+  list.forEach(b=>{
+    const div=document.createElement("div");
+    div.className="gc booking-card";
+    div.innerHTML=`
+      <div class="bk-top">
+        <div class="bk-route">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="#2ecc71"><circle cx="12" cy="12" r="10"/></svg>
+          ${b.origin||"—"}
+          <span class="bk-arrow">→</span>
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="#00a8ff"><circle cx="12" cy="12" r="10"/></svg>
+          ${b.destination||"—"}
+        </div>
+        <span class="status ${b.status}">${statusLabel(b.status)}</span>
+      </div>
+      <div class="bk-meta">
+        <div class="bkm"><div class="bkm-lbl">Khởi hành</div><div class="bkm-val">${fmtDT(b.departure_time)}</div></div>
+        <div class="bkm"><div class="bkm-lbl">Tổng tiền</div><div class="bkm-val" style="color:#f39c12;">${fmt(b.total_amount)} VNĐ</div></div>
+        <div class="bkm"><div class="bkm-lbl">Mã đặt vé</div><div class="bkm-val">#${b.booking_id}</div></div>
+      </div>
+      <div class="bk-btns">
+        ${b.status==="PENDING"
+          ?`<button class="pay-btn" onclick="openPayModal(${b.booking_id},${b.total_amount})">
+              <svg width="11" height="11" viewBox="0 0 24 24" fill="currentColor"><path d="M20 4H4c-1.11 0-2 .89-2 2v12c0 1.11.89 2 2 2h16c1.11 0 2-.89 2-2V6c0-1.11-.89-2-2-2z"/></svg>
+              💳 Thanh toán
+            </button>`:""}
+        ${b.status!=="CANCELED"
+          ?`<button class="cancel-btn" onclick="cancelBk(${b.booking_id})">
+              <svg width="11" height="11" viewBox="0 0 24 24" fill="currentColor"><path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+              Huỷ vé
+            </button>`:""}
+        <button class="detail-btn">
+          <svg width="11" height="11" viewBox="0 0 24 24" fill="currentColor"><path d="M12 4.5C7 4.5 2.73 7.61 1 12c1.73 4.39 6 7.5 11 7.5s9.27-3.11 11-7.5c-1.73-4.39-6-7.5-11-7.5zm0 12.5c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5zm0-8c-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3-1.34-3-3-3z"/></svg>
+          Chi tiết
+        </button>
+      </div>`;
+    frag.appendChild(div);
+  });
+  el.appendChild(frag);
+}
+
+function filterBk(status,chipEl){
+  document.querySelectorAll(".fchip").forEach(c=>c.classList.remove("on"));
+  chipEl.classList.add("on");
+  renderBk(status==="ALL"?allBk:allBk.filter(b=>b.status===status));
+}
+
+async function cancelBk(id){
+  if(!confirm("Huỷ vé này?")) return;
+  await fetch(`/api/bookings/${id}`,{
+    method:"PUT",
+    headers:{"Content-Type":"application/json"},
+    body:JSON.stringify({status:"CANCELED"})
+  });
+  loadBookings();
+}
+
+/* ──────────────────────────────────────────────────
+   AI TOUR  — two separate scripts, one per screen
+────────────────────────────────────────────────── */
+const tours={
+  A:[
+    { el:".hero-strip",    title:"👤 Hồ sơ của bạn",      text:"Ảnh đại diện, tên, huy hiệu và thống kê hành trình của bạn hiển thị ngay tại đây." },
+    { el:".sidebar",       title:"💡 Thanh bên",           text:"Thông tin nhanh và 5 lợi ích khi sử dụng tài khoản SmartBusAI." },
+    { el:".form-card",     title:"📋 Form thông tin",      text:"Điền đầy đủ họ tên, email, SĐT và ngày sinh để đặt vé nhanh hơn." },
+    { el:".fgrid.full",    title:"📍 Địa chỉ của bạn",     text:"Tỉnh thành và quận huyện giúp hệ thống gợi ý chuyến đi phù hợp." },
+    { el:".save-btn",      title:"💾 Lưu thay đổi",        text:"Nhấn nút xanh này để cập nhật thông tin. Hiệu lực ngay lập tức." },
+    { el:".delete-btn",    title:"🗑 Xoá tài khoản",       text:"⚠️ Thao tác không thể hoàn tác. Toàn bộ dữ liệu sẽ bị xoá vĩnh viễn." },
+  ],
+  B:[
+    { el:".bk-stats",      title:"📊 Tổng quan vé",        text:"Xem nhanh số vé tổng, đã thanh toán, đang chờ và tổng chi tiêu của bạn." },
+    { el:".bk-header",     title:"🔍 Bộ lọc trạng thái",   text:"Lọc vé theo: Tất cả, Đã thanh toán, Chờ thanh toán hoặc Đã huỷ." },
+    { el:"#bookingList",   title:"🗂 Danh sách vé",         text:"Toàn bộ vé đã đặt. Mỗi thẻ hiện tuyến đường, giờ khởi hành, số tiền và trạng thái." },
+    { el:".booking-card",  title:"🎫 Thẻ vé đơn lẻ",       text:"Xem chi tiết từng vé — tuyến đường, giờ chạy, tổng tiền và mã đặt vé." },
+    { el:".cancel-btn",    title:"❌ Huỷ vé",               text:"Có thể huỷ vé chưa bị huỷ. Hoàn tiền 100% nếu huỷ trước 24h khởi hành." },
+    { el:".detail-btn",    title:"🔎 Xem chi tiết",         text:"Nhấn để xem đầy đủ thông tin chuyến đi và ghế đã đặt." },
+  ]
+};
+
+let tourCtx="A", tourIdx=0;
+
+function startTour(ctx){
+  tourCtx=ctx; tourIdx=0;
+  const titles={ A:"👤 Hướng dẫn Thông tin cá nhân", B:"🎫 Hướng dẫn Vé đã đặt" };
+  document.getElementById("aiTitle").textContent = titles[ctx];
+  document.getElementById("aiBox").style.display    = "block";
+  document.getElementById("aiOverlay").style.display= "block";
+  showStep();
+}
+
+async function showStep(){
+  removeHL();
+  const steps=tours[tourCtx];
+  const step=steps[tourIdx];
+  let el=null;
+  for(let i=0;i<15;i++){
+    el=document.querySelector(step.el);
+    if(el) break;
+    await new Promise(r=>setTimeout(r,160));
+  }
+  if(!el){ aiNext(); return; }
+  el.classList.add("ai-highlight");
+  /* force stacking context so highlight always shows above overlay */
+  el.style.position="relative";
+  el.style.zIndex="3001";
+  el.scrollIntoView({behavior:"smooth",block:"center"});
+  /* small delay so scroll finishes before spotlight calc */
+  await new Promise(r=>setTimeout(r,300));
+  spotlight(el);
+  document.getElementById("aiContent").innerHTML=
+    `<b>${step.title}</b><br>${step.text}<br><br>
+     <span style="color:#1abc9c;font-size:11.5px;font-weight:700;">Bước ${tourIdx+1}/${steps.length}</span>`;
+}
+
+function aiNext(){
+  tourIdx++;
+  if(tourIdx>=tours[tourCtx].length) aiEnd();
+  else showStep();
+}
+
+function aiEnd(){
+  removeHL();
+  document.getElementById("aiBox").style.display    ="none";
+  document.getElementById("aiOverlay").style.display="none";
+}
+
+function removeHL(){
+  document.querySelectorAll(".ai-highlight").forEach(e=>{
+    e.classList.remove("ai-highlight");
+    e.style.position="";
+    e.style.zIndex="";
+  });
+}
+
+function spotlight(el){
+  const ov=document.getElementById("aiOverlay");
+  const r=el.getBoundingClientRect(), p=10;
+  ov.style.clipPath=`polygon(0 0,100% 0,100% 100%,0 100%,0 0,
+    ${r.left-p}px ${r.top-p}px,
+    ${r.right+p}px ${r.top-p}px,
+    ${r.right+p}px ${r.bottom+p}px,
+    ${r.left-p}px ${r.bottom+p}px,
+    ${r.left-p}px ${r.top-p}px)`;
+}
+
+window.addEventListener("scroll",()=>{
+  if(!tours[tourCtx]) return;
+  const el=document.querySelector(tours[tourCtx][tourIdx]?.el);
+  if(el) spotlight(el);
+});
+
+/* ── INIT ── */
+document.addEventListener("DOMContentLoaded",()=>{
+  loadProfile();
+  loadBookings();
+  // Auto scroll to bookings if hash
+  if(location.hash==="bookings"||location.hash==="#bookings"){
+    setTimeout(()=>showScreen("B"),300);
+  }
+});
+</script>
+
+<!-- ════ PAYMENT MODAL ════ -->
+<div id="payModal">
+  <div class="pay-modal-box">
+    <h3>💳 Thanh toán vé</h3>
+    <p id="payModalInfo">Chọn phương thức thanh toán cho vé đặt của bạn.</p>
+    <div class="pay-option selected" id="payOptCASH" onclick="selectPayOpt('CASH')">
+      <div class="pay-option-ico">🏢</div>
+      <div><div class="pay-option-name">Tiền mặt tại quầy</div><div class="pay-option-desc">Thanh toán trực tiếp khi lên xe</div></div>
+    </div>
+    <div class="pay-option" id="payOptMOMO" onclick="selectPayOpt('MOMO')">
+      <div class="pay-option-ico">💜</div>
+      <div><div class="pay-option-name">Ví MoMo</div><div class="pay-option-desc">Quét mã QR qua ứng dụng MoMo</div></div>
+    </div>
+    <div class="pay-option" id="payOptZALOPAY" onclick="selectPayOpt('ZALOPAY')">
+      <div class="pay-option-ico">💙</div>
+      <div><div class="pay-option-name">ZaloPay / VNPay</div><div class="pay-option-desc">Quét mã QR qua ứng dụng ZaloPay</div></div>
+    </div>
+    <button class="pay-confirm-btn" id="payConfirmBtn" onclick="doPayBooking()">✅ Xác nhận thanh toán</button>
+    <span class="pay-cancel-link" onclick="closePayModal()">Huỷ / Thanh toán sau</span>
+  </div>
+</div>
+
+<!-- QR popup for online payments -->
+<div id="payQRModal" style="display:none;position:fixed;inset:0;z-index:5000;background:rgba(3,8,20,.85);backdrop-filter:blur(6px);align-items:center;justify-content:center;">
+  <div style="background:#fff;border-radius:20px;padding:28px;text-align:center;max-width:320px;width:100%;box-shadow:0 20px 60px rgba(0,0,0,.5);">
+    <h3 id="payQRTitle" style="color:#0f3d4c;margin-bottom:6px;"></h3>
+    <p id="payQRText" style="font-size:13px;color:#546e7a;margin-bottom:12px;"></p>
+    <img id="payQRImg" alt="QR" style="width:190px;border-radius:10px;box-shadow:0 4px 14px rgba(0,0,0,.15);">
+    <div style="margin-top:14px;background:#f0faf7;border-radius:10px;padding:10px 14px;font-size:12.5px;color:#2e7d62;font-weight:600;">Mở ứng dụng và quét mã QR để hoàn tất</div>
+    <div style="display:flex;gap:8px;margin-top:14px;justify-content:center;">
+      <button onclick="confirmQRPay()" style="padding:9px 18px;border:none;border-radius:20px;background:#1abc9c;color:#fff;font-weight:700;cursor:pointer;font-size:13px;">✅ Đã thanh toán</button>
+      <button onclick="document.getElementById('payQRModal').style.display='none'" style="padding:9px 18px;border:none;border-radius:20px;background:#e74c3c;color:#fff;font-weight:700;cursor:pointer;font-size:13px;">↩ Quay lại</button>
+    </div>
+  </div>
+</div>
+
+<script>
+/* ── PAYMENT MODAL LOGIC ── */
+let _payBookingId=null, _payAmount=0, _payMethod="CASH";
+
+function openPayModal(bookingId, amount){
+  _payBookingId=bookingId; _payAmount=amount;
+  document.getElementById("payModalInfo").textContent=
+    `Mã vé #${bookingId} · Tổng thanh toán: ${fmt(amount)} VNĐ`;
+  selectPayOpt("CASH");
+  document.getElementById("payModal").classList.add("open");
+}
+function closePayModal(){ document.getElementById("payModal").classList.remove("open"); }
+function selectPayOpt(method){
+  _payMethod=method;
+  ["CASH","MOMO","ZALOPAY"].forEach(m=>{
+    const el=document.getElementById("payOpt"+m);
+    if(el) el.classList.toggle("selected",m===method);
+  });
+}
+async function doPayBooking(){
+  const btn=document.getElementById("payConfirmBtn");
+  btn.disabled=true; btn.textContent="⏳ Đang xử lý...";
+
+  if(_payMethod==="MOMO"||_payMethod==="ZALOPAY"){
+    // Show QR first, then confirm
+    const names={MOMO:"MoMo",ZALOPAY:"ZaloPay / VNPay"};
+    document.getElementById("payQRTitle").textContent="Thanh toán qua "+names[_payMethod];
+    document.getElementById("payQRText").textContent="Số tiền: "+fmt(_payAmount)+" VNĐ";
+    document.getElementById("payQRImg").src=`https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=SmartBusAI-${_payMethod}-${_payAmount}-booking${_payBookingId}`;
+    document.getElementById("payQRModal").style.display="flex";
+    btn.disabled=false; btn.textContent="✅ Xác nhận thanh toán";
+    return;
+  }
+  // CASH: direct confirm
+  await submitPay();
+  btn.disabled=false; btn.textContent="✅ Xác nhận thanh toán";
+}
+async function confirmQRPay(){
+  document.getElementById("payQRModal").style.display="none";
+  document.getElementById("payConfirmBtn").disabled=true;
+  await submitPay();
+  document.getElementById("payConfirmBtn").disabled=false;
+}
+async function submitPay(){
+  try{
+    const res=await fetch(`/api/bookings/${_payBookingId}/pay`,{
+      method:"POST",
+      headers:{"Content-Type":"application/json"},
+      body:JSON.stringify({method:_payMethod})
+    });
+    const data=await res.json();
+    if(res.ok){
+      closePayModal();
+      showToastPay("✅ Thanh toán thành công!", "success");
+      loadBookings();
+    }else{
+      showToastPay("❌ "+data.message,"error");
+    }
+  }catch{
+    showToastPay("❌ Lỗi kết nối máy chủ","error");
+  }
+}
+function showToastPay(msg,type){
+  let t=document.getElementById("payToast");
+  if(!t){ t=document.createElement("div"); t.id="payToast"; t.style.cssText="position:fixed;bottom:28px;right:28px;z-index:9999;padding:12px 20px;border-radius:12px;font-size:13.5px;font-weight:700;background:#1a2840;border:1px solid rgba(0,255,224,.3);color:#c8e8f0;box-shadow:0 6px 30px rgba(0,0,0,.5);transform:translateY(20px);opacity:0;transition:all .3s;font-family:'Segoe UI',Arial,sans-serif;"; document.body.appendChild(t); }
+  t.textContent=msg;
+  t.style.borderColor=type==="success"?"rgba(46,204,113,.4)":"rgba(231,76,60,.4)";
+  t.style.color=type==="success"?"#2ecc71":"#e74c3c";
+  t.style.transform="translateY(0)"; t.style.opacity="1";
+  clearTimeout(t._t); t._t=setTimeout(()=>{t.style.transform="translateY(20px)";t.style.opacity="0";},3000);
+}
+</script>
+</body>
+</html>

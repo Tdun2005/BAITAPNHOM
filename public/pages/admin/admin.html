@@ -1,0 +1,667 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Admin Dashboard — SmartBusAI</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<style>
+:root{
+  --neon:#00ffe0;--neon2:#00a8ff;--purple:#7c5ce7;
+  --amber:#f39c12;--green:#2ecc71;--red:#e74c3c;--pink:#fd79a8;
+  --glass:rgba(255,255,255,0.055);--glass2:rgba(255,255,255,0.10);
+  --border:rgba(255,255,255,0.09);--border2:rgba(255,255,255,0.16);
+  --hh:62px;
+}
+*{box-sizing:border-box;margin:0;padding:0;font-family:"Segoe UI",Arial,sans-serif;}
+html{background:linear-gradient(160deg,#020508 0%,#05101e 38%,#071420 68%,#020508 100%);background-attachment:fixed;min-height:100vh;}
+body{color:#fff;background:transparent;overflow-x:hidden;animation:fadeIn .38s ease;}
+@keyframes fadeIn{from{opacity:0;transform:translateY(5px)}to{opacity:1;transform:translateY(0)}}
+
+#gc{position:fixed;inset:0;z-index:-3;pointer-events:none;}
+.neb{position:fixed;inset:0;z-index:-2;pointer-events:none;
+  background:
+    radial-gradient(ellipse at 6% 16%,rgba(0,255,224,0.07) 0%,transparent 42%),
+    radial-gradient(ellipse at 92% 78%,rgba(124,92,231,0.09) 0%,transparent 45%),
+    radial-gradient(ellipse at 52% 94%,rgba(0,168,255,0.06) 0%,transparent 40%),
+    radial-gradient(ellipse at 75% 12%,rgba(253,121,168,0.04) 0%,transparent 35%);}
+.pl{position:fixed;border-radius:50%;pointer-events:none;}
+.pl1{width:120px;height:120px;top:70px;right:90px;z-index:-1;
+  background:radial-gradient(circle at 28% 28%,#c8b8ff,#6c5ce7 46%,#12063a 82%);
+  box-shadow:0 0 50px rgba(108,92,231,.65),0 0 100px rgba(108,92,231,.20);}
+.pl2{width:54px;height:54px;bottom:120px;left:80px;z-index:-1;
+  background:radial-gradient(circle at 36% 36%,#fff,#00d4ff 56%,#001830 86%);
+  box-shadow:0 0 34px rgba(0,212,255,.65);animation:pfloat 9s ease-in-out infinite;}
+@keyframes pfloat{0%,100%{transform:translateY(0)}50%{transform:translateY(-14px)}}
+.mt{position:fixed;pointer-events:none;z-index:-1;width:1.5px;height:55px;border-radius:2px;
+  background:linear-gradient(rgba(255,255,255,.9),transparent);transform:rotate(42deg);animation:mtfall linear infinite;}
+.mt:nth-child(1){top:3%;left:8%;animation-duration:15s;}
+.mt:nth-child(2){top:22%;left:52%;animation-duration:21s;animation-delay:5s;}
+.mt:nth-child(3){top:60%;left:80%;animation-duration:18s;animation-delay:10s;}
+.mt:nth-child(4){top:40%;left:30%;animation-duration:26s;animation-delay:3s;}
+@keyframes mtfall{0%{transform:translate3d(0,0,0) rotate(42deg);opacity:1}100%{transform:translate3d(600px,600px,0) rotate(42deg);opacity:0}}
+.sf{position:fixed;inset:0;z-index:-2;pointer-events:none;overflow:hidden;}
+.ts{position:absolute;border-radius:50%;background:rgba(255,255,255,.85);
+  animation:twinkle var(--td,3s) ease-in-out var(--dl,0s) infinite alternate;}
+@keyframes twinkle{0%{opacity:.1;transform:scale(.8)}100%{opacity:.9;transform:scale(1.3)}}
+body.leaving{opacity:0;transition:opacity .22s;}
+
+/* ── HEADER ── */
+.hdr{
+  position:sticky;top:0;z-index:3000;height:var(--hh);
+  display:flex;align-items:center;padding:0 30px;gap:16px;
+  background:rgba(2,5,10,0.80);
+  backdrop-filter:blur(22px);-webkit-backdrop-filter:blur(22px);
+  border-bottom:1px solid var(--border);
+  box-shadow:0 2px 24px rgba(0,0,0,.50);
+}
+.hdr-logo{display:flex;align-items:center;gap:10px;text-decoration:none;flex-shrink:0;}
+.hdr-logo-icon{
+  width:36px;height:36px;border-radius:10px;flex-shrink:0;
+  background:linear-gradient(135deg,#00ffe0,#00a8ff);
+  display:flex;align-items:center;justify-content:center;
+  font-size:18px;box-shadow:0 0 16px rgba(0,255,224,.38);}
+.hdr-logo-text{
+  font-size:16px;font-weight:800;letter-spacing:.3px;
+  background:linear-gradient(90deg,#00ffe0,#7eb8ff);
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;white-space:nowrap;}
+.hdr-logo-badge{
+  font-size:9px;font-weight:800;padding:2px 7px;border-radius:20px;
+  background:rgba(0,255,224,.12);border:1px solid rgba(0,255,224,.28);
+  color:#00ffe0;letter-spacing:.5px;}
+.hdr-sep{width:1px;height:26px;background:var(--border);flex-shrink:0;}
+.hdr-space{flex:1;}
+
+/* 4 nav links */
+.hdr-nav{display:flex;align-items:center;gap:4px;}
+.hdr-nav a{
+  display:flex;align-items:center;gap:6px;padding:7px 13px;border-radius:10px;
+  font-size:12.5px;font-weight:600;color:rgba(255,255,255,.48);
+  text-decoration:none;border:1px solid transparent;transition:all .22s;white-space:nowrap;}
+.hdr-nav a:hover{background:var(--glass2);color:#fff;border-color:var(--border);}
+.hdr-nav a.act{background:rgba(0,255,224,.09);border-color:rgba(0,255,224,.24);color:#00ffe0;}
+.nav-icon{font-size:13px;}
+.nbadge{
+  display:inline-flex;align-items:center;justify-content:center;
+  min-width:15px;height:15px;border-radius:8px;padding:0 3px;
+  font-size:9px;font-weight:800;
+  background:rgba(231,76,60,.22);border:1px solid rgba(231,76,60,.40);color:#e74c3c;
+  margin-left:2px;}
+
+.hdr-right{display:flex;align-items:center;gap:8px;flex-shrink:0;}
+.notif-btn{
+  position:relative;width:34px;height:34px;border-radius:9px;cursor:pointer;
+  background:var(--glass);border:1px solid var(--border);
+  display:flex;align-items:center;justify-content:center;
+  transition:background .2s;font-size:14px;}
+.notif-btn:hover{background:var(--glass2);}
+.notif-dot{position:absolute;top:5px;right:5px;width:7px;height:7px;
+  border-radius:50%;background:#e74c3c;border:2px solid #020508;}
+.btn-export{
+  display:flex;align-items:center;gap:6px;padding:7px 16px;border-radius:10px;
+  border:none;cursor:pointer;font-size:12px;font-weight:700;
+  font-family:"Segoe UI",Arial,sans-serif;
+  background:linear-gradient(135deg,#00ffe0,#00a8ff);color:#030d18;
+  box-shadow:0 0 14px rgba(0,255,224,.30);transition:all .22s;}
+.btn-export:hover{transform:translateY(-2px);box-shadow:0 4px 22px rgba(0,255,224,.50);}
+.admin-chip{
+  display:flex;align-items:center;gap:8px;padding:5px 10px;
+  border-radius:10px;background:var(--glass);border:1px solid var(--border);}
+.admin-avt{
+  width:26px;height:26px;border-radius:50%;
+  background:linear-gradient(135deg,#00ffe0,#7c5ce7);
+  display:flex;align-items:center;justify-content:center;font-size:12px;}
+.admin-label{font-size:11.5px;font-weight:700;color:#b8d8e8;}
+.btn-logout{
+  display:flex;align-items:center;gap:6px;padding:7px 13px;border-radius:10px;
+  border:1px solid rgba(231,76,60,.28);cursor:pointer;font-size:12px;
+  font-weight:700;font-family:"Segoe UI",Arial,sans-serif;
+  background:rgba(231,76,60,.10);color:#e74c3c;transition:all .22s;}
+.btn-logout:hover{background:rgba(231,76,60,.26);color:#fff;}
+
+/* ── CONTENT ── */
+.content{padding:24px 30px;max-width:1640px;margin:0 auto;}
+
+/* Glass card */
+.gc{
+  background:var(--glass);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);
+  border:1px solid var(--border);border-radius:18px;
+  box-shadow:0 8px 30px rgba(0,0,0,.28);transition:border-color .25s;}
+.gc:hover{border-color:rgba(255,255,255,.14);}
+.gc-pad{padding:22px 24px;}
+
+/* Section head */
+.sec-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:18px;}
+.sec-title{font-size:14.5px;font-weight:800;color:#fff;}
+.sec-sub{font-size:10.5px;color:#5a8498;margin-top:2px;}
+
+/* Tab bar */
+.tab-bar{display:flex;gap:8px;margin-bottom:24px;flex-wrap:wrap;}
+.tb{
+  padding:8px 18px;border-radius:11px;border:1px solid var(--border);
+  background:var(--glass);color:#6a94a8;font-weight:600;font-size:12.5px;
+  cursor:pointer;transition:all .22s;display:flex;align-items:center;gap:6px;
+  font-family:"Segoe UI",Arial,sans-serif;}
+.tb:hover{background:var(--glass2);color:#c8e4f0;}
+.tb.on{background:rgba(0,255,224,.09);border-color:rgba(0,255,224,.30);color:#00ffe0;box-shadow:0 0 14px rgba(0,255,224,.09);}
+.tb-dot{width:5px;height:5px;border-radius:50%;background:currentColor;opacity:.5;}
+.tb.on .tb-dot{opacity:1;}
+.panel{display:none;}.panel.on{display:block;}
+
+/* KPI grids */
+.kpi4{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:20px;}
+.kpi{
+  padding:18px 20px;border-radius:16px;position:relative;overflow:hidden;
+  border:1px solid var(--k-bdr,rgba(0,255,224,.16));
+  background:var(--k-bg,rgba(0,255,224,.05));
+  transition:transform .22s,box-shadow .22s;}
+.kpi:hover{transform:translateY(-3px);box-shadow:0 10px 28px rgba(0,0,0,.26);}
+.kpi-glow{
+  position:absolute;top:-22px;right:-22px;width:80px;height:80px;
+  border-radius:50%;background:var(--k-glow,rgba(0,255,224,.09));
+  filter:blur(20px);pointer-events:none;}
+.kpi-ico{
+  width:38px;height:38px;border-radius:10px;font-size:17px;
+  background:var(--k-ico,rgba(0,255,224,.14));
+  display:flex;align-items:center;justify-content:center;margin-bottom:12px;position:relative;}
+.kpi-lbl{font-size:10px;font-weight:700;color:#5a8498;text-transform:uppercase;letter-spacing:.6px;position:relative;}
+.kpi-val{font-size:24px;font-weight:800;line-height:1.1;margin:5px 0 6px;position:relative;}
+.kpi-val.sm{font-size:18px;}
+.kpi-trend{font-size:10.5px;font-weight:600;position:relative;display:flex;align-items:center;gap:3px;}
+.up{color:#2ecc71;}.dn{color:#e74c3c;}.nt{color:#5a8498;}
+
+.k-c{--k-bg:rgba(0,255,224,.05);--k-ico:rgba(0,255,224,.14);--k-bdr:rgba(0,255,224,.16);--k-glow:rgba(0,255,224,.10);}
+.k-b{--k-bg:rgba(0,168,255,.05);--k-ico:rgba(0,168,255,.14);--k-bdr:rgba(0,168,255,.16);--k-glow:rgba(0,168,255,.10);}
+.k-p{--k-bg:rgba(124,92,231,.05);--k-ico:rgba(124,92,231,.14);--k-bdr:rgba(124,92,231,.16);--k-glow:rgba(124,92,231,.10);}
+.k-a{--k-bg:rgba(243,156,18,.05);--k-ico:rgba(243,156,18,.14);--k-bdr:rgba(243,156,18,.16);--k-glow:rgba(243,156,18,.10);}
+.k-g{--k-bg:rgba(46,204,113,.05);--k-ico:rgba(46,204,113,.14);--k-bdr:rgba(46,204,113,.16);--k-glow:rgba(46,204,113,.10);}
+.k-r{--k-bg:rgba(231,76,60,.05);--k-ico:rgba(231,76,60,.14);--k-bdr:rgba(231,76,60,.16);--k-glow:rgba(231,76,60,.10);}
+.k-pk{--k-bg:rgba(253,121,168,.05);--k-ico:rgba(253,121,168,.14);--k-bdr:rgba(253,121,168,.16);--k-glow:rgba(253,121,168,.10);}
+.k-t{--k-bg:rgba(0,206,201,.05);--k-ico:rgba(0,206,201,.14);--k-bdr:rgba(0,206,201,.16);--k-glow:rgba(0,206,201,.10);}
+
+/* Chart grids */
+.cg2{display:grid;grid-template-columns:1fr 1fr;gap:18px;margin-bottom:20px;}
+.cg3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:18px;margin-bottom:20px;}
+.cg13{display:grid;grid-template-columns:1fr 2fr;gap:18px;margin-bottom:20px;}
+.cg31{display:grid;grid-template-columns:2fr 1fr;gap:18px;margin-bottom:20px;}
+
+.cc{padding:20px 22px;}
+.cc-head{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:16px;}
+.cc-title{font-size:13.5px;font-weight:700;color:#fff;}
+.cc-sub{font-size:10.5px;color:#5a8498;margin-top:2px;}
+.cc-badge{font-size:10px;font-weight:700;padding:3px 10px;border-radius:20px;border:1px solid;white-space:nowrap;flex-shrink:0;}
+.cb-c{background:rgba(0,255,224,.08);border-color:rgba(0,255,224,.28);color:#00ffe0;}
+.cb-g{background:rgba(46,204,113,.08);border-color:rgba(46,204,113,.28);color:#2ecc71;}
+.cb-a{background:rgba(243,156,18,.08);border-color:rgba(243,156,18,.28);color:#f39c12;}
+.cb-r{background:rgba(231,76,60,.08);border-color:rgba(231,76,60,.28);color:#e74c3c;}
+.cb-p{background:rgba(124,92,231,.08);border-color:rgba(124,92,231,.28);color:#a78bfa;}
+.cb-b{background:rgba(0,168,255,.08);border-color:rgba(0,168,255,.28);color:#00a8ff;}
+.cc canvas{max-height:230px;}.cc.tall canvas{max-height:280px;}.cc.sh canvas{max-height:165px;}
+
+/* Tables */
+.tw{overflow-x:auto;}
+table{width:100%;border-collapse:collapse;font-size:12.5px;}
+thead th{
+  padding:10px 14px;text-align:left;font-size:10px;font-weight:700;color:#5a8498;
+  text-transform:uppercase;letter-spacing:.5px;border-bottom:1px solid var(--border);
+  white-space:nowrap;background:rgba(0,0,0,.12);}
+tbody td{padding:12px 14px;border-bottom:1px solid rgba(255,255,255,.04);color:#b8d8e8;vertical-align:middle;}
+tbody tr:last-child td{border-bottom:none;}
+tbody tr{transition:background .18s;}
+tbody tr:hover{background:rgba(255,255,255,.025);}
+
+/* Badges */
+.b{display:inline-flex;align-items:center;gap:3px;padding:3px 9px;border-radius:20px;font-size:10px;font-weight:700;white-space:nowrap;border:1px solid;}
+.b-paid{background:rgba(46,204,113,.12);border-color:rgba(46,204,113,.34);color:#2ecc71;}
+.b-pending{background:rgba(243,156,18,.12);border-color:rgba(243,156,18,.34);color:#f39c12;}
+.b-canceled{background:rgba(231,76,60,.12);border-color:rgba(231,76,60,.34);color:#e74c3c;}
+.b-active{background:rgba(46,204,113,.12);border-color:rgba(46,204,113,.34);color:#2ecc71;}
+.b-blocked{background:rgba(231,76,60,.12);border-color:rgba(231,76,60,.34);color:#e74c3c;}
+.b-open{background:rgba(0,255,224,.08);border-color:rgba(0,255,224,.28);color:#00ffe0;}
+.b-full{background:rgba(243,156,18,.12);border-color:rgba(243,156,18,.34);color:#f39c12;}
+.b-passenger{background:rgba(0,168,255,.10);border-color:rgba(0,168,255,.28);color:#00a8ff;}
+.b-operator{background:rgba(124,92,231,.10);border-color:rgba(124,92,231,.28);color:#a78bfa;}
+.b-admin{background:rgba(243,156,18,.10);border-color:rgba(243,156,18,.28);color:#f39c12;}
+
+/* Reviews */
+.rev-card{padding:13px 15px;border-radius:13px;margin-bottom:10px;background:rgba(255,255,255,.038);border:1px solid var(--border);transition:background .2s;}
+.rev-card:hover{background:rgba(255,255,255,.065);}
+.rev-top{display:flex;justify-content:space-between;align-items:center;margin-bottom:5px;}
+.rev-name{font-size:12.5px;font-weight:700;color:#fff;}
+.rev-stars{color:#f39c12;font-size:12px;letter-spacing:1px;}
+.rev-route{font-size:10.5px;color:#5a8498;margin-bottom:5px;}
+.rev-comment{font-size:12px;color:#8ab0c0;line-height:1.55;}
+.rev-date{font-size:10px;color:#3a5a68;margin-top:5px;}
+
+/* Progress bars */
+.prog-wrap{margin-bottom:11px;}
+.prog-label{display:flex;justify-content:space-between;font-size:11.5px;font-weight:600;margin-bottom:4px;color:#b0ccd8;}
+.prog-track{height:7px;border-radius:4px;background:rgba(255,255,255,.08);overflow:hidden;}
+.prog-fill{height:100%;border-radius:4px;transition:width 1.2s cubic-bezier(.34,1.56,.64,1);}
+
+/* AI rows */
+.ai-row{display:flex;align-items:center;gap:10px;padding:9px 0;border-bottom:1px solid rgba(255,255,255,.045);}
+.ai-row:last-child{border-bottom:none;}
+.ai-rank{width:22px;height:22px;border-radius:7px;flex-shrink:0;background:rgba(0,255,224,.12);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:800;color:#00ffe0;}
+.ai-route{font-size:12.5px;font-weight:600;flex:1;color:#c8e4f0;}
+.ai-bar{width:70px;height:5px;border-radius:3px;background:rgba(255,255,255,.08);overflow:hidden;}
+.ai-bar-fill{height:100%;border-radius:3px;background:linear-gradient(90deg,#f39c12,#e74c3c);}
+.ai-cnt{font-size:11px;font-weight:700;color:#f39c12;}
+
+.empty{text-align:center;padding:40px 20px;color:#3a5a6a;}
+.empty-ico{font-size:40px;margin-bottom:8px;}
+
+::-webkit-scrollbar{width:5px;height:5px;}
+::-webkit-scrollbar-track{background:transparent;}
+::-webkit-scrollbar-thumb{background:rgba(255,255,255,.12);border-radius:3px;}
+::-webkit-scrollbar-thumb:hover{background:rgba(255,255,255,.22);}
+</style>
+<script src="/js/api.js"></script>
+</head>
+<body>
+
+<canvas id="gc"></canvas>
+<div class="neb"></div>
+<div class="pl pl1"></div>
+<div class="pl pl2"></div>
+<div class="mt"></div><div class="mt"></div><div class="mt"></div><div class="mt"></div>
+<div class="sf" id="starField"></div>
+
+<!-- ═══ HEADER ═══ -->
+<header class="hdr">
+  <a class="hdr-logo" href="admin.html">
+    <div class="hdr-logo-icon">🚌</div>
+    <div class="hdr-logo-text">SmartBusAI</div>
+    <div class="hdr-logo-badge">ADMIN</div>
+  </a>
+  <div class="hdr-sep"></div>
+  <span style="font-size:12.5px;color:rgba(255,255,255,.30);font-weight:600;">Dashboard</span>
+  <div class="hdr-space"></div>
+  <nav class="hdr-nav">
+    <a href="users.html"><span class="nav-icon">👥</span> Người dùng <span class="nbadge" id="pendingBadge">0</span></a>
+    <a href="operators.html"><span class="nav-icon">🏢</span> Nhà xe</a>
+    <a href="settings.html"><span class="nav-icon">⚙️</span> Cấu hình</a>
+    <a href="support.html"><span class="nav-icon">🛟</span> Hỗ trợ</a>
+  </nav>
+  <div class="hdr-right">
+    <div class="notif-btn" title="Thông báo">🔔<div class="notif-dot"></div></div>
+    <button class="btn-export">📤 Xuất báo cáo</button>
+    <div class="admin-chip">
+      <div class="admin-avt">👑</div>
+      <div class="admin-label">Admin</div>
+    </div>
+    <button class="btn-logout" onclick="logout()">🚪 Đăng xuất</button>
+  </div>
+</header>
+
+<!-- ═══ CONTENT ═══ -->
+<div class="content">
+
+  <div class="tab-bar">
+    <div class="tb on" onclick="switchTab('overview',this)"><div class="tb-dot"></div>📊 Tổng quan</div>
+    <div class="tb" onclick="switchTab('revenue',this)"><div class="tb-dot"></div>💰 Doanh thu</div>
+    <div class="tb" onclick="switchTab('trips',this)"><div class="tb-dot"></div>🚍 Chuyến xe</div>
+    <div class="tb" onclick="switchTab('users',this)"><div class="tb-dot"></div>👥 Người dùng</div>
+    <div class="tb" onclick="switchTab('ai',this)"><div class="tb-dot"></div>🤖 AI & Hành vi</div>
+    <div class="tb" onclick="switchTab('reviews',this)"><div class="tb-dot"></div>⭐ Đánh giá</div>
+  </div>
+
+  <!-- ▌ PANEL OVERVIEW ▌ -->
+  <div class="panel on" id="panel-overview">
+    <div class="kpi4" style="margin-bottom:16px;">
+      <div class="kpi k-a"><div class="kpi-glow"></div><div class="kpi-ico">💰</div><div class="kpi-lbl">Tổng doanh thu</div><div class="kpi-val sm" id="kRevenue">—</div><div class="kpi-trend nt">Tất cả thời gian</div></div>
+      <div class="kpi k-c"><div class="kpi-glow"></div><div class="kpi-ico">🎫</div><div class="kpi-lbl">Tổng đặt vé</div><div class="kpi-val" id="kBookings">—</div><div class="kpi-trend nt" id="kBkTrend">—</div></div>
+      <div class="kpi k-b"><div class="kpi-glow"></div><div class="kpi-ico">👥</div><div class="kpi-lbl">Người dùng</div><div class="kpi-val" id="kUsers">—</div><div class="kpi-trend nt">Đã đăng ký</div></div>
+      <div class="kpi k-p"><div class="kpi-glow"></div><div class="kpi-ico">🏢</div><div class="kpi-lbl">Nhà xe hoạt động</div><div class="kpi-val" id="kOperators">—</div><div class="kpi-trend nt">Đang phục vụ</div></div>
+    </div>
+    <div class="kpi4" style="margin-bottom:22px;">
+      <div class="kpi k-g"><div class="kpi-glow"></div><div class="kpi-ico">🚍</div><div class="kpi-lbl">Chuyến đang mở</div><div class="kpi-val" id="kTripsOpen">—</div><div class="kpi-trend up">OPEN / FULL</div></div>
+      <div class="kpi k-r"><div class="kpi-glow"></div><div class="kpi-ico">❌</div><div class="kpi-lbl">Vé bị huỷ</div><div class="kpi-val" id="kCanceled">—</div><div class="kpi-trend dn" id="kCancelRate">—</div></div>
+      <div class="kpi k-pk"><div class="kpi-glow"></div><div class="kpi-ico">⭐</div><div class="kpi-lbl">Đánh giá TB</div><div class="kpi-val" id="kRating">—</div><div class="kpi-trend nt">/ 5 sao</div></div>
+      <div class="kpi k-t"><div class="kpi-glow"></div><div class="kpi-ico">💳</div><div class="kpi-lbl">Thanh toán OK</div><div class="kpi-val" id="kPayOK">—</div><div class="kpi-trend nt" id="kPayRate">—</div></div>
+    </div>
+    <div class="cg31" style="margin-bottom:20px;">
+      <div class="gc cc tall"><div class="cc-head"><div><div class="cc-title">Doanh thu 6 tháng</div><div class="cc-sub">Biểu đồ theo tháng (VNĐ)</div></div><span class="cc-badge cb-g">Line chart</span></div><canvas id="revenueChart"></canvas></div>
+      <div class="gc cc tall"><div class="cc-head"><div><div class="cc-title">Trạng thái booking</div><div class="cc-sub">PAID / PENDING / CANCELED</div></div><span class="cc-badge cb-a">Doughnut</span></div><canvas id="bookingStatusChart"></canvas></div>
+    </div>
+    <div class="cg2" style="margin-bottom:20px;">
+      <div class="gc cc"><div class="cc-head"><div><div class="cc-title">Đặt vé theo ngày</div><div class="cc-sub">14 ngày gần nhất</div></div><span class="cc-badge cb-p">Bar</span></div><canvas id="bookingChart"></canvas></div>
+      <div class="gc cc"><div class="cc-head"><div><div class="cc-title">Tuyến đường phổ biến</div><div class="cc-sub">Top 5 tuyến nhiều vé nhất</div></div><span class="cc-badge cb-c">Doughnut</span></div><canvas id="routeChart"></canvas></div>
+    </div>
+    <div class="cg13">
+      <div class="gc cc"><div class="cc-head"><div><div class="cc-title">Phương thức thanh toán</div><div class="cc-sub">BANK / MOMO / ZALOPAY</div></div><span class="cc-badge cb-g">Polar</span></div><canvas id="payMethodChart"></canvas></div>
+      <div class="gc cc"><div class="cc-head"><div><div class="cc-title">Giờ đặt vé cao điểm</div><div class="cc-sub">Phân bổ theo 24h</div></div><span class="cc-badge cb-r">Area line</span></div><canvas id="hourChart"></canvas></div>
+    </div>
+  </div>
+
+  <!-- ▌ PANEL REVENUE ▌ -->
+  <div class="panel" id="panel-revenue">
+    <div class="kpi4" style="margin-bottom:22px;">
+      <div class="kpi k-a"><div class="kpi-glow"></div><div class="kpi-ico">💰</div><div class="kpi-lbl">Tổng doanh thu</div><div class="kpi-val sm" id="rRevTotal">—</div><div class="kpi-trend nt">Tất cả thời gian</div></div>
+      <div class="kpi k-g"><div class="kpi-glow"></div><div class="kpi-ico">✅</div><div class="kpi-lbl">Đã thu (PAID)</div><div class="kpi-val sm" id="rRevPaid">—</div><div class="kpi-trend up">Thực thu</div></div>
+      <div class="kpi k-c"><div class="kpi-glow"></div><div class="kpi-ico">📅</div><div class="kpi-lbl">Tháng này</div><div class="kpi-val sm" id="rRevMonth">—</div><div class="kpi-trend nt">—</div></div>
+      <div class="kpi k-r"><div class="kpi-glow"></div><div class="kpi-ico">💸</div><div class="kpi-lbl">Mất doanh thu</div><div class="kpi-val sm" id="rRevLost">—</div><div class="kpi-trend dn">Từ vé huỷ</div></div>
+    </div>
+    <div class="cg2" style="margin-bottom:20px;">
+      <div class="gc cc tall"><div class="cc-head"><div><div class="cc-title">Doanh thu 12 tháng</div><div class="cc-sub">Biểu đồ đường</div></div><span class="cc-badge cb-a">Line</span></div><canvas id="rev12Chart"></canvas></div>
+      <div class="gc cc tall"><div class="cc-head"><div><div class="cc-title">Doanh thu theo nhà xe</div><div class="cc-sub">Top operators</div></div><span class="cc-badge cb-c">Horizontal bar</span></div><canvas id="revOperatorChart"></canvas></div>
+    </div>
+    <div class="cg2">
+      <div class="gc cc"><div class="cc-head"><div><div class="cc-title">Doanh thu theo loại xe</div><div class="cc-sub">Bus type breakdown</div></div><span class="cc-badge cb-p">Doughnut</span></div><canvas id="revBusTypeChart"></canvas></div>
+      <div class="gc cc"><div class="cc-head"><div><div class="cc-title">Tăng trưởng doanh thu</div><div class="cc-sub">% so với tháng trước</div></div><span class="cc-badge cb-g">Bar</span></div><canvas id="revGrowthChart"></canvas></div>
+    </div>
+  </div>
+
+  <!-- ▌ PANEL TRIPS ▌ -->
+  <div class="panel" id="panel-trips">
+    <div class="kpi4" style="margin-bottom:22px;">
+      <div class="kpi k-c"><div class="kpi-glow"></div><div class="kpi-ico">🚍</div><div class="kpi-lbl">Tổng chuyến xe</div><div class="kpi-val" id="tTotal">—</div><div class="kpi-trend nt">Tất cả</div></div>
+      <div class="kpi k-g"><div class="kpi-glow"></div><div class="kpi-ico">🟢</div><div class="kpi-lbl">Đang mở (OPEN)</div><div class="kpi-val" id="tOpen">—</div><div class="kpi-trend up">Còn chỗ</div></div>
+      <div class="kpi k-a"><div class="kpi-glow"></div><div class="kpi-ico">🟡</div><div class="kpi-lbl">Đã đầy (FULL)</div><div class="kpi-val" id="tFull">—</div><div class="kpi-trend nt">Hết ghế</div></div>
+      <div class="kpi k-r"><div class="kpi-glow"></div><div class="kpi-ico">❌</div><div class="kpi-lbl">Đã huỷ</div><div class="kpi-val" id="tCanceled">—</div><div class="kpi-trend dn">CANCELED</div></div>
+    </div>
+    <div class="cg2" style="margin-bottom:20px;">
+      <div class="gc cc"><div class="cc-head"><div><div class="cc-title">Phân bổ trạng thái chuyến</div><div class="cc-sub">OPEN / FULL / CANCELED</div></div><span class="cc-badge cb-c">Doughnut</span></div><canvas id="tripStatusChart"></canvas></div>
+      <div class="gc cc"><div class="cc-head"><div><div class="cc-title">Tỷ lệ lấp đầy xe</div><div class="cc-sub">Occupancy % theo xe</div></div><span class="cc-badge cb-a">Bar</span></div><canvas id="busChart"></canvas></div>
+    </div>
+    <div class="gc gc-pad">
+      <div class="sec-head"><div><div class="sec-title">Chuyến xe gần đây</div><div class="sec-sub">10 chuyến mới nhất</div></div><span class="cc-badge cb-c">Realtime</span></div>
+      <div class="tw"><table>
+        <thead><tr><th>#ID</th><th>Tuyến đường</th><th>Xe (biển số)</th><th>Khởi hành</th><th>Giá vé</th><th>Trạng thái</th><th>Lấp đầy</th></tr></thead>
+        <tbody id="tripsTable"><tr><td colspan="7"><div class="empty"><div class="empty-ico">⏳</div>Đang tải…</div></td></tr></tbody>
+      </table></div>
+    </div>
+  </div>
+
+  <!-- ▌ PANEL USERS ▌ -->
+  <div class="panel" id="panel-users">
+    <div class="kpi4" style="margin-bottom:22px;">
+      <div class="kpi k-b"><div class="kpi-glow"></div><div class="kpi-ico">👥</div><div class="kpi-lbl">Tổng người dùng</div><div class="kpi-val" id="uTotal">—</div><div class="kpi-trend nt">Đã đăng ký</div></div>
+      <div class="kpi k-g"><div class="kpi-glow"></div><div class="kpi-ico">✅</div><div class="kpi-lbl">Đang hoạt động</div><div class="kpi-val" id="uActive">—</div><div class="kpi-trend up">ACTIVE</div></div>
+      <div class="kpi k-r"><div class="kpi-glow"></div><div class="kpi-ico">🚫</div><div class="kpi-lbl">Bị khoá</div><div class="kpi-val" id="uBlocked">—</div><div class="kpi-trend dn">BLOCKED</div></div>
+      <div class="kpi k-p"><div class="kpi-glow"></div><div class="kpi-ico">🏢</div><div class="kpi-lbl">Nhà xe (OPERATOR)</div><div class="kpi-val" id="uOperator">—</div><div class="kpi-trend nt">—</div></div>
+    </div>
+    <div class="cg2" style="margin-bottom:20px;">
+      <div class="gc cc tall"><div class="cc-head"><div><div class="cc-title">Tăng trưởng người dùng</div><div class="cc-sub">Người dùng mới theo tháng</div></div><span class="cc-badge cb-c">Area line</span></div><canvas id="growthChart"></canvas></div>
+      <div class="gc cc tall"><div class="cc-head"><div><div class="cc-title">Top user hoạt động nhất</div><div class="cc-sub">Theo số lần đặt vé</div></div><span class="cc-badge cb-p">Horizontal bar</span></div><canvas id="userChart"></canvas></div>
+    </div>
+    <div class="gc gc-pad">
+      <div class="sec-head"><div><div class="sec-title">Người dùng mới nhất</div><div class="sec-sub">10 tài khoản đăng ký gần đây</div></div><span class="cc-badge cb-b">Table</span></div>
+      <div class="tw"><table>
+        <thead><tr><th>#ID</th><th>Tên</th><th>Email</th><th>SĐT</th><th>Vai trò</th><th>Trạng thái</th><th>Ngày tạo</th></tr></thead>
+        <tbody id="usersTable"><tr><td colspan="7"><div class="empty"><div class="empty-ico">⏳</div>Đang tải…</div></td></tr></tbody>
+      </table></div>
+    </div>
+  </div>
+
+  <!-- ▌ PANEL AI ▌ -->
+  <div class="panel" id="panel-ai">
+    <div class="kpi4" style="margin-bottom:22px;">
+      <div class="kpi k-c"><div class="kpi-glow"></div><div class="kpi-ico">🤖</div><div class="kpi-lbl">Tổng AI đề xuất</div><div class="kpi-val" id="aiTotal">—</div><div class="kpi-trend nt">AI_RECOMMENDATION</div></div>
+      <div class="kpi k-a"><div class="kpi-glow"></div><div class="kpi-ico">📈</div><div class="kpi-lbl">Điểm đề xuất TB</div><div class="kpi-val" id="aiAvgScore">—</div><div class="kpi-trend nt">Score avg</div></div>
+      <div class="kpi k-p"><div class="kpi-glow"></div><div class="kpi-ico">👁</div><div class="kpi-lbl">Log hành vi</div><div class="kpi-val" id="aiBehavior">—</div><div class="kpi-trend nt">USER_BEHAVIOR</div></div>
+      <div class="kpi k-g"><div class="kpi-glow"></div><div class="kpi-ico">🎯</div><div class="kpi-lbl">Tỉ lệ chuyển đổi</div><div class="kpi-val" id="aiConvert">—</div><div class="kpi-trend up">AI → Đặt vé</div></div>
+    </div>
+    <div class="cg2" style="margin-bottom:20px;">
+      <div class="gc cc tall"><div class="cc-head"><div><div class="cc-title">AI đề xuất tuyến nhiều nhất</div><div class="cc-sub">Top routes được AI gợi ý</div></div><span class="cc-badge cb-a">Bar</span></div><canvas id="aiRouteChart"></canvas></div>
+      <div class="gc cc tall"><div class="cc-head"><div><div class="cc-title">Phân bổ hành vi người dùng</div><div class="cc-sub">Action types từ USER_BEHAVIOR</div></div><span class="cc-badge cb-p">Doughnut</span></div><canvas id="behaviorChart"></canvas></div>
+    </div>
+    <div class="cg2">
+      <div class="gc gc-pad">
+        <div class="sec-head" style="margin-bottom:12px;"><div><div class="sec-title">Top tuyến AI đề xuất</div><div class="sec-sub">Rank theo score cao nhất</div></div></div>
+        <div id="aiRouteList"><div class="empty"><div class="empty-ico">🤖</div><p>Đang tải…</p></div></div>
+      </div>
+      <div class="gc cc"><div class="cc-head"><div><div class="cc-title">Hành vi theo giờ</div><div class="cc-sub">User action time distribution</div></div><span class="cc-badge cb-p">Area</span></div><canvas id="behaviorHourChart"></canvas></div>
+    </div>
+  </div>
+
+  <!-- ▌ PANEL REVIEWS ▌ -->
+  <div class="panel" id="panel-reviews">
+    <div class="kpi4" style="margin-bottom:22px;">
+      <div class="kpi k-pk"><div class="kpi-glow"></div><div class="kpi-ico">⭐</div><div class="kpi-lbl">Điểm TB hệ thống</div><div class="kpi-val" id="rvAvg">—</div><div class="kpi-trend nt">/ 5 sao</div></div>
+      <div class="kpi k-c"><div class="kpi-glow"></div><div class="kpi-ico">💬</div><div class="kpi-lbl">Tổng đánh giá</div><div class="kpi-val" id="rvTotal">—</div><div class="kpi-trend nt">Tất cả</div></div>
+      <div class="kpi k-g"><div class="kpi-glow"></div><div class="kpi-ico">😊</div><div class="kpi-lbl">Tích cực (4-5★)</div><div class="kpi-val" id="rvPositive">—</div><div class="kpi-trend up">Hài lòng</div></div>
+      <div class="kpi k-r"><div class="kpi-glow"></div><div class="kpi-ico">😞</div><div class="kpi-lbl">Tiêu cực (1-2★)</div><div class="kpi-val" id="rvNegative">—</div><div class="kpi-trend dn">Cần cải thiện</div></div>
+    </div>
+    <div class="cg31">
+      <div class="gc gc-pad">
+        <div class="sec-head" style="margin-bottom:14px;"><div><div class="sec-title">Đánh giá gần đây</div><div class="sec-sub">10 reviews mới nhất</div></div><span class="cc-badge cb-p">Live</span></div>
+        <div id="reviewsList"><div class="empty"><div class="empty-ico">⭐</div><p>Đang tải…</p></div></div>
+      </div>
+      <div>
+        <div class="gc cc" style="margin-bottom:18px;"><div class="cc-head"><div><div class="cc-title">Phân bổ số sao</div><div class="cc-sub">1★ → 5★</div></div><span class="cc-badge cb-a">Bar</span></div><canvas id="ratingChart"></canvas></div>
+        <div class="gc gc-pad">
+          <div class="sec-title" style="margin-bottom:14px;font-size:13px;">Tỉ lệ hài lòng</div>
+          <div class="prog-wrap"><div class="prog-label"><span>5★</span><span id="p5">0%</span></div><div class="prog-track"><div class="prog-fill" id="pb5" style="width:0%;background:linear-gradient(90deg,#2ecc71,#1abc9c)"></div></div></div>
+          <div class="prog-wrap"><div class="prog-label"><span>4★</span><span id="p4">0%</span></div><div class="prog-track"><div class="prog-fill" id="pb4" style="width:0%;background:linear-gradient(90deg,#1abc9c,#16a085)"></div></div></div>
+          <div class="prog-wrap"><div class="prog-label"><span>3★</span><span id="p3">0%</span></div><div class="prog-track"><div class="prog-fill" id="pb3" style="width:0%;background:linear-gradient(90deg,#f39c12,#e67e22)"></div></div></div>
+          <div class="prog-wrap"><div class="prog-label"><span>2★</span><span id="p2">0%</span></div><div class="prog-track"><div class="prog-fill" id="pb2" style="width:0%;background:linear-gradient(90deg,#e67e22,#d35400)"></div></div></div>
+          <div class="prog-wrap"><div class="prog-label"><span>1★</span><span id="p1">0%</span></div><div class="prog-track"><div class="prog-fill" id="pb1" style="width:0%;background:linear-gradient(90deg,#e74c3c,#c0392b)"></div></div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div><!-- /content -->
+
+<script>
+/* GALAXY */
+(()=>{
+  const cv=document.getElementById("gc"),cx=cv.getContext("2d");
+  function mb32(s){s=s>>>0;return()=>{s+=0x6D2B79F5;let t=Math.imul(s^s>>>15,1|s);t^=t+Math.imul(t^t>>>7,61|t);return((t^t>>>14)>>>0)/4294967296;};}
+  function draw(){
+    cv.width=innerWidth;cv.height=innerHeight;
+    cx.clearRect(0,0,cv.width,cv.height);
+    const bg=cx.createRadialGradient(cv.width*.5,cv.height*.38,0,cv.width*.5,cv.height*.38,cv.width*.85);
+    bg.addColorStop(0,"#0c1a2e");bg.addColorStop(.5,"#060d18");bg.addColorStop(1,"#020408");
+    cx.fillStyle=bg;cx.fillRect(0,0,cv.width,cv.height);
+    const mw=cx.createLinearGradient(0,cv.height*.12,cv.width,cv.height*.70);
+    mw.addColorStop(0,"transparent");mw.addColorStop(.40,"rgba(60,100,160,0.07)");
+    mw.addColorStop(.52,"rgba(80,130,210,0.11)");mw.addColorStop(1,"transparent");
+    cx.fillStyle=mw;cx.fillRect(0,0,cv.width,cv.height);
+    const rng=mb32(cv.width*cv.height+7);
+    const n=Math.min(420,Math.floor(cv.width*cv.height/4000));
+    for(let i=0;i<n;i++){
+      const x=rng()*cv.width,y=rng()*cv.height,r=rng()*1.6+.12,a=rng()*.7+.18;
+      const h=rng()<.10?180:rng()<.08?265:0;
+      cx.beginPath();cx.arc(x,y,r,0,Math.PI*2);
+      cx.fillStyle=h===180?`rgba(0,255,224,${a*.48})`:h===265?`rgba(180,155,255,${a*.40})`:`rgba(255,255,255,${a})`;cx.fill();
+    }
+    [{x:.14,y:.24,r:.18,c:"rgba(0,170,210,0.07)"},{x:.78,y:.68,r:.15,c:"rgba(140,80,245,0.07)"},{x:.50,y:.85,r:.12,c:"rgba(0,100,210,0.05)"}].forEach(s=>{
+      const ng=cx.createRadialGradient(s.x*cv.width,s.y*cv.height,0,s.x*cv.width,s.y*cv.height,s.r*cv.width);
+      ng.addColorStop(0,s.c);ng.addColorStop(1,"transparent");cx.fillStyle=ng;cx.fillRect(0,0,cv.width,cv.height);
+    });
+  }
+  draw();let rt;window.addEventListener("resize",()=>{clearTimeout(rt);rt=setTimeout(draw,160);});
+  const sf=document.getElementById("starField");
+  for(let i=0;i<60;i++){
+    const s=document.createElement("div");s.className="ts";
+    const sz=Math.random()*2+.5;
+    s.style.cssText=`width:${sz}px;height:${sz}px;top:${Math.random()*100}%;left:${Math.random()*100}%;--td:${(Math.random()*4+2).toFixed(1)}s;--dl:${(Math.random()*5).toFixed(1)}s;`;
+    sf.appendChild(s);
+  }
+})();
+
+/* PAGE TRANSITION */
+document.addEventListener("click",e=>{
+  const a=e.target.closest("a[href]");
+  if(!a)return;const h=a.getAttribute("href");
+  if(!h||h==="#"||h.startsWith("http"))return;
+  e.preventDefault();document.body.style.transition="opacity .22s";document.body.style.opacity="0";
+  setTimeout(()=>{window.location.href=h;},230);
+});
+
+function logout(){localStorage.clear();window.location.href="../auth/login.html";}
+
+/* CHART DEFAULTS */
+Chart.defaults.color="rgba(255,255,255,0.48)";
+Chart.defaults.font.family="Segoe UI";Chart.defaults.font.size=11;
+Chart.defaults.plugins.legend.labels.boxWidth=11;Chart.defaults.plugins.legend.labels.padding=13;
+
+const GC="rgba(255,255,255,0.055)";
+const PAL=["#00ffe0","#00a8ff","#7c5ce7","#f39c12","#2ecc71","#e74c3c","#fd79a8","#fdcb6e","#00cec9","#a29bfe"];
+const TTP={backgroundColor:"rgba(4,12,24,0.94)",titleColor:"#00ffe0",bodyColor:"#b0ccd8",borderColor:"rgba(0,255,224,0.20)",borderWidth:1,padding:11,cornerRadius:8};
+
+function lineOpts(yCb){return{responsive:true,maintainAspectRatio:true,plugins:{legend:{display:false},tooltip:{...TTP,callbacks:{label:yCb?c=>" "+yCb(c.raw):undefined}}},scales:{x:{grid:{color:GC},ticks:{maxRotation:35}},y:{grid:{color:GC},ticks:{callback:yCb}}}};}
+function barOpts(yCb,h){const o=lineOpts(yCb);o.scales.x.grid={display:false};if(h){o.indexAxis="y";o.scales.x.grid={color:GC};o.scales.y.grid={display:false};}return o;}
+function dnutOpts(){return{responsive:true,maintainAspectRatio:true,cutout:"66%",plugins:{legend:{position:"bottom",labels:{boxWidth:11,padding:12}},tooltip:{...TTP}}};}
+
+const $=id=>document.getElementById(id);
+function fmt(v){return Number(v||0).toLocaleString("vi-VN")+"đ";}
+function fmtD(s){const d=new Date(s);return isNaN(d)?"—":d.toLocaleDateString("vi-VN");}
+function fmtDT(s){const d=new Date(s);return isNaN(d)?"—":d.toLocaleString("vi-VN",{day:"2-digit",month:"2-digit",year:"numeric",hour:"2-digit",minute:"2-digit"});}
+function set(id,v){const e=$(id);if(e)e.textContent=v;}
+async function api(p){try{const r=await fetch("/api/"+p);return r.ok?r.json():null;}catch{return null;}}
+function mkg(ctx,c1,c2,h=260){const g=ctx.createLinearGradient(0,0,0,h);g.addColorStop(0,c1);g.addColorStop(1,c2);return g;}
+
+function bBadge(s){return s==="PAID"?`<span class="b b-paid">✅ PAID</span>`:s==="PENDING"?`<span class="b b-pending">⏳ PENDING</span>`:`<span class="b b-canceled">❌ CANCELED</span>`;}
+function tBadge(s){return s==="OPEN"?`<span class="b b-open">🟢 OPEN</span>`:s==="FULL"?`<span class="b b-full">🟡 FULL</span>`:`<span class="b b-canceled">❌ CANCELED</span>`;}
+function uStatus(s){return s==="ACTIVE"?`<span class="b b-active">✅ ACTIVE</span>`:`<span class="b b-blocked">🚫 BLOCKED</span>`;}
+function uRole(r){return r==="ADMIN"?`<span class="b b-admin">👑 ADMIN</span>`:r==="OPERATOR"?`<span class="b b-operator">🏢 OP</span>`:`<span class="b b-passenger">👤 User</span>`;}
+
+/* TAB SYSTEM */
+const loaded={};
+function switchTab(name,el){
+  document.querySelectorAll(".tb").forEach(b=>b.classList.remove("on"));
+  document.querySelectorAll(".panel").forEach(p=>p.classList.remove("on"));
+  el.classList.add("on");$("panel-"+name).classList.add("on");
+  if(!loaded[name]){loaded[name]=true;loadTab(name);}
+}
+function loadTab(n){
+  if(n==="overview")return loadOverview();if(n==="revenue")return loadRevenue();
+  if(n==="trips")return loadTrips();if(n==="users")return loadUsers();
+  if(n==="ai")return loadAI();if(n==="reviews")return loadReviews();
+}
+
+/* OVERVIEW */
+async function loadOverview(){
+  const[stats,rev6,bpd,routes,bstat,paym,peak]=await Promise.all([
+    api("admin/stats"),api("admin/revenue-6months"),api("admin/bookings-per-day"),
+    api("admin/top-routes"),api("admin/booking-status"),api("admin/payment-methods"),api("admin/peak-hours")
+  ]);
+  if(stats){
+    set("kRevenue",fmt(stats.totalRevenue));set("kBookings",(stats.totalBookings||0).toLocaleString());
+    set("kUsers",(stats.totalUsers||0).toLocaleString());set("kOperators",(stats.totalOperators||0).toLocaleString());
+    set("kTripsOpen",(stats.tripsOpen||0).toLocaleString());set("kCanceled",(stats.canceledBookings||0).toLocaleString());
+    set("kRating",stats.avgRating?(+stats.avgRating).toFixed(1)+"★":"—");set("kPayOK",(stats.paySuccess||0).toLocaleString());
+    set("pendingBadge",stats.pendingBookings||0);
+    if(stats.totalBookings>0)set("kCancelRate","Huỷ: "+((stats.canceledBookings/stats.totalBookings)*100).toFixed(1)+"%");
+    if(stats.totalPayments>0)set("kPayRate","OK: "+((stats.paySuccess/stats.totalPayments)*100).toFixed(1)+"%");
+  }
+  if(rev6?.length){
+    const c=$("revenueChart").getContext("2d");
+    new Chart($("revenueChart"),{type:"line",data:{labels:rev6.map(d=>d.month),datasets:[{data:rev6.map(d=>d.revenue),borderColor:"#2ecc71",backgroundColor:mkg(c,"rgba(46,204,113,0.32)","rgba(46,204,113,0.02)"),borderWidth:2.5,tension:.42,pointRadius:4,pointBackgroundColor:"#2ecc71",fill:true}]},options:{...lineOpts(v=>v.toLocaleString("vi-VN")),plugins:{legend:{display:false},tooltip:{...TTP,callbacks:{label:c=>" "+fmt(c.raw)}}}}});
+  }
+  if(bstat){new Chart($("bookingStatusChart"),{type:"doughnut",data:{labels:["PAID","PENDING","CANCELED"],datasets:[{data:[bstat.paid||0,bstat.pending||0,bstat.canceled||0],backgroundColor:["#2ecc71","#f39c12","#e74c3c"],borderWidth:0}]},options:dnutOpts()});}
+  if(bpd?.length){
+    const c=$("bookingChart").getContext("2d");
+    new Chart($("bookingChart"),{type:"bar",data:{labels:bpd.map(d=>fmtD(d.date)),datasets:[{data:bpd.map(d=>d.count),backgroundColor:mkg(c,"rgba(124,92,231,0.85)","rgba(124,92,231,0.20)"),borderRadius:6,barThickness:20}]},options:{...barOpts(),plugins:{legend:{display:false},tooltip:{...TTP,callbacks:{label:c=>" "+c.raw+" vé"}}}}});
+  }
+  if(routes?.length){new Chart($("routeChart"),{type:"doughnut",data:{labels:routes.map(d=>d.route),datasets:[{data:routes.map(d=>d.count),backgroundColor:PAL,borderWidth:0}]},options:dnutOpts()});}
+  if(paym?.length){new Chart($("payMethodChart"),{type:"polarArea",data:{labels:paym.map(d=>d.method),datasets:[{data:paym.map(d=>d.count),backgroundColor:["rgba(0,255,224,0.65)","rgba(253,121,168,0.65)","rgba(0,168,255,0.65)"],borderWidth:0}]},options:{responsive:true,maintainAspectRatio:true,plugins:{legend:{position:"bottom",labels:{padding:12,boxWidth:11}},tooltip:{...TTP}}}});}
+  if(peak?.length){
+    const c=$("hourChart").getContext("2d");
+    new Chart($("hourChart"),{type:"line",data:{labels:peak.map(d=>d.hour+":00"),datasets:[{data:peak.map(d=>d.count),borderColor:"#00ffe0",backgroundColor:mkg(c,"rgba(0,255,224,0.24)","rgba(0,255,224,0.02)"),borderWidth:2,tension:.4,pointRadius:3,fill:true}]},options:{...lineOpts(),plugins:{legend:{display:false},tooltip:{...TTP,callbacks:{label:c=>" "+c.raw+" lượt"}}}}});
+  }
+}
+
+/* REVENUE */
+async function loadRevenue(){
+  const[stats,rev12,revOp,revBT]=await Promise.all([api("admin/stats"),api("admin/revenue-12months"),api("admin/revenue-by-operator"),api("admin/revenue-by-bustype")]);
+  if(stats){set("rRevTotal",fmt(stats.totalRevenue));set("rRevPaid",fmt(stats.revenuePaid));set("rRevMonth",fmt(stats.revenueThisMonth));set("rRevLost",fmt(stats.revenueCanceled));}
+  if(rev12?.length){
+    const c=$("rev12Chart").getContext("2d");
+    new Chart($("rev12Chart"),{type:"line",data:{labels:rev12.map(d=>d.month),datasets:[{data:rev12.map(d=>d.revenue),borderColor:"#f39c12",backgroundColor:mkg(c,"rgba(243,156,18,0.30)","rgba(243,156,18,0.02)"),borderWidth:2.5,tension:.42,pointRadius:4,pointBackgroundColor:"#f39c12",fill:true}]},options:{...lineOpts(v=>v.toLocaleString("vi-VN")),plugins:{legend:{display:false},tooltip:{...TTP,callbacks:{label:c=>" "+fmt(c.raw)}}}}});
+  }
+  if(revOp?.length){new Chart($("revOperatorChart"),{type:"bar",data:{labels:revOp.map(d=>d.name),datasets:[{data:revOp.map(d=>d.revenue),backgroundColor:PAL.map(c=>c+"bb"),borderRadius:6,barThickness:22}]},options:{...barOpts(v=>v.toLocaleString("vi-VN"),true),plugins:{legend:{display:false},tooltip:{...TTP,callbacks:{label:c=>" "+fmt(c.raw)}}}}});}
+  if(revBT?.length){new Chart($("revBusTypeChart"),{type:"doughnut",data:{labels:revBT.map(d=>d.bus_type),datasets:[{data:revBT.map(d=>d.revenue),backgroundColor:PAL,borderWidth:0}]},options:dnutOpts()});}
+  if(rev12?.length>1){
+    const gL=[],gV=[],gC=[];
+    for(let i=1;i<rev12.length;i++){const p=rev12[i-1].revenue,c2=rev12[i].revenue,pct=p>0?((c2-p)/p*100).toFixed(1):0;gL.push(rev12[i].month);gV.push(pct);gC.push(pct>=0?"rgba(46,204,113,0.80)":"rgba(231,76,60,0.80)");}
+    new Chart($("revGrowthChart"),{type:"bar",data:{labels:gL,datasets:[{data:gV,backgroundColor:gC,borderRadius:6,barThickness:22}]},options:{...barOpts(v=>v+"%"),plugins:{legend:{display:false},tooltip:{...TTP,callbacks:{label:c=>" "+c.raw+"%"}}}}});
+  }
+}
+
+/* TRIPS */
+async function loadTrips(){
+  const[tstat,occ,recent]=await Promise.all([api("admin/trip-status"),api("admin/bus-occupancy"),api("admin/recent-trips")]);
+  if(tstat?.length){
+    const open=tstat.find(d=>d.status==="OPEN")?.count||0,full=tstat.find(d=>d.status==="FULL")?.count||0,canc=tstat.find(d=>d.status==="CANCELED")?.count||0;
+    set("tTotal",(open+full+canc).toLocaleString());set("tOpen",open.toLocaleString());set("tFull",full.toLocaleString());set("tCanceled",canc.toLocaleString());
+    new Chart($("tripStatusChart"),{type:"doughnut",data:{labels:["OPEN","FULL","CANCELED"],datasets:[{data:[open,full,canc],backgroundColor:["#00ffe0","#f39c12","#e74c3c"],borderWidth:0}]},options:dnutOpts()});
+  }
+  if(occ?.length){new Chart($("busChart"),{type:"bar",data:{labels:occ.map(d=>"Bus "+d.bus),datasets:[{data:occ.map(d=>d.rate),backgroundColor:occ.map(d=>d.rate>80?"rgba(231,76,60,.80)":d.rate>50?"rgba(243,156,18,.80)":"rgba(46,204,113,.80)"),borderRadius:7,barThickness:24}]},options:{...barOpts(v=>v+"%"),plugins:{legend:{display:false},tooltip:{...TTP,callbacks:{label:c=>" "+c.raw+"%"}}}}});}
+  if(recent?.length){
+    $("tripsTable").innerHTML=recent.map(t=>`<tr>
+      <td><b style="color:#00ffe0;">#${t.trip_id}</b></td>
+      <td><b>${t.origin||"—"}</b> → <b>${t.destination||"—"}</b></td>
+      <td style="color:#8ab0c0;">${t.plate_number||t.bus_id||"—"}</td>
+      <td style="color:#6a94a8;">${fmtDT(t.departure_time)}</td>
+      <td style="color:#f39c12;font-weight:700;">${fmt(t.base_price)}</td>
+      <td>${tBadge(t.status)}</td>
+      <td><div style="display:flex;align-items:center;gap:8px;"><div style="flex:1;height:5px;background:rgba(255,255,255,.07);border-radius:3px;overflow:hidden;"><div style="height:100%;border-radius:3px;width:${t.occupancy_rate||0}%;background:${(t.occupancy_rate||0)>80?"#e74c3c":(t.occupancy_rate||0)>50?"#f39c12":"#2ecc71"};"></div></div><span style="font-size:11px;font-weight:700;color:#8ab4c9;">${t.occupancy_rate||0}%</span></div></td>
+    </tr>`).join("");
+  }
+}
+
+/* USERS */
+async function loadUsers(){
+  const[grow,top,recent,stats]=await Promise.all([api("admin/growth-rate"),api("admin/top-users"),api("admin/recent-users"),api("admin/user-stats")]);
+  if(stats){set("uTotal",(stats.total||0).toLocaleString());set("uActive",(stats.active||0).toLocaleString());set("uBlocked",(stats.blocked||0).toLocaleString());set("uOperator",(stats.operators||0).toLocaleString());}
+  if(grow?.length){
+    const c=$("growthChart").getContext("2d");
+    new Chart($("growthChart"),{type:"line",data:{labels:grow.map(d=>d.month),datasets:[{data:grow.map(d=>d.users),borderColor:"#00ffe0",backgroundColor:mkg(c,"rgba(0,255,224,0.24)","rgba(0,255,224,0.02)"),borderWidth:2.5,tension:.42,pointRadius:4,pointBackgroundColor:"#00ffe0",fill:true}]},options:{...lineOpts(),plugins:{legend:{display:false}}}});
+  }
+  if(top?.length){new Chart($("userChart"),{type:"bar",data:{labels:top.map(d=>d.full_name),datasets:[{data:top.map(d=>d.actions||d.bookings||0),backgroundColor:"rgba(124,92,231,0.80)",borderRadius:6,barThickness:20}]},options:{...barOpts(null,true),plugins:{legend:{display:false}}}});}
+  if(recent?.length){
+    $("usersTable").innerHTML=recent.map(u=>`<tr>
+      <td><b style="color:#00ffe0;">#${u.user_id}</b></td>
+      <td><b>${u.full_name||"—"}</b></td>
+      <td style="color:#6a94a8;">${u.email||"—"}</td>
+      <td>${u.phone||"—"}</td>
+      <td>${uRole(u.role)}</td><td>${uStatus(u.status)}</td>
+      <td style="color:#5a8498;">${fmtD(u.created_at)}</td>
+    </tr>`).join("");
+  }
+}
+
+/* AI */
+async function loadAI(){
+  const[aiR,beh,aiS]=await Promise.all([api("admin/ai-top-routes"),api("admin/user-behavior"),api("admin/ai-stats")]);
+  if(aiS){set("aiTotal",(aiS.totalRecommendations||0).toLocaleString());set("aiAvgScore",aiS.avgScore?(+aiS.avgScore).toFixed(2):"—");set("aiBehavior",(aiS.totalBehaviors||0).toLocaleString());set("aiConvert",aiS.conversionRate?(+aiS.conversionRate).toFixed(1)+"%":"—");}
+  if(aiR?.length){
+    const c=$("aiRouteChart").getContext("2d");
+    const g=c.createLinearGradient(0,0,c.canvas.width,0);g.addColorStop(0,"rgba(243,156,18,0.90)");g.addColorStop(1,"rgba(253,121,168,0.70)");
+    new Chart($("aiRouteChart"),{type:"bar",data:{labels:aiR.map(d=>d.route),datasets:[{data:aiR.map(d=>d.count),backgroundColor:g,borderRadius:7,barThickness:24}]},options:{...barOpts(),plugins:{legend:{display:false}}}});
+    const mx=Math.max(...aiR.map(d=>d.count),1);
+    $("aiRouteList").innerHTML=aiR.slice(0,8).map((d,i)=>`<div class="ai-row"><div class="ai-rank">${i+1}</div><div class="ai-route">${d.route}</div><div class="ai-bar"><div class="ai-bar-fill" style="width:${Math.round(d.count/mx*100)}%"></div></div><div class="ai-cnt">${d.count}</div></div>`).join("");
+  }
+  if(beh?.length){
+    new Chart($("behaviorChart"),{type:"doughnut",data:{labels:beh.map(d=>d.action),datasets:[{data:beh.map(d=>d.count),backgroundColor:PAL,borderWidth:0}]},options:dnutOpts()});
+    const bh=beh.reduce((a,d)=>{if(d.hour!=null)a[d.hour]=(a[d.hour]||0)+d.count;return a;},{});
+    const hrs=Array.from({length:24},(_,i)=>i);
+    const c=$("behaviorHourChart").getContext("2d");
+    new Chart($("behaviorHourChart"),{type:"line",data:{labels:hrs.map(h=>h+":00"),datasets:[{data:hrs.map(h=>bh[h]||0),borderColor:"#fd79a8",backgroundColor:mkg(c,"rgba(253,121,168,0.26)","rgba(253,121,168,0.02)"),borderWidth:2,tension:.4,pointRadius:2,fill:true}]},options:{...lineOpts(),plugins:{legend:{display:false}}}});
+  }
+}
+
+/* REVIEWS */
+async function loadReviews(){
+  const data=await api("admin/reviews");
+  if(!data?.length){$("reviewsList").innerHTML=`<div class="empty"><div class="empty-ico">⭐</div><p>Chưa có đánh giá</p></div>`;return;}
+  const total=data.length,avg=(data.reduce((s,r)=>s+(r.rating||0),0)/total).toFixed(1);
+  const pos=data.filter(r=>r.rating>=4).length,neg=data.filter(r=>r.rating<=2).length;
+  set("rvAvg",avg+"★");set("rvTotal",total.toLocaleString());set("rvPositive",pos.toLocaleString());set("rvNegative",neg.toLocaleString());
+  $("reviewsList").innerHTML=data.slice(0,10).map(r=>`<div class="rev-card"><div class="rev-top"><div class="rev-name">${r.user||"Ẩn danh"}</div><div class="rev-stars">${"⭐".repeat(r.rating||0)}</div></div><div class="rev-route">${r.origin||""}${r.destination?" → "+r.destination:""}</div><div class="rev-comment">${r.comment||"(không có nhận xét)"}</div><div class="rev-date">${fmtDT(r.created_at)}</div></div>`).join("");
+  const dist=[1,2,3,4,5].map(s=>data.filter(r=>r.rating===s).length);
+  new Chart($("ratingChart"),{type:"bar",data:{labels:["1★","2★","3★","4★","5★"],datasets:[{data:dist,backgroundColor:["#e74c3c","#e67e22","#f39c12","#1abc9c","#2ecc71"],borderRadius:6,barThickness:26}]},options:{...barOpts(),plugins:{legend:{display:false}}}});
+  const tot=dist.reduce((s,v)=>s+v,0)||1;
+  [5,4,3,2,1].forEach(s=>{const pct=Math.round(dist[s-1]/tot*100);set("p"+s,pct+"%");const pb=$("pb"+s);if(pb)setTimeout(()=>{pb.style.width=pct+"%";},300);});
+}
+
+/* INIT */
+loaded["overview"]=true;
+loadOverview();
+</script>
+</body>
+</html>

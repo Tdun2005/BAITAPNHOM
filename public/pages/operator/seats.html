@@ -1,0 +1,956 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Sơ đồ Ghế — SmartBusAI Operator</title>
+<style>
+:root{
+  --bg:#04080f; --neon:#00ffe0; --neon2:#00a8ff; --purple:#7c5ce7;
+  --amber:#f39c12; --green:#2ecc71; --red:#e74c3c; --pink:#fd79a8;
+  --glass:rgba(255,255,255,0.055); --glass2:rgba(255,255,255,0.10);
+  --border:rgba(255,255,255,0.09); --border2:rgba(255,255,255,0.16);
+  --hh:62px; --text:#e8f4f8; --text2:rgba(255,255,255,.52); --text3:rgba(255,255,255,.30);
+}
+*{box-sizing:border-box;margin:0;padding:0;font-family:"Segoe UI",Arial,sans-serif;}
+html{background:var(--bg);min-height:100vh;}
+body{color:var(--text);background:transparent;overflow-x:hidden;animation:pageIn .3s ease;}
+@keyframes pageIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+
+/* ── Galaxy ── */
+#gc{position:fixed;inset:0;z-index:-3;pointer-events:none;}
+.neb{position:fixed;inset:0;z-index:-2;pointer-events:none;
+  background:radial-gradient(ellipse at 10% 18%,rgba(0,255,224,.07) 0%,transparent 40%),
+    radial-gradient(ellipse at 88% 78%,rgba(124,92,231,.08) 0%,transparent 44%),
+    radial-gradient(ellipse at 52% 4%,rgba(0,164,255,.06) 0%,transparent 38%);}
+.pl1{position:fixed;width:110px;height:110px;top:70px;right:85px;border-radius:50%;z-index:-1;pointer-events:none;
+  background:radial-gradient(circle at 30% 30%,#d0c8ff,#7c5ce7 44%,#1a0a40 78%);
+  box-shadow:0 0 50px rgba(124,92,231,.5),0 0 100px rgba(124,92,231,.18);}
+.pl2{position:fixed;width:50px;height:50px;bottom:75px;left:90px;border-radius:50%;z-index:-1;pointer-events:none;
+  background:radial-gradient(circle at 38% 38%,#fff,#00d4ff 52%,#001a33 82%);
+  box-shadow:0 0 32px rgba(0,212,255,.5);animation:pfloat 12s ease-in-out infinite;}
+@keyframes pfloat{0%,100%{transform:translateY(0)}50%{transform:translateY(-14px)}}
+.mt{position:fixed;width:2px;height:50px;pointer-events:none;z-index:-1;
+  background:linear-gradient(rgba(255,255,255,.8),transparent);transform:rotate(42deg);animation:mt linear infinite;}
+.mt:nth-child(1){top:7%;left:13%;animation-duration:17s;}
+.mt:nth-child(2){top:33%;left:58%;animation-duration:22s;animation-delay:5s;}
+.mt:nth-child(3){top:62%;left:80%;animation-duration:19s;animation-delay:10s;}
+@keyframes mt{0%{opacity:1;transform:translate3d(0,0,0) rotate(42deg)}100%{opacity:0;transform:translate3d(580px,580px,0) rotate(42deg)}}
+
+/* ── HEADER ── */
+.hdr{position:sticky;top:0;z-index:3000;height:var(--hh);display:flex;align-items:center;
+  background:rgba(4,8,15,0.82);backdrop-filter:blur(18px);border-bottom:1px solid var(--border);padding:0 32px;}
+.hdr-logo{display:flex;align-items:center;gap:10px;text-decoration:none;flex-shrink:0;}
+.hdr-logo-ic{width:34px;height:34px;border-radius:9px;font-size:18px;
+  background:linear-gradient(135deg,#00ffe0,#00a8ff);display:flex;align-items:center;justify-content:center;
+  box-shadow:0 0 14px rgba(0,255,224,.38);}
+.hdr-logo-tx{font-size:16px;font-weight:800;background:linear-gradient(90deg,#00ffe0,#7eb8ff);
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;}
+.hdr-sep{width:1px;height:30px;background:var(--border);margin:0 18px;flex-shrink:0;}
+.hdr-role{background:rgba(0,255,224,.10);border:1px solid rgba(0,255,224,.22);color:var(--neon);
+  font-size:11px;font-weight:800;padding:4px 10px;border-radius:20px;text-transform:uppercase;letter-spacing:.6px;flex-shrink:0;}
+.hdr-nav{display:flex;align-items:center;gap:4px;margin-left:auto;}
+.hdr-nav a{text-decoration:none;color:var(--text2);font-size:12.5px;font-weight:600;padding:7px 12px;
+  border-radius:8px;border:1px solid transparent;transition:all .2s;white-space:nowrap;}
+.hdr-nav a:hover{color:var(--neon);background:rgba(0,255,224,.08);border-color:rgba(0,255,224,.20);}
+.hdr-nav a.active{color:var(--neon);background:rgba(0,255,224,.10);border-color:rgba(0,255,224,.25);}
+.hdr-actions{display:flex;align-items:center;gap:8px;margin-left:16px;flex-shrink:0;}
+.op-chip{display:flex;align-items:center;gap:7px;background:var(--glass);border:1px solid var(--border);
+  border-radius:20px;padding:5px 12px 5px 6px;}
+.op-avatar{width:26px;height:26px;border-radius:50%;background:linear-gradient(135deg,#00a8ff,#00ffe0);
+  display:flex;align-items:center;justify-content:center;font-size:13px;}
+.op-name{font-size:12px;font-weight:600;}
+.btn-logout{background:rgba(231,76,60,.12);border:1px solid rgba(231,76,60,.28);color:#e74c3c;
+  padding:7px 14px;border-radius:9px;font-size:12px;font-weight:700;cursor:pointer;
+  font-family:"Segoe UI",Arial,sans-serif;transition:all .2s;}
+.btn-logout:hover{background:rgba(231,76,60,.26);color:#fff;}
+
+/* ── MAIN LAYOUT ── */
+.main{max-width:1440px;margin:0 auto;padding:28px 32px 60px;}
+.pg-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:24px;flex-wrap:wrap;gap:14px;}
+.pg-head-left h1{font-size:22px;font-weight:800;}
+.pg-head-left p{font-size:13px;color:var(--text2);margin-top:3px;}
+.btn{border:none;border-radius:11px;padding:10px 18px;font-size:13px;font-weight:700;cursor:pointer;
+  font-family:"Segoe UI",Arial,sans-serif;transition:all .22s;display:inline-flex;align-items:center;gap:7px;}
+.btn-add{background:linear-gradient(135deg,#00ffe0,#00a8ff);color:#04080f;box-shadow:0 0 18px rgba(0,255,224,.30);}
+.btn-add:hover{transform:translateY(-2px);box-shadow:0 4px 24px rgba(0,255,224,.5);}
+.btn-sec{background:var(--glass2);border:1px solid var(--border);color:var(--text2);}
+.btn-sec:hover{color:var(--neon);border-color:rgba(0,255,224,.25);}
+
+/* ── TWO COLUMN LAYOUT ── */
+.layout{display:grid;grid-template-columns:320px 1fr;gap:22px;align-items:start;}
+
+/* ── LEFT PANEL: Selector + Stats ── */
+.left-panel{display:flex;flex-direction:column;gap:16px;}
+.panel{background:var(--glass);border:1px solid var(--border);border-radius:18px;overflow:hidden;}
+.panel-head{padding:16px 20px 14px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:8px;}
+.panel-head h3{font-size:14px;font-weight:800;}
+.panel-body{padding:18px 20px;}
+
+/* Selector */
+.sel-group{margin-bottom:14px;}
+.sel-group:last-child{margin-bottom:0;}
+.sel-label{font-size:10.5px;font-weight:700;color:var(--text2);text-transform:uppercase;letter-spacing:.6px;margin-bottom:7px;}
+.sel{width:100%;padding:10px 13px;border-radius:11px;background:rgba(255,255,255,.07);
+  border:1px solid var(--border2);color:var(--text);font-size:13px;
+  font-family:"Segoe UI",Arial,sans-serif;outline:none;cursor:pointer;transition:border .2s;}
+.sel:focus{border-color:rgba(0,255,224,.4);box-shadow:0 0 0 3px rgba(0,255,224,.08);}
+.sel option{background:#0d1827;}
+
+/* Bus info card */
+.bus-info-card{background:rgba(0,255,224,.05);border:1px solid rgba(0,255,224,.15);
+  border-radius:14px;padding:16px;margin-top:14px;}
+.bic-plate{font-size:18px;font-weight:800;color:var(--neon);letter-spacing:1px;}
+.bic-type{font-size:12px;color:var(--text2);margin-top:3px;}
+.bic-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:12px;}
+.bic-item{background:rgba(255,255,255,.05);border-radius:9px;padding:9px 12px;}
+.bic-item-label{font-size:10px;color:var(--text3);font-weight:700;text-transform:uppercase;letter-spacing:.5px;}
+.bic-item-val{font-size:14px;font-weight:800;color:var(--text);margin-top:2px;}
+
+/* Stats */
+.stat-row{display:flex;align-items:center;justify-content:space-between;padding:9px 0;
+  border-bottom:1px solid rgba(255,255,255,.05);}
+.stat-row:last-child{border-bottom:none;padding-bottom:0;}
+.stat-row:first-child{padding-top:0;}
+.stat-lbl{font-size:12.5px;color:var(--text2);display:flex;align-items:center;gap:7px;}
+.stat-val{font-size:14px;font-weight:800;}
+
+/* Legend */
+.legend{display:flex;flex-direction:column;gap:9px;}
+.leg-item{display:flex;align-items:center;gap:10px;font-size:12.5px;color:var(--text2);}
+.leg-box{width:32px;height:28px;border-radius:7px;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:12px;}
+.leg-free-vip{background:rgba(253,121,168,.15);border:1.5px solid rgba(253,121,168,.4);}
+.leg-free-normal{background:rgba(0,168,255,.12);border:1.5px solid rgba(0,168,255,.35);}
+.leg-booked{background:rgba(231,76,60,.15);border:1.5px solid rgba(231,76,60,.35);}
+.leg-selected{background:rgba(0,255,224,.20);border:1.5px solid rgba(0,255,224,.6);}
+
+/* Action buttons */
+.action-stack{display:flex;flex-direction:column;gap:8px;}
+.btn-full{width:100%;justify-content:center;padding:11px;}
+.btn-save-seats{background:linear-gradient(135deg,#00ffe0,#00a8ff);color:#04080f;box-shadow:0 0 18px rgba(0,255,224,.25);}
+.btn-save-seats:hover{transform:translateY(-2px);box-shadow:0 4px 20px rgba(0,255,224,.5);}
+.btn-toggle-all{background:rgba(124,92,231,.14);border:1px solid rgba(124,92,231,.28);color:#a29bfe;}
+.btn-toggle-all:hover{background:rgba(124,92,231,.28);}
+.btn-add-seat{background:rgba(46,204,113,.10);border:1px solid rgba(46,204,113,.25);color:#2ecc71;}
+.btn-add-seat:hover{background:rgba(46,204,113,.22);}
+
+/* ── RIGHT: Bus Shell + Seat Map ── */
+.right-panel{display:flex;flex-direction:column;gap:0;}
+.bus-shell-wrap{position:relative;}
+.bus-shell{background:var(--glass);border:1px solid var(--border);border-radius:18px;overflow:hidden;}
+
+/* Bus header bar */
+.bus-header-bar{background:rgba(0,255,224,.06);border-bottom:1px solid rgba(0,255,224,.12);
+  padding:14px 22px;display:flex;align-items:center;justify-content:space-between;}
+.bh-route{font-size:14px;font-weight:700;color:var(--neon);}
+.bh-departure{font-size:12px;color:var(--text2);}
+.bh-status{display:inline-flex;align-items:center;gap:5px;padding:4px 10px;border-radius:20px;
+  font-size:11.5px;font-weight:700;background:rgba(46,204,113,.14);color:#2ecc71;border:1px solid rgba(46,204,113,.22);}
+
+/* Bus body layout */
+.bus-body{padding:20px 28px 24px;position:relative;}
+
+/* Driver cabin */
+.driver-cabin{display:flex;align-items:center;justify-content:center;gap:10px;
+  background:rgba(0,255,224,.04);border:1px dashed rgba(0,255,224,.18);
+  border-radius:12px;padding:10px;margin-bottom:22px;}
+.driver-cabin span{font-size:12px;color:var(--text3);}
+.steering{font-size:24px;}
+
+/* Aisle label */
+.aisle-label{position:absolute;left:50%;transform:translateX(-50%);
+  font-size:9px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:1px;
+  writing-mode:vertical-lr;text-orientation:mixed;top:80px;bottom:20px;display:flex;align-items:center;}
+
+/* Seat grid columns */
+.seat-deck{display:flex;gap:20px;justify-content:center;}
+.seat-col-group{display:flex;gap:8px;}
+.aisle-gap{width:28px;display:flex;align-items:center;justify-content:center;}
+.aisle-gap-inner{width:1px;background:repeating-linear-gradient(180deg,rgba(0,255,224,.18) 0px,rgba(0,255,224,.18) 6px,transparent 6px,transparent 12px);height:100%;}
+
+/* Individual seat */
+.seat{width:54px;height:50px;border-radius:10px;display:flex;flex-direction:column;
+  align-items:center;justify-content:center;cursor:pointer;transition:all .2s;
+  position:relative;user-select:none;}
+.seat:hover:not(.booked){transform:scale(1.08);z-index:2;}
+.seat.vip{background:rgba(253,121,168,.13);border:1.5px solid rgba(253,121,168,.38);}
+.seat.vip:hover:not(.booked){background:rgba(253,121,168,.25);border-color:rgba(253,121,168,.65);box-shadow:0 0 14px rgba(253,121,168,.3);}
+.seat.normal{background:rgba(0,168,255,.10);border:1.5px solid rgba(0,168,255,.30);}
+.seat.normal:hover:not(.booked){background:rgba(0,168,255,.22);border-color:rgba(0,168,255,.6);box-shadow:0 0 14px rgba(0,168,255,.25);}
+.seat.booked{background:rgba(231,76,60,.12);border:1.5px solid rgba(231,76,60,.30);cursor:not-allowed;opacity:.7;}
+.seat.selected{background:rgba(0,255,224,.20);border:2px solid rgba(0,255,224,.7);box-shadow:0 0 18px rgba(0,255,224,.3);}
+.seat-num{font-size:12px;font-weight:800;color:var(--text);}
+.seat-type-tag{font-size:9px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:.3px;margin-top:1px;}
+.seat.vip .seat-type-tag{color:rgba(253,121,168,.7);}
+.seat.normal .seat-type-tag{color:rgba(0,168,255,.7);}
+.seat.booked .seat-num{color:var(--text3);}
+.seat.selected .seat-num{color:var(--neon);}
+.seat.selected .seat-type-tag{color:rgba(0,255,224,.7);}
+
+/* Seat row wrapper */
+.seat-rows{display:flex;flex-direction:column;gap:10px;}
+.seat-row{display:flex;align-items:center;gap:8px;justify-content:center;}
+.row-num{font-size:10px;font-weight:700;color:var(--text3);width:16px;text-align:right;flex-shrink:0;}
+
+/* Back row */
+.back-row{margin-top:14px;padding-top:14px;border-top:1px dashed rgba(255,255,255,.07);}
+.back-row .seat{width:52px;}
+
+/* Seat count bar */
+.seat-count-bar{display:flex;align-items:center;gap:10px;margin-top:20px;padding:14px 22px;
+  border-top:1px solid var(--border);background:rgba(255,255,255,.02);}
+.scb-seg{flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;}
+.scb-val{font-size:18px;font-weight:800;}
+.scb-label{font-size:10.5px;color:var(--text3);font-weight:600;text-transform:uppercase;letter-spacing:.5px;}
+.scb-divider{width:1px;height:36px;background:var(--border);}
+
+/* Seat tooltip */
+.seat-tooltip{position:absolute;bottom:calc(100% + 6px);left:50%;transform:translateX(-50%);
+  background:rgba(4,8,15,.95);border:1px solid var(--border2);border-radius:9px;
+  padding:8px 12px;font-size:11.5px;white-space:nowrap;z-index:10;
+  pointer-events:none;opacity:0;transition:opacity .18s;}
+.seat:hover .seat-tooltip{opacity:1;}
+
+/* ── MODALS ── */
+.modal-overlay{position:fixed;inset:0;z-index:4000;background:rgba(0,0,0,.65);
+  backdrop-filter:blur(8px);display:none;align-items:center;justify-content:center;}
+.modal-overlay.open{display:flex;}
+.modal{width:540px;max-width:96vw;max-height:90vh;
+  background:linear-gradient(160deg,#0d1827 0%,#080f1c 100%);
+  border:1px solid var(--border2);border-radius:22px;
+  box-shadow:0 30px 80px rgba(0,0,0,.7),0 0 0 1px rgba(0,255,224,.06);
+  overflow:hidden;animation:modalIn .28s cubic-bezier(.22,.61,.36,1);display:flex;flex-direction:column;}
+.modal.sm{max-width:400px;}
+@keyframes modalIn{from{opacity:0;transform:translateY(20px) scale(.96)}to{opacity:1;transform:translateY(0) scale(1)}}
+.modal-head{padding:20px 24px 16px;border-bottom:1px solid var(--border);
+  display:flex;align-items:center;justify-content:space-between;flex-shrink:0;}
+.modal-head h3{font-size:16px;font-weight:800;display:flex;align-items:center;gap:9px;}
+.modal-close{background:rgba(255,255,255,.08);border:1px solid var(--border);color:var(--text2);
+  width:30px;height:30px;border-radius:8px;cursor:pointer;font-size:15px;transition:all .2s;}
+.modal-close:hover{background:rgba(231,76,60,.2);color:#e74c3c;}
+.modal-body{padding:22px 24px;overflow-y:auto;flex:1;}
+.modal-body::-webkit-scrollbar{width:4px;}
+.modal-body::-webkit-scrollbar-thumb{background:rgba(255,255,255,.12);border-radius:2px;}
+.modal-foot{padding:16px 24px;border-top:1px solid var(--border);
+  display:flex;justify-content:flex-end;gap:10px;flex-shrink:0;}
+.form-group{display:flex;flex-direction:column;gap:7px;margin-bottom:14px;}
+.form-group label{font-size:11px;font-weight:700;color:var(--text2);text-transform:uppercase;letter-spacing:.5px;}
+.form-control{padding:10px 13px;border-radius:10px;background:rgba(255,255,255,.07);
+  border:1px solid var(--border2);color:var(--text);font-size:13px;font-family:"Segoe UI",Arial,sans-serif;
+  outline:none;transition:border .2s;}
+.form-control:focus{border-color:rgba(0,255,224,.45);box-shadow:0 0 0 3px rgba(0,255,224,.08);}
+select.form-control{cursor:pointer;}
+select.form-control option{background:#0d1827;}
+.form-row{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+.btn-cancel-m{background:rgba(255,255,255,.07);border:1px solid var(--border);color:var(--text2);
+  border-radius:10px;padding:10px 18px;font-size:13px;font-weight:700;cursor:pointer;
+  font-family:"Segoe UI",Arial,sans-serif;transition:all .2s;}
+.btn-cancel-m:hover{background:rgba(255,255,255,.12);}
+.btn-save-m{background:linear-gradient(135deg,#00ffe0,#00a8ff);color:#04080f;border:none;
+  box-shadow:0 0 16px rgba(0,255,224,.3);border-radius:10px;padding:10px 18px;
+  font-size:13px;font-weight:700;cursor:pointer;font-family:"Segoe UI",Arial,sans-serif;transition:all .2s;}
+.btn-save-m:hover{transform:translateY(-2px);}
+.btn-danger-m{background:linear-gradient(135deg,#e74c3c,#c0392b);color:#fff;border:none;
+  border-radius:10px;padding:10px 18px;font-size:13px;font-weight:700;cursor:pointer;
+  font-family:"Segoe UI",Arial,sans-serif;transition:all .2s;}
+
+/* Seat detail modal */
+.seat-detail-hero{display:flex;align-items:center;gap:16px;margin-bottom:20px;
+  background:rgba(255,255,255,.04);border:1px solid var(--border);border-radius:14px;padding:16px;}
+.sdh-box{width:64px;height:60px;border-radius:12px;display:flex;flex-direction:column;
+  align-items:center;justify-content:center;gap:2px;flex-shrink:0;}
+.sdh-num{font-size:18px;font-weight:800;color:var(--text);}
+.sdh-type{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;}
+.detail-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
+.dg-item{background:rgba(255,255,255,.04);border:1px solid var(--border);border-radius:11px;padding:11px 14px;}
+.dg-label{font-size:10px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:.5px;}
+.dg-val{font-size:13.5px;font-weight:700;color:var(--text);margin-top:4px;}
+
+/* Toast */
+.toast-wrap{position:fixed;top:80px;right:24px;z-index:9999;display:flex;flex-direction:column;gap:10px;}
+.toast{padding:12px 16px;border-radius:12px;font-size:13px;font-weight:600;backdrop-filter:blur(12px);
+  box-shadow:0 8px 30px rgba(0,0,0,.4);display:flex;align-items:center;gap:8px;
+  animation:toastIn .3s cubic-bezier(.22,.61,.36,1);min-width:240px;}
+@keyframes toastIn{from{opacity:0;transform:translateX(30px)}to{opacity:1;transform:translateX(0)}}
+@keyframes toastOut{from{opacity:1;transform:translateX(0)}to{opacity:0;transform:translateX(30px)}}
+.toast.success{background:rgba(46,204,113,.16);border:1px solid rgba(46,204,113,.35);color:#2ecc71;}
+.toast.error{background:rgba(231,76,60,.16);border:1px solid rgba(231,76,60,.35);color:#e74c3c;}
+.toast.info{background:rgba(0,168,255,.16);border:1px solid rgba(0,168,255,.35);color:#5dc8ff;}
+
+/* Responsive */
+@media(max-width:1100px){.layout{grid-template-columns:1fr;}}
+@keyframes spin{to{transform:rotate(360deg)}}
+</style>
+<script src="/js/api.js"></script>
+</head>
+<body>
+
+<canvas id="gc"></canvas>
+<div class="neb"></div>
+<div class="pl1"></div>
+<div class="pl2"></div>
+<div class="mt"></div><div class="mt"></div><div class="mt"></div>
+<div class="toast-wrap" id="toastWrap"></div>
+
+<!-- HEADER -->
+<header class="hdr">
+  <a class="hdr-logo" href="operator.html">
+    <div class="hdr-logo-ic">🚌</div>
+    <div class="hdr-logo-tx">SmartBusAI</div>
+  </a>
+  <div class="hdr-sep"></div>
+  <span class="hdr-role">Nhà xe</span>
+  <nav class="hdr-nav">
+    <a href="operator.html">Tổng quan</a>
+    <a href="trips.html">Chuyến xe</a>
+    <a href="bookings.html">Đặt vé</a>
+    <a href="vehicles.html">Phương tiện</a>
+    <a href="seats.html" class="active">Sơ đồ ghế</a>
+    <a href="revenue.html">Doanh thu</a>
+  </nav>
+  <div class="hdr-actions">
+    <div class="op-chip">
+      <div class="op-avatar">🏢</div>
+      <span class="op-name">Nhà xe</span>
+    </div>
+    <button class="btn-logout" onclick="logout()">🚪 Đăng xuất</button>
+  </div>
+</header>
+
+<main class="main">
+  <div class="pg-head">
+    <div class="pg-head-left">
+      <h1>💺 Sơ đồ Ghế</h1>
+      <p>Xem trạng thái, phân loại ghế NORMAL / VIP và lịch sử đặt — SEAT table</p>
+    </div>
+    <div style="display:flex;gap:10px;">
+      <button class="btn btn-sec" onclick="loadAll()">🔄 Làm mới</button>
+      <button class="btn btn-add" onclick="openAddSeat()">＋ Thêm ghế</button>
+    </div>
+  </div>
+
+  <div class="layout">
+
+    <!-- ── LEFT PANEL ── -->
+    <div class="left-panel">
+
+      <!-- Selector -->
+      <div class="panel">
+        <div class="panel-head"><h3>🔍 Chọn xe & Chuyến</h3></div>
+        <div class="panel-body">
+          <div class="sel-group">
+            <div class="sel-label">Chọn xe — BUS</div>
+            <select class="sel" id="busSel" onchange="onBusChange()">
+              <option value="">-- Chọn xe --</option>
+            </select>
+          </div>
+          <div class="sel-group">
+            <div class="sel-label">Chọn chuyến — TRIP (tùy chọn)</div>
+            <select class="sel" id="tripSel" onchange="onTripChange()">
+              <option value="">-- Xem ghế theo xe --</option>
+            </select>
+          </div>
+          <div id="busInfoCard" style="display:none;" class="bus-info-card">
+            <div class="bic-plate" id="bic_plate">—</div>
+            <div class="bic-type" id="bic_type">—</div>
+            <div class="bic-grid">
+              <div class="bic-item"><div class="bic-item-label">Tổng ghế</div><div class="bic-item-val" id="bic_total">—</div></div>
+              <div class="bic-item"><div class="bic-item-label">Trạng thái xe</div><div class="bic-item-val" id="bic_status">—</div></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Stats -->
+      <div class="panel">
+        <div class="panel-head"><h3>📊 Thống kê ghế</h3></div>
+        <div class="panel-body">
+          <div class="stat-row"><span class="stat-lbl">💺 Tổng số ghế</span><span class="stat-val" id="stTotal" style="color:var(--neon);">—</span></div>
+          <div class="stat-row"><span class="stat-lbl" style="color:#fd79a8;">👑 Ghế VIP</span><span class="stat-val" id="stVip" style="color:#fd79a8;">—</span></div>
+          <div class="stat-row"><span class="stat-lbl" style="color:#5dc8ff;">🪑 Ghế thường</span><span class="stat-val" id="stNormal" style="color:#5dc8ff;">—</span></div>
+          <div class="stat-row"><span class="stat-lbl" style="color:#e74c3c;">🔴 Đã đặt (chuyến)</span><span class="stat-val" id="stBooked" style="color:#e74c3c;">—</span></div>
+          <div class="stat-row"><span class="stat-lbl" style="color:#2ecc71;">🟢 Còn trống</span><span class="stat-val" id="stFree" style="color:#2ecc71;">—</span></div>
+          <div class="stat-row"><span class="stat-lbl">📈 Lấp ghế</span><span class="stat-val" id="stRate" style="color:var(--amber);">—</span></div>
+        </div>
+      </div>
+
+      <!-- Legend -->
+      <div class="panel">
+        <div class="panel-head"><h3>🎨 Chú thích</h3></div>
+        <div class="panel-body">
+          <div class="legend">
+            <div class="leg-item"><div class="leg-box leg-free-vip">👑</div><span>Ghế VIP — trống</span></div>
+            <div class="leg-item"><div class="leg-box leg-free-normal">🪑</div><span>Ghế thường — trống</span></div>
+            <div class="leg-item"><div class="leg-box leg-booked">✖</div><span>Đã có booking (PAID/PENDING)</span></div>
+            <div class="leg-item"><div class="leg-box leg-selected">✓</div><span>Đang chọn</span></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Actions -->
+      <div class="panel">
+        <div class="panel-head"><h3>⚡ Thao tác</h3></div>
+        <div class="panel-body">
+          <div class="action-stack">
+            <button class="btn btn-save-seats btn-full" onclick="saveChanges()">💾 Lưu thay đổi loại ghế</button>
+            <button class="btn btn-toggle-all btn-full" onclick="toggleAllVip()">👑 Đổi tất cả → VIP</button>
+            <button class="btn btn-toggle-all btn-full" onclick="toggleAllNormal()">🪑 Đổi tất cả → Thường</button>
+            <button class="btn btn-add-seat btn-full" onclick="openAddSeat()">＋ Thêm ghế mới</button>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- ── RIGHT: Bus Shell ── -->
+    <div class="right-panel">
+      <div class="bus-shell" id="busShell">
+
+        <!-- Bus route bar -->
+        <div class="bus-header-bar">
+          <span class="bh-route" id="shellRoute">🚌 Chọn xe để xem sơ đồ ghế</span>
+          <div style="display:flex;align-items:center;gap:10px;">
+            <span class="bh-departure" id="shellDep"></span>
+            <span class="bh-status" id="shellStatus" style="display:none;">OPEN</span>
+          </div>
+        </div>
+
+        <!-- Seat map body -->
+        <div class="bus-body" id="busSeatBody">
+          <div style="text-align:center;padding:60px 20px;color:var(--text3);">
+            <div style="font-size:52px;margin-bottom:16px;opacity:.3;">🚌</div>
+            <div style="font-size:14px;font-weight:600;">Chọn xe ở bên trái để hiển thị sơ đồ ghế</div>
+            <div style="font-size:12px;margin-top:6px;">SEAT.bus_id → BUS.bus_id</div>
+          </div>
+        </div>
+
+        <!-- Count bar -->
+        <div class="seat-count-bar" id="seatCountBar" style="display:none;">
+          <div class="scb-seg">
+            <div class="scb-val" id="cbTotal" style="color:var(--neon);">0</div>
+            <div class="scb-label">Tổng</div>
+          </div>
+          <div class="scb-divider"></div>
+          <div class="scb-seg">
+            <div class="scb-val" id="cbVip" style="color:#fd79a8;">0</div>
+            <div class="scb-label">VIP</div>
+          </div>
+          <div class="scb-divider"></div>
+          <div class="scb-seg">
+            <div class="scb-val" id="cbNormal" style="color:#5dc8ff;">0</div>
+            <div class="scb-label">Thường</div>
+          </div>
+          <div class="scb-divider"></div>
+          <div class="scb-seg">
+            <div class="scb-val" id="cbBooked" style="color:#e74c3c;">0</div>
+            <div class="scb-label">Đã đặt</div>
+          </div>
+          <div class="scb-divider"></div>
+          <div class="scb-seg">
+            <div class="scb-val" id="cbFree" style="color:#2ecc71;">0</div>
+            <div class="scb-label">Trống</div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+  </div>
+</main>
+
+<!-- MODAL: Seat Detail -->
+<div class="modal-overlay" id="seatDetailModal">
+  <div class="modal sm">
+    <div class="modal-head">
+      <h3>💺 Chi tiết ghế</h3>
+      <button class="modal-close" onclick="closeModal('seatDetailModal')">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="seat-detail-hero">
+        <div class="sdh-box" id="sdhBox">
+          <span class="sdh-num" id="sdhNum">—</span>
+          <span class="sdh-type" id="sdhType">—</span>
+        </div>
+        <div style="flex:1;">
+          <div style="font-size:15px;font-weight:800;" id="sdhBus">—</div>
+          <div style="font-size:12px;color:var(--text2);margin-top:3px;" id="sdhStatus">—</div>
+        </div>
+      </div>
+      <div class="detail-grid" id="seatDetailGrid"></div>
+      <div style="margin-top:16px;">
+        <div style="font-size:11px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:.5px;margin-bottom:10px;">Đổi loại ghế</div>
+        <div style="display:flex;gap:8px;">
+          <button class="btn btn-full" id="setVipBtn"
+            style="flex:1;background:rgba(253,121,168,.14);border:1px solid rgba(253,121,168,.3);color:#fd79a8;"
+            onclick="setSeatType('VIP')">👑 VIP</button>
+          <button class="btn btn-full" id="setNormalBtn"
+            style="flex:1;background:rgba(0,168,255,.12);border:1px solid rgba(0,168,255,.3);color:#5dc8ff;"
+            onclick="setSeatType('NORMAL')">🪑 Thường</button>
+        </div>
+      </div>
+    </div>
+    <div class="modal-foot">
+      <button class="btn-danger-m" id="seatDeleteBtn">🗑 Xóa ghế</button>
+      <button class="btn-cancel-m" onclick="closeModal('seatDetailModal')">Đóng</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL: Add Seat -->
+<div class="modal-overlay" id="addSeatModal">
+  <div class="modal sm">
+    <div class="modal-head">
+      <h3>➕ Thêm ghế mới</h3>
+      <button class="modal-close" onclick="closeModal('addSeatModal')">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="form-group">
+        <label>Mã ghế (seat_number) *</label>
+        <input class="form-control" id="add_seatNum" placeholder="VD: A1, B2, 45...">
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label>Loại ghế</label>
+          <select class="form-control" id="add_seatType">
+            <option value="NORMAL">🪑 NORMAL</option>
+            <option value="VIP">👑 VIP</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Số lượng thêm</label>
+          <input class="form-control" id="add_seatCount" type="number" value="1" min="1" max="20">
+        </div>
+      </div>
+    </div>
+    <div class="modal-foot">
+      <button class="btn-cancel-m" onclick="closeModal('addSeatModal')">Hủy</button>
+      <button class="btn-save-m" onclick="addSeats()">💾 Thêm ghế</button>
+    </div>
+  </div>
+</div>
+
+<script>
+/* ── Galaxy Canvas ── */
+(function(){
+  const cv=document.getElementById("gc"),ctx=cv.getContext("2d");
+  function mb32(s){s=s>>>0;return()=>{s+=0x6D2B79F5;let t=Math.imul(s^s>>>15,1|s);t^=t+Math.imul(t^t>>>7,61|t);return((t^t>>>14)>>>0)/4294967296;};}
+  function draw(){
+    cv.width=innerWidth;cv.height=innerHeight;
+    const g=ctx.createRadialGradient(cv.width*.5,cv.height*.3,0,cv.width*.5,cv.height*.3,cv.width*.85);
+    g.addColorStop(0,"#0c1830");g.addColorStop(.5,"#080f1c");g.addColorStop(1,"#04080f");
+    ctx.fillStyle=g;ctx.fillRect(0,0,cv.width,cv.height);
+    const rng=mb32(cv.width*cv.height+9);
+    const n=Math.min(340,Math.floor(cv.width*cv.height/4600));
+    for(let i=0;i<n;i++){
+      const x=rng()*cv.width,y=rng()*cv.height,r=rng()*1.4+.15,a=rng()*.7+.2;
+      const h=rng()<.11?180:rng()<.07?265:0;
+      ctx.beginPath();ctx.arc(x,y,r,0,Math.PI*2);
+      ctx.fillStyle=h===180?`rgba(0,255,224,${a*.5})`:h===265?`rgba(170,148,255,${a*.42})`:`rgba(255,255,255,${a})`;ctx.fill();
+    }
+    [{x:.10,y:.18,r:.14,c:"rgba(0,190,255,0.055)"},{x:.78,y:.68,r:.14,c:"rgba(120,75,240,0.065)"}].forEach(s=>{
+      const ng=ctx.createRadialGradient(s.x*cv.width,s.y*cv.height,0,s.x*cv.width,s.y*cv.height,s.r*cv.width);
+      ng.addColorStop(0,s.c);ng.addColorStop(1,"transparent");ctx.fillStyle=ng;ctx.fillRect(0,0,cv.width,cv.height);
+    });
+  }
+  draw();let rt;window.addEventListener("resize",()=>{clearTimeout(rt);rt=setTimeout(draw,200);});
+})();
+
+document.addEventListener("click",e=>{
+  const a=e.target.closest("a[href]");if(!a)return;
+  const h=a.getAttribute("href");if(!h||h==="#"||h.startsWith("http"))return;
+  e.preventDefault();
+  document.body.style.transition="opacity .2s";document.body.style.opacity="0";
+  setTimeout(()=>{window.location.href=h;},210);
+});
+
+/* ── State ── */
+const API="/api";
+let allBuses=[], allTrips=[], seats=[], bookedSeatIds=new Set();
+let currentBus=null, currentTrip=null, selectedSeatId=null;
+let pendingChanges={}; // seatId -> new type
+
+function logout(){localStorage.clear();window.location.href="../auth/login.html";}
+function fmtDT(s){if(!s)return"—";try{const d=new Date(s);return d.toLocaleDateString("vi-VN")+` ${d.getHours()}:${String(d.getMinutes()).padStart(2,"0")}`;}catch{return s;}}
+function money(v){return Number(v||0).toLocaleString("vi-VN")+" đ";}
+
+function toast(msg,type="info"){
+  const w=document.getElementById("toastWrap");
+  const el=document.createElement("div");el.className=`toast ${type}`;
+  el.innerHTML=`<span>${{success:"✅",error:"❌",info:"ℹ️"}[type]}</span><span>${msg}</span>`;
+  w.appendChild(el);
+  setTimeout(()=>{el.style.animation="toastOut .3s ease forwards";setTimeout(()=>el.remove(),320);},3200);
+}
+
+function closeModal(id){document.getElementById(id).classList.remove("open");}
+document.querySelectorAll(".modal-overlay").forEach(ov=>{
+  ov.addEventListener("click",e=>{if(e.target===ov)ov.classList.remove("open");});
+});
+
+/* ── Load buses ── */
+async function loadBuses(){
+  try{
+    const res=await fetch(`${API}/buses`,{signal:AbortSignal.timeout(5000)});
+    if(!res.ok)throw new Error("HTTP "+res.status);
+    const d=await res.json();
+    const arr=Array.isArray(d)?d:(d.data||d.buses||[]);
+    if(arr.length){allBuses=arr;}else throw new Error("empty");
+  }catch(e){
+    // Fallback demo — server chưa có hoặc chưa chạy
+    allBuses=[
+      {bus_id:1,plate_number:"51B-12345",bus_type:"Limousine",total_seats:34,status:"AVAILABLE"},
+      {bus_id:2,plate_number:"51B-67890",bus_type:"Sleeper",total_seats:40,status:"AVAILABLE"},
+      {bus_id:3,plate_number:"30A-11111",bus_type:"VIP Express",total_seats:28,status:"MAINTENANCE"},
+      {bus_id:4,plate_number:"43C-22222",bus_type:"Express",total_seats:44,status:"AVAILABLE"},
+    ];
+  }
+  const sel=document.getElementById("busSel");
+  sel.innerHTML='<option value="">-- Chọn xe --</option>';
+  allBuses.forEach(b=>{
+    sel.innerHTML+=`<option value="${b.bus_id}">${b.plate_number} — ${b.bus_type||""} (${b.total_seats||0} ghế)</option>`;
+  });
+}
+
+/* ── On bus change ── */
+async function onBusChange(){
+  const id=document.getElementById("busSel").value;
+  currentTrip=null;
+  bookedSeatIds=new Set();
+  document.getElementById("tripSel").value="";
+  document.getElementById("shellStatus").style.display="none";
+  document.getElementById("shellDep").textContent="";
+  if(!id){
+    currentBus=null;seats=[];pendingChanges={};
+    document.getElementById("busInfoCard").style.display="none";
+    renderShell();updateStats();return;
+  }
+  currentBus=allBuses.find(b=>b.bus_id==id)||{bus_id:Number(id),plate_number:"Bus #"+id,bus_type:"",total_seats:40,status:"AVAILABLE"};
+  pendingChanges={};selectedSeatId=null;
+  // Show bus info card ngay lập tức
+  document.getElementById("busInfoCard").style.display="block";
+  document.getElementById("bic_plate").textContent=currentBus.plate_number||"—";
+  document.getElementById("bic_type").textContent=currentBus.bus_type||"—";
+  document.getElementById("bic_total").textContent=currentBus.total_seats||"—";
+  document.getElementById("bic_status").textContent=currentBus.status||"—";
+  // Show loading skeleton
+  document.getElementById("shellRoute").textContent=`⏳ Đang tải ${currentBus.plate_number}...`;
+  document.getElementById("busSeatBody").innerHTML=`<div style="text-align:center;padding:50px;color:var(--text3);"><div style="font-size:28px;margin-bottom:10px;animation:spin 1s linear infinite;display:inline-block;">⏳</div><div style="font-size:13px;">Đang tải ghế...</div></div>`;
+  document.getElementById("seatCountBar").style.display="none";
+  // Load trips & seats song song
+  await Promise.all([loadTripsForBus(id),loadSeats(id)]);
+  updateStats();
+  renderShell();
+}
+
+async function loadTripsForBus(busId){
+  const sel=document.getElementById("tripSel");
+  sel.innerHTML='<option value="">-- Đang tải... --</option>';
+  try{
+    const res=await fetch(`${API}/trips?bus_id=${busId}`,{signal:AbortSignal.timeout(5000)});
+    if(!res.ok)throw new Error("HTTP "+res.status);
+    const d=await res.json();
+    allTrips=Array.isArray(d)?d:(d.data||d.trips||[]);
+    if(!allTrips.length)throw new Error("empty");
+  }catch{
+    allTrips=[
+      {trip_id:100+Number(busId),origin:"Hà Nội",destination:"TP.HCM",departure_time:new Date(Date.now()+3600000*3).toISOString(),status:"OPEN",base_price:450000},
+      {trip_id:200+Number(busId),origin:"Hà Nội",destination:"Đà Nẵng",departure_time:new Date(Date.now()+3600000*8).toISOString(),status:"OPEN",base_price:280000},
+      {trip_id:300+Number(busId),origin:"Hà Nội",destination:"Hải Phòng",departure_time:new Date(Date.now()-3600000*2).toISOString(),status:"FULL",base_price:150000},
+    ];
+  }
+  sel.innerHTML='<option value="">-- Xem ghế theo xe (không lọc booking) --</option>';
+  allTrips.forEach(t=>{
+    const time=new Date(t.departure_time).toLocaleDateString("vi-VN");
+    const stIco={OPEN:"🟢",FULL:"🟡",CANCELED:"🔴"}[t.status]||"⚪";
+    sel.innerHTML+=`<option value="${t.trip_id}">${stIco} #${t.trip_id} · ${t.origin}→${t.destination} · ${time}</option>`;
+  });
+}
+
+async function onTripChange(){
+  const id=document.getElementById("tripSel").value;
+  bookedSeatIds=new Set();selectedSeatId=null;
+  if(!id){
+    currentTrip=null;
+    if(currentBus){
+      document.getElementById("shellRoute").textContent=`🚌 ${currentBus.plate_number} — ${currentBus.bus_type||""}`;
+      document.getElementById("shellStatus").style.display="none";
+      document.getElementById("shellDep").textContent="";
+    }
+    updateStats();renderSeatMap();return;
+  }
+  currentTrip=allTrips.find(t=>t.trip_id==id)||{trip_id:Number(id),origin:"?",destination:"?",departure_time:new Date().toISOString(),status:"OPEN"};
+  document.getElementById("shellRoute").textContent=`📍 ${currentTrip.origin} → ${currentTrip.destination}`;
+  document.getElementById("shellDep").textContent=fmtDT(currentTrip.departure_time);
+  const statusEl=document.getElementById("shellStatus");
+  statusEl.style.display="inline-flex";
+  statusEl.textContent=currentTrip.status||"OPEN";
+  const stMap={OPEN:"background:rgba(46,204,113,.14);color:#2ecc71;border:1px solid rgba(46,204,113,.22);",
+    FULL:"background:rgba(243,156,18,.14);color:#f9c858;border:1px solid rgba(243,156,18,.22);",
+    CANCELED:"background:rgba(231,76,60,.14);color:#e74c3c;border:1px solid rgba(231,76,60,.22);"};
+  statusEl.style.cssText=(stMap[currentTrip.status]||stMap.OPEN)+"display:inline-flex;align-items:center;gap:5px;padding:4px 10px;border-radius:20px;font-size:11.5px;font-weight:700;";
+  await loadBookedSeats(id);
+  updateStats();renderSeatMap();
+}
+
+async function loadSeats(busId){
+  seats=[];
+  // Thử các endpoint có thể có trong server
+  const endpoints=[
+    `${API}/seats/bus/${busId}`,
+    `${API}/seats?bus_id=${busId}`,
+    `${API}/buses/${busId}/seats`,
+  ];
+  for(const url of endpoints){
+    try{
+      const res=await fetch(url);
+      if(!res.ok)continue;
+      const d=await res.json();
+      const arr=Array.isArray(d)?d:(d.data||d.seats||[]);
+      if(arr.length){seats=arr;return;}
+    }catch{}
+  }
+  // Fallback: generate demo seats từ BUS.total_seats
+  const total=currentBus?.total_seats||34;
+  const isVipBus=(currentBus?.bus_type||"").toLowerCase().includes("vip")||(currentBus?.bus_type||"").toLowerCase().includes("limousine");
+  for(let i=1;i<=total;i++){
+    const isVip=isVipBus||(i<=Math.floor(total*0.35));
+    seats.push({
+      seat_id:(currentBus?.bus_id||1)*1000+i,
+      bus_id:currentBus?.bus_id||1,
+      seat_number:String(i),
+      seat_type:isVip?"VIP":"NORMAL"
+    });
+  }
+}
+
+async function loadBookedSeats(tripId){
+  bookedSeatIds=new Set();
+  const endpoints=[
+    `${API}/booking-details?trip_id=${tripId}`,
+    `${API}/bookings/trip/${tripId}/seats`,
+    `${API}/seats/trip/${tripId}`,
+  ];
+  for(const url of endpoints){
+    try{
+      const res=await fetch(url);
+      if(!res.ok)continue;
+      const d=await res.json();
+      const arr=Array.isArray(d)?d:(d.data||d.seats||[]);
+      if(arr.length){
+        // Xử lý cả 2 format: [{seat_id}] hoặc [{seat_id, status:"BOOKED"}]
+        arr.forEach(item=>{
+          if(item.seat_id&&(item.status===undefined||item.status==="BOOKED"||item.booking_detail_id))
+            bookedSeatIds.add(item.seat_id);
+        });
+        return;
+      }
+    }catch{}
+  }
+  // Fallback demo: simulate ~35% booked với seed cố định theo tripId
+  let seed=Number(tripId)*1234567;
+  const pseudo=()=>{seed=(seed*1664525+1013904223)&0xffffffff;return(seed>>>0)/4294967296;};
+  seats.forEach(s=>{if(pseudo()<0.35)bookedSeatIds.add(s.seat_id);});
+}
+
+/* ── Render seat map ── */
+function renderShell(){
+  if(!currentBus||!seats.length){
+    document.getElementById("busSeatBody").innerHTML=`
+      <div style="text-align:center;padding:60px 20px;color:var(--text3);">
+        <div style="font-size:52px;margin-bottom:16px;opacity:.3;">🚌</div>
+        <div style="font-size:14px;font-weight:600;">Chọn xe ở bên trái để hiển thị sơ đồ ghế</div>
+        <div style="font-size:12px;margin-top:6px;">SEAT.bus_id → BUS.bus_id</div>
+      </div>`;
+    document.getElementById("seatCountBar").style.display="none";
+    document.getElementById("shellRoute").textContent="🚌 Chọn xe để xem sơ đồ ghế";
+    document.getElementById("shellStatus").style.display="none";
+    document.getElementById("shellDep").textContent="";
+    return;
+  }
+  document.getElementById("shellRoute").textContent=`🚌 ${currentBus.plate_number} — ${currentBus.bus_type||""}`;
+  document.getElementById("seatCountBar").style.display="flex";
+  renderSeatMap();
+}
+
+function renderSeatMap(){
+  const body=document.getElementById("busSeatBody");
+  // Build rows of 4 (2 left + 2 right per row like a real bus)
+  const seatsPerRow=4;
+  const rows=[];
+  for(let i=0;i<seats.length;i+=seatsPerRow)rows.push(seats.slice(i,i+seatsPerRow));
+
+  let html=`<div class="driver-cabin"><span class="steering">🎡</span><span>Tài xế</span></div><div class="seat-rows">`;
+
+  rows.forEach((row,ri)=>{
+    const left=row.slice(0,2);
+    const right=row.slice(2,4);
+    html+=`<div class="seat-row"><span class="row-num">${ri+1}</span>`;
+    html+=left.map(s=>buildSeatHtml(s)).join("");
+    html+=`<div class="aisle-gap"><div class="aisle-gap-inner"></div></div>`;
+    html+=right.map(s=>buildSeatHtml(s)).join("");
+    html+=`</div>`;
+  });
+  html+=`</div>`;
+  body.innerHTML=html;
+  updateCountBar();
+}
+
+function buildSeatHtml(s){
+  const curType=pendingChanges[s.seat_id]||s.seat_type;
+  const isBooked=bookedSeatIds.has(s.seat_id);
+  const isVip=curType==="VIP";
+  const isSelected=s.seat_id===selectedSeatId;
+  let cls=`seat ${isVip?"vip":"normal"}${isBooked?" booked":""}${isSelected?" selected":""}`;
+  const ico=isBooked?"✖":isSelected?"✓":(isVip?"👑":"🪑");
+  return`<div class="${cls}" onclick="onSeatClick(${s.seat_id})" title="${isBooked?'Đã đặt':''}">
+    <div class="seat-tooltip">${s.seat_number} · ${curType}${isBooked?" · Đã đặt":""}</div>
+    <span style="font-size:14px;">${ico}</span>
+    <div class="seat-num">${s.seat_number}</div>
+  </div>`;
+}
+
+function updateCountBar(){
+  const total=seats.length;
+  const vip=seats.filter(s=>(pendingChanges[s.seat_id]||s.seat_type)==="VIP").length;
+  const normal=total-vip;
+  const booked=bookedSeatIds.size;
+  const free=total-booked;
+  document.getElementById("cbTotal").textContent=total;
+  document.getElementById("cbVip").textContent=vip;
+  document.getElementById("cbNormal").textContent=normal;
+  document.getElementById("cbBooked").textContent=booked;
+  document.getElementById("cbFree").textContent=free;
+}
+
+/* ── Stats panel ── */
+function updateStats(){
+  const total=seats.length;
+  const vip=seats.filter(s=>(pendingChanges[s.seat_id]||s.seat_type)==="VIP").length;
+  const booked=bookedSeatIds.size;
+  const free=total-booked;
+  const rate=total?Math.round(booked/total*100):0;
+  document.getElementById("stTotal").textContent=total;
+  document.getElementById("stVip").textContent=vip;
+  document.getElementById("stNormal").textContent=total-vip;
+  document.getElementById("stBooked").textContent=currentTrip?booked:"—";
+  document.getElementById("stFree").textContent=currentTrip?free:"—";
+  document.getElementById("stRate").textContent=currentTrip?rate+"%":"— (chọn chuyến)";
+}
+
+/* ── Seat click ── */
+function onSeatClick(seatId){
+  const seat=seats.find(s=>s.seat_id===seatId);if(!seat)return;
+  if(bookedSeatIds.has(seatId)){
+    // Show detail of booked seat
+    openSeatDetail(seat,true);return;
+  }
+  selectedSeatId=seatId;
+  openSeatDetail(seat,false);
+  renderSeatMap();updateStats();
+}
+
+function openSeatDetail(seat,booked){
+  const curType=pendingChanges[seat.seat_id]||seat.seat_type;
+  const isVip=curType==="VIP";
+  const box=document.getElementById("sdhBox");
+  box.className="sdh-box";
+  box.style.background=isVip?"rgba(253,121,168,.15)":"rgba(0,168,255,.12)";
+  box.style.border=isVip?"1.5px solid rgba(253,121,168,.4)":"1.5px solid rgba(0,168,255,.35)";
+  document.getElementById("sdhNum").textContent=seat.seat_number;
+  document.getElementById("sdhType").textContent=curType;
+  document.getElementById("sdhType").style.color=isVip?"#fd79a8":"#5dc8ff";
+  document.getElementById("sdhBus").textContent=currentBus?.plate_number||"—";
+  document.getElementById("sdhStatus").textContent=booked?"🔴 Đã có booking":"🟢 Còn trống";
+  document.getElementById("sdhStatus").style.color=booked?"#e74c3c":"#2ecc71";
+  document.getElementById("seatDetailGrid").innerHTML=[
+    ["🆔 Seat ID","#"+seat.seat_id],
+    ["🔢 Số ghế",seat.seat_number],
+    ["🏷️ Loại ghế",curType],
+    ["🚌 Bus ID","#"+seat.bus_id],
+    ["📊 Trạng thái",booked?"ĐÃ ĐẶT":"TRỐNG"],
+    ["💰 Loại vé",isVip?"VIP (BOOKING_DETAIL.price cao hơn)":"Thường"],
+  ].map(([l,v])=>`<div class="dg-item"><div class="dg-label">${l}</div><div class="dg-val">${v}</div></div>`).join("");
+  // Disable type change if booked
+  document.getElementById("setVipBtn").disabled=booked;
+  document.getElementById("setNormalBtn").disabled=booked;
+  document.getElementById("seatDeleteBtn").onclick=()=>deleteSeat(seat.seat_id);
+  document.getElementById("seatDeleteBtn").style.display=booked?"none":"flex";
+  // Store current seat for type switch
+  window._currentDetailSeat=seat;
+  document.getElementById("seatDetailModal").classList.add("open");
+}
+
+function setSeatType(type){
+  if(!window._currentDetailSeat)return;
+  const s=window._currentDetailSeat;
+  if((pendingChanges[s.seat_id]||s.seat_type)===type)return;
+  pendingChanges[s.seat_id]=type;
+  toast(`Ghế ${s.seat_number} → ${type} (chưa lưu)`,"info");
+  closeModal("seatDetailModal");
+  renderSeatMap();updateStats();
+}
+
+function toggleAllVip(){
+  seats.forEach(s=>{if(!bookedSeatIds.has(s.seat_id))pendingChanges[s.seat_id]="VIP";});
+  renderSeatMap();updateStats();toast("Đã đổi tất cả ghế trống → VIP","info");
+}
+function toggleAllNormal(){
+  seats.forEach(s=>{if(!bookedSeatIds.has(s.seat_id))pendingChanges[s.seat_id]="NORMAL";});
+  renderSeatMap();updateStats();toast("Đã đổi tất cả ghế trống → Thường","info");
+}
+
+/* ── Save changes ── */
+async function saveChanges(){
+  if(!Object.keys(pendingChanges).length){toast("Không có thay đổi nào để lưu","info");return;}
+  const updates=Object.entries(pendingChanges).map(([id,type])=>({seat_id:Number(id),seat_type:type}));
+  try{
+    for(const u of updates){
+      await fetch(`${API}/seats/${u.seat_id}`,{
+        method:"PUT",headers:{"Content-Type":"application/json"},
+        body:JSON.stringify({seat_type:u.seat_type})
+      });
+      const s=seats.find(x=>x.seat_id===u.seat_id);
+      if(s)s.seat_type=u.seat_type;
+    }
+    pendingChanges={};
+    renderSeatMap();updateStats();
+    toast(`Đã lưu ${updates.length} thay đổi!`,"success");
+  }catch{toast("Lỗi khi lưu, đang áp dụng demo","error");pendingChanges={};renderSeatMap();}
+}
+
+/* ── Add seats ── */
+function openAddSeat(){
+  if(!currentBus){toast("Vui lòng chọn xe trước","error");return;}
+  document.getElementById("addSeatModal").classList.add("open");
+}
+function addSeats(){
+  const num=document.getElementById("add_seatNum").value.trim();
+  const type=document.getElementById("add_seatType").value;
+  const count=Number(document.getElementById("add_seatCount").value)||1;
+  if(!num){toast("Nhập mã ghế","error");return;}
+  for(let i=0;i<count;i++){
+    const label=count>1?`${num}-${i+1}`:num;
+    if(seats.find(s=>s.seat_number===label)){toast(`Ghế ${label} đã tồn tại`,"error");continue;}
+    const newId=Math.max(0,...seats.map(s=>s.seat_id))+1;
+    seats.push({seat_id:newId,bus_id:currentBus.bus_id,seat_number:label,seat_type:type});
+  }
+  closeModal("addSeatModal");renderSeatMap();updateStats();
+  toast(`Đã thêm ${count} ghế ${type}`,"success");
+}
+
+/* ── Delete seat ── */
+function deleteSeat(seatId){
+  if(bookedSeatIds.has(seatId)){toast("Không thể xóa ghế đã có booking","error");return;}
+  seats=seats.filter(s=>s.seat_id!==seatId);delete pendingChanges[seatId];
+  if(selectedSeatId===seatId)selectedSeatId=null;
+  closeModal("seatDetailModal");renderSeatMap();updateStats();
+  toast("Đã xóa ghế","info");
+}
+
+/* ── Init ── */
+async function loadAll(){
+  await loadBuses();
+}
+loadAll();
+</script>
+</body>
+</html>

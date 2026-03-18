@@ -1,0 +1,710 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Theo dõi Đặt Vé — SmartBusAI Operator</title>
+<style>
+:root{
+  --bg:#04080f;--neon:#00ffe0;--neon2:#00a8ff;--purple:#7c5ce7;
+  --amber:#f39c12;--green:#2ecc71;--red:#e74c3c;--pink:#fd79a8;
+  --glass:rgba(255,255,255,0.055);--glass2:rgba(255,255,255,0.10);
+  --border:rgba(255,255,255,0.09);--border2:rgba(255,255,255,0.16);
+  --hh:62px;--text:#e8f4f8;--text2:rgba(255,255,255,.52);--text3:rgba(255,255,255,.30);
+}
+*{box-sizing:border-box;margin:0;padding:0;font-family:"Segoe UI",Arial,sans-serif;}
+html{background:var(--bg);min-height:100vh;}
+body{color:var(--text);background:transparent;overflow-x:hidden;animation:pageIn .3s ease;}
+@keyframes pageIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+
+/* Galaxy */
+#gc{position:fixed;inset:0;z-index:-3;pointer-events:none;}
+.neb{position:fixed;inset:0;z-index:-2;pointer-events:none;
+  background:radial-gradient(ellipse at 10% 18%,rgba(0,255,224,.07) 0%,transparent 40%),
+    radial-gradient(ellipse at 88% 78%,rgba(124,92,231,.08) 0%,transparent 44%),
+    radial-gradient(ellipse at 52% 4%,rgba(0,164,255,.06) 0%,transparent 38%);}
+.pl1{position:fixed;width:110px;height:110px;top:70px;right:85px;border-radius:50%;z-index:-1;pointer-events:none;
+  background:radial-gradient(circle at 30% 30%,#d0c8ff,#7c5ce7 44%,#1a0a40 78%);
+  box-shadow:0 0 50px rgba(124,92,231,.5),0 0 100px rgba(124,92,231,.18);}
+.pl2{position:fixed;width:50px;height:50px;bottom:75px;left:90px;border-radius:50%;z-index:-1;pointer-events:none;
+  background:radial-gradient(circle at 38% 38%,#fff,#00d4ff 52%,#001a33 82%);
+  box-shadow:0 0 32px rgba(0,212,255,.5);animation:pfloat 12s ease-in-out infinite;}
+@keyframes pfloat{0%,100%{transform:translateY(0)}50%{transform:translateY(-14px)}}
+.mt{position:fixed;width:2px;height:50px;pointer-events:none;z-index:-1;
+  background:linear-gradient(rgba(255,255,255,.8),transparent);transform:rotate(42deg);animation:mt linear infinite;}
+.mt:nth-child(1){top:7%;left:13%;animation-duration:17s;}
+.mt:nth-child(2){top:33%;left:58%;animation-duration:22s;animation-delay:5s;}
+.mt:nth-child(3){top:62%;left:80%;animation-duration:19s;animation-delay:10s;}
+@keyframes mt{0%{opacity:1;transform:translate3d(0,0,0) rotate(42deg)}100%{opacity:0;transform:translate3d(580px,580px,0) rotate(42deg)}}
+
+/* ── HEADER ── */
+.hdr{position:sticky;top:0;z-index:3000;height:var(--hh);display:flex;align-items:center;
+  background:rgba(4,8,15,0.82);backdrop-filter:blur(18px);border-bottom:1px solid var(--border);padding:0 32px;}
+.hdr-logo{display:flex;align-items:center;gap:10px;text-decoration:none;flex-shrink:0;}
+.hdr-logo-ic{width:34px;height:34px;border-radius:9px;font-size:18px;
+  background:linear-gradient(135deg,#00ffe0,#00a8ff);display:flex;align-items:center;justify-content:center;
+  box-shadow:0 0 14px rgba(0,255,224,.38);}
+.hdr-logo-tx{font-size:16px;font-weight:800;background:linear-gradient(90deg,#00ffe0,#7eb8ff);
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;}
+.hdr-sep{width:1px;height:30px;background:var(--border);margin:0 18px;flex-shrink:0;}
+.hdr-role{background:rgba(0,255,224,.10);border:1px solid rgba(0,255,224,.22);color:var(--neon);
+  font-size:11px;font-weight:800;padding:4px 10px;border-radius:20px;text-transform:uppercase;letter-spacing:.6px;flex-shrink:0;}
+.hdr-nav{display:flex;align-items:center;gap:4px;margin-left:auto;}
+.hdr-nav a{text-decoration:none;color:var(--text2);font-size:12.5px;font-weight:600;padding:7px 12px;
+  border-radius:8px;border:1px solid transparent;transition:all .2s;white-space:nowrap;}
+.hdr-nav a:hover{color:var(--neon);background:rgba(0,255,224,.08);border-color:rgba(0,255,224,.20);}
+.hdr-nav a.active{color:var(--neon);background:rgba(0,255,224,.10);border-color:rgba(0,255,224,.25);}
+.hdr-actions{display:flex;align-items:center;gap:8px;margin-left:16px;flex-shrink:0;}
+.op-chip{display:flex;align-items:center;gap:7px;background:var(--glass);border:1px solid var(--border);
+  border-radius:20px;padding:5px 12px 5px 6px;}
+.op-avatar{width:26px;height:26px;border-radius:50%;background:linear-gradient(135deg,#00a8ff,#00ffe0);
+  display:flex;align-items:center;justify-content:center;font-size:13px;}
+.op-name{font-size:12px;font-weight:600;}
+.btn-logout{background:rgba(231,76,60,.12);border:1px solid rgba(231,76,60,.28);color:#e74c3c;
+  padding:7px 14px;border-radius:9px;font-size:12px;font-weight:700;cursor:pointer;
+  font-family:"Segoe UI",Arial,sans-serif;transition:all .2s;}
+.btn-logout:hover{background:rgba(231,76,60,.26);color:#fff;}
+
+/* ── MAIN ── */
+.main{max-width:1440px;margin:0 auto;padding:28px 32px 60px;}
+.pg-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:26px;flex-wrap:wrap;gap:14px;}
+.pg-head-left h1{font-size:22px;font-weight:800;}
+.pg-head-left p{font-size:13px;color:var(--text2);margin-top:3px;}
+.pg-actions{display:flex;align-items:center;gap:10px;flex-wrap:wrap;}
+.btn{border:none;border-radius:11px;padding:10px 18px;font-size:13px;font-weight:700;cursor:pointer;
+  font-family:"Segoe UI",Arial,sans-serif;transition:all .22s;display:inline-flex;align-items:center;gap:7px;}
+.btn-primary{background:linear-gradient(135deg,#00ffe0,#00a8ff);color:#04080f;box-shadow:0 0 18px rgba(0,255,224,.28);}
+.btn-primary:hover{transform:translateY(-2px);box-shadow:0 4px 24px rgba(0,255,224,.5);}
+.btn-sec{background:var(--glass2);border:1px solid var(--border);color:var(--text2);}
+.btn-sec:hover{color:var(--neon);border-color:rgba(0,255,224,.25);}
+.btn-export{background:rgba(124,92,231,.14);border:1px solid rgba(124,92,231,.28);color:#a29bfe;}
+.btn-export:hover{background:rgba(124,92,231,.28);}
+
+/* KPI */
+.kpi-strip{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:22px;}
+.kpi-card{background:var(--glass);border:1px solid var(--border);border-radius:16px;
+  padding:18px 20px;position:relative;overflow:hidden;transition:transform .25s,box-shadow .25s;cursor:default;}
+.kpi-card:hover{transform:translateY(-3px);box-shadow:0 12px 40px rgba(0,0,0,.4);}
+.kpi-card::before{content:"";position:absolute;inset:0;border-radius:16px;
+  background:linear-gradient(135deg,var(--k-bg,rgba(0,255,224,.04)),transparent 65%);pointer-events:none;}
+.kpi-ico{font-size:22px;margin-bottom:8px;}
+.kpi-val{font-size:26px;font-weight:800;color:var(--k-col,var(--neon));line-height:1;}
+.kpi-label{font-size:11.5px;color:var(--text2);margin-top:5px;font-weight:500;}
+
+/* TOOLBAR */
+.toolbar{display:flex;align-items:center;gap:12px;flex-wrap:wrap;background:var(--glass);
+  border:1px solid var(--border);border-radius:16px;padding:14px 18px;margin-bottom:18px;}
+.search-wrap{position:relative;flex:1;min-width:220px;}
+.s-ico{position:absolute;left:12px;top:50%;transform:translateY(-50%);font-size:14px;color:var(--text3);pointer-events:none;}
+.inp-search{width:100%;padding:10px 14px 10px 34px;border-radius:11px;
+  background:rgba(255,255,255,.07);border:1px solid var(--border2);color:var(--text);
+  font-size:13px;font-family:"Segoe UI",Arial,sans-serif;outline:none;transition:border .2s;}
+.inp-search::placeholder{color:var(--text3);}
+.inp-search:focus{border-color:rgba(0,255,224,.4);box-shadow:0 0 0 3px rgba(0,255,224,.08);}
+.sel{padding:10px 13px;border-radius:11px;background:rgba(255,255,255,.07);
+  border:1px solid var(--border2);color:var(--text);font-size:13px;
+  font-family:"Segoe UI",Arial,sans-serif;outline:none;cursor:pointer;transition:border .2s;}
+.sel:focus{border-color:rgba(0,255,224,.4);}
+.sel option{background:#0d1827;}
+
+/* Filter chips */
+.chips{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:20px;}
+.chip{padding:5px 13px;border-radius:20px;font-size:11.5px;font-weight:600;cursor:pointer;
+  border:1px solid var(--border);color:var(--text2);background:var(--glass);transition:all .2s;}
+.chip:hover,.chip.active{color:var(--neon);background:rgba(0,255,224,.10);border-color:rgba(0,255,224,.28);box-shadow:0 0 10px rgba(0,255,224,.12);}
+
+/* Result info */
+.result-info{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;}
+.result-info span{font-size:12.5px;color:var(--text2);}
+.result-info b{color:var(--neon);}
+
+/* TABLE */
+.panel{background:var(--glass);border:1px solid var(--border);border-radius:18px;overflow:hidden;}
+.tbl{width:100%;border-collapse:collapse;}
+.tbl thead tr{background:rgba(255,255,255,.04);}
+.tbl th{padding:11px 14px;font-size:11px;font-weight:700;color:var(--text2);
+  text-transform:uppercase;letter-spacing:.6px;text-align:left;border-bottom:1px solid var(--border);white-space:nowrap;}
+.tbl th:first-child{padding-left:20px;}
+.tbl th:last-child{text-align:center;padding-right:20px;}
+.tbl tbody tr{border-bottom:1px solid rgba(255,255,255,.04);transition:background .18s;}
+.tbl tbody tr:last-child{border-bottom:none;}
+.tbl tbody tr:hover{background:rgba(255,255,255,.04);}
+.tbl td{padding:13px 14px;font-size:12.5px;vertical-align:middle;}
+.tbl td:first-child{padding-left:20px;}
+.tbl td:last-child{text-align:center;padding-right:20px;}
+
+/* User avatar */
+.user-av{width:34px;height:34px;border-radius:50%;display:flex;align-items:center;justify-content:center;
+  font-size:13px;font-weight:800;color:#fff;flex-shrink:0;}
+
+/* Badges */
+.bdg{display:inline-flex;align-items:center;gap:4px;padding:3px 10px;border-radius:20px;font-size:11px;font-weight:700;}
+.bdg-paid    {background:rgba(46,204,113,.14);color:#2ecc71;border:1px solid rgba(46,204,113,.22);}
+.bdg-pending {background:rgba(243,156,18,.14);color:#f9c858;border:1px solid rgba(243,156,18,.22);}
+.bdg-canceled{background:rgba(231,76,60,.14);color:#e74c3c;border:1px solid rgba(231,76,60,.22);}
+.sdot{width:6px;height:6px;border-radius:50%;display:inline-block;}
+.sdot-g{background:#2ecc71;box-shadow:0 0 5px #2ecc71;}
+.sdot-a{background:#f9c858;box-shadow:0 0 5px #f9c858;}
+.sdot-r{background:#e74c3c;box-shadow:0 0 5px #e74c3c;}
+
+/* Action btns */
+.act-btn{border:none;border-radius:8px;padding:6px 12px;cursor:pointer;font-size:11.5px;
+  font-weight:700;transition:all .2s;font-family:"Segoe UI",Arial,sans-serif;display:inline-flex;align-items:center;gap:4px;}
+.act-view{background:rgba(0,168,255,.12);color:#5dc8ff;border:1px solid rgba(0,168,255,.2);}
+.act-view:hover{background:rgba(0,168,255,.25);}
+.act-cancel{background:rgba(231,76,60,.12);color:#e74c3c;border:1px solid rgba(231,76,60,.2);}
+.act-cancel:hover{background:rgba(231,76,60,.25);}
+.act-paid{background:rgba(46,204,113,.12);color:#2ecc71;border:1px solid rgba(46,204,113,.2);}
+.act-paid:hover{background:rgba(46,204,113,.25);}
+
+/* Pagination */
+.pagination{display:flex;align-items:center;justify-content:center;gap:6px;padding:20px 0 0;}
+.pg-btn{background:var(--glass);border:1px solid var(--border);color:var(--text2);
+  width:34px;height:34px;border-radius:8px;cursor:pointer;font-size:12.5px;font-weight:600;
+  transition:all .2s;font-family:"Segoe UI",Arial,sans-serif;}
+.pg-btn:hover,.pg-btn.active{background:rgba(0,255,224,.12);border-color:rgba(0,255,224,.3);color:var(--neon);}
+.pg-btn:disabled{opacity:.3;cursor:not-allowed;}
+.pg-dot{font-size:12px;color:var(--text3);}
+
+/* Empty */
+.empty{text-align:center;padding:60px 20px;color:var(--text2);}
+.empty .ei{font-size:50px;margin-bottom:14px;opacity:.4;}
+
+/* ── MODALS ── */
+.modal-overlay{position:fixed;inset:0;z-index:4000;background:rgba(0,0,0,.65);
+  backdrop-filter:blur(8px);display:none;align-items:center;justify-content:center;}
+.modal-overlay.open{display:flex;}
+.modal{width:580px;max-width:96vw;max-height:90vh;
+  background:linear-gradient(160deg,#0d1827 0%,#080f1c 100%);
+  border:1px solid var(--border2);border-radius:22px;
+  box-shadow:0 30px 80px rgba(0,0,0,.7),0 0 0 1px rgba(0,255,224,.06);
+  overflow:hidden;animation:modalIn .28s cubic-bezier(.22,.61,.36,1);display:flex;flex-direction:column;}
+.modal.sm{max-width:420px;}
+@keyframes modalIn{from{opacity:0;transform:translateY(20px) scale(.96)}to{opacity:1;transform:translateY(0) scale(1)}}
+.modal-head{padding:20px 24px 16px;border-bottom:1px solid var(--border);
+  display:flex;align-items:center;justify-content:space-between;flex-shrink:0;}
+.modal-head h3{font-size:16px;font-weight:800;display:flex;align-items:center;gap:9px;}
+.modal-close{background:rgba(255,255,255,.08);border:1px solid var(--border);color:var(--text2);
+  width:30px;height:30px;border-radius:8px;cursor:pointer;font-size:15px;transition:all .2s;}
+.modal-close:hover{background:rgba(231,76,60,.2);color:#e74c3c;}
+.modal-body{padding:22px 24px;overflow-y:auto;flex:1;}
+.modal-body::-webkit-scrollbar{width:4px;}
+.modal-body::-webkit-scrollbar-thumb{background:rgba(255,255,255,.12);border-radius:2px;}
+.modal-foot{padding:16px 24px;border-top:1px solid var(--border);
+  display:flex;justify-content:flex-end;gap:10px;flex-shrink:0;}
+
+/* View modal */
+.view-hero{display:flex;align-items:center;gap:14px;margin-bottom:18px;
+  background:rgba(0,255,224,.05);border:1px solid rgba(0,255,224,.14);border-radius:14px;padding:16px;}
+.view-av{width:50px;height:50px;border-radius:50%;display:flex;align-items:center;justify-content:center;
+  font-size:18px;font-weight:800;color:#fff;flex-shrink:0;}
+.view-name{font-size:16px;font-weight:800;}
+.view-sub{font-size:12px;color:var(--text2);margin-top:3px;}
+.view-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
+.vg-item{background:rgba(255,255,255,.04);border:1px solid var(--border);border-radius:11px;padding:11px 13px;}
+.vg-item.full{grid-column:1/-1;}
+.vg-label{font-size:10px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:.5px;}
+.vg-val{font-size:13px;font-weight:700;color:var(--text);margin-top:4px;}
+
+/* Seat chips */
+.seat-chips{display:flex;flex-wrap:wrap;gap:6px;margin-top:6px;}
+.seat-chip{padding:3px 10px;border-radius:10px;font-size:11.5px;font-weight:700;}
+.seat-chip.vip{background:rgba(253,121,168,.14);color:#fd79a8;border:1px solid rgba(253,121,168,.25);}
+.seat-chip.normal{background:rgba(0,168,255,.12);color:#5dc8ff;border:1px solid rgba(0,168,255,.22);}
+
+/* Confirm modal */
+.confirm-center{text-align:center;padding:8px 0;}
+.confirm-ico{font-size:48px;margin-bottom:12px;}
+.confirm-center h3{font-size:16px;font-weight:800;margin-bottom:8px;}
+.confirm-center p{font-size:13px;color:var(--text2);line-height:1.6;}
+
+/* Modal buttons */
+.btn-cancel-m{background:rgba(255,255,255,.07);border:1px solid var(--border);color:var(--text2);
+  border-radius:10px;padding:10px 18px;font-size:13px;font-weight:700;cursor:pointer;
+  font-family:"Segoe UI",Arial,sans-serif;transition:all .2s;}
+.btn-cancel-m:hover{background:rgba(255,255,255,.12);}
+.btn-danger-m{background:linear-gradient(135deg,#e74c3c,#c0392b);color:#fff;border:none;
+  border-radius:10px;padding:10px 18px;font-size:13px;font-weight:700;cursor:pointer;
+  font-family:"Segoe UI",Arial,sans-serif;transition:all .2s;}
+.btn-save-m{background:linear-gradient(135deg,#00ffe0,#00a8ff);color:#04080f;border:none;
+  box-shadow:0 0 16px rgba(0,255,224,.3);border-radius:10px;padding:10px 18px;
+  font-size:13px;font-weight:700;cursor:pointer;font-family:"Segoe UI",Arial,sans-serif;transition:all .2s;}
+.btn-save-m:hover{transform:translateY(-2px);}
+
+/* Toast */
+.toast-wrap{position:fixed;top:80px;right:24px;z-index:9999;display:flex;flex-direction:column;gap:10px;}
+.toast{padding:12px 16px;border-radius:12px;font-size:13px;font-weight:600;backdrop-filter:blur(12px);
+  box-shadow:0 8px 30px rgba(0,0,0,.4);display:flex;align-items:center;gap:8px;
+  animation:toastIn .3s cubic-bezier(.22,.61,.36,1);min-width:240px;}
+@keyframes toastIn{from{opacity:0;transform:translateX(30px)}to{opacity:1;transform:translateX(0)}}
+@keyframes toastOut{from{opacity:1;transform:translateX(0)}to{opacity:0;transform:translateX(30px)}}
+.toast.success{background:rgba(46,204,113,.16);border:1px solid rgba(46,204,113,.35);color:#2ecc71;}
+.toast.error{background:rgba(231,76,60,.16);border:1px solid rgba(231,76,60,.35);color:#e74c3c;}
+.toast.info{background:rgba(0,168,255,.16);border:1px solid rgba(0,168,255,.35);color:#5dc8ff;}
+</style>
+<script src="/js/api.js"></script>
+</head>
+<body>
+
+<canvas id="gc"></canvas>
+<div class="neb"></div><div class="pl1"></div><div class="pl2"></div>
+<div class="mt"></div><div class="mt"></div><div class="mt"></div>
+<div class="toast-wrap" id="toastWrap"></div>
+
+<!-- HEADER -->
+<header class="hdr">
+  <a class="hdr-logo" href="operator.html">
+    <div class="hdr-logo-ic">🚌</div>
+    <div class="hdr-logo-tx">SmartBusAI</div>
+  </a>
+  <div class="hdr-sep"></div>
+  <span class="hdr-role">Nhà xe</span>
+  <nav class="hdr-nav">
+    <a href="operator.html">Tổng quan</a>
+    <a href="trips.html">Chuyến xe</a>
+    <a href="bookings.html" class="active">Đặt vé</a>
+    <a href="vehicles.html">Phương tiện</a>
+    <a href="seats.html">Sơ đồ ghế</a>
+    <a href="revenue.html">Doanh thu</a>
+  </nav>
+  <div class="hdr-actions">
+    <div class="op-chip">
+      <div class="op-avatar">🏢</div>
+      <span class="op-name">Nhà xe</span>
+    </div>
+    <button class="btn-logout" onclick="logout()">🚪 Đăng xuất</button>
+  </div>
+</header>
+
+<main class="main">
+
+  <div class="pg-head">
+    <div class="pg-head-left">
+      <h1>🎫 Theo dõi Đặt Vé</h1>
+      <p>Quản lý BOOKING · BOOKING_DETAIL · PAYMENT theo thời gian thực</p>
+    </div>
+    <div class="pg-actions">
+      <button class="btn btn-export" onclick="exportCSV()">📥 Xuất CSV</button>
+      <button class="btn btn-sec" onclick="loadBookings()">🔄 Làm mới</button>
+    </div>
+  </div>
+
+  <!-- KPI -->
+  <div class="kpi-strip">
+    <div class="kpi-card" style="--k-bg:rgba(0,255,224,.05);--k-col:#00ffe0;">
+      <div class="kpi-ico">🎫</div>
+      <div class="kpi-val" id="kTotal">—</div>
+      <div class="kpi-label">Tổng booking</div>
+    </div>
+    <div class="kpi-card" style="--k-bg:rgba(46,204,113,.05);--k-col:#2ecc71;">
+      <div class="kpi-ico">✅</div>
+      <div class="kpi-val" id="kPaid">—</div>
+      <div class="kpi-label">PAID</div>
+    </div>
+    <div class="kpi-card" style="--k-bg:rgba(243,156,18,.05);--k-col:#f9c858;">
+      <div class="kpi-ico">⏳</div>
+      <div class="kpi-val" id="kPending">—</div>
+      <div class="kpi-label">PENDING</div>
+    </div>
+    <div class="kpi-card" style="--k-bg:rgba(231,76,60,.05);--k-col:#e74c3c;">
+      <div class="kpi-ico">❌</div>
+      <div class="kpi-val" id="kCanceled">—</div>
+      <div class="kpi-label">CANCELED</div>
+    </div>
+  </div>
+
+  <!-- Toolbar -->
+  <div class="toolbar">
+    <div class="search-wrap">
+      <span class="s-ico">🔍</span>
+      <input class="inp-search" id="searchInp" placeholder="Tìm khách hàng, tuyến, mã booking..." oninput="applyFilter()">
+    </div>
+    <select class="sel" id="statusFilter" onchange="applyFilter()">
+      <option value="">Tất cả trạng thái</option>
+      <option value="PAID">PAID</option>
+      <option value="PENDING">PENDING</option>
+      <option value="CANCELED">CANCELED</option>
+    </select>
+    <select class="sel" id="sortSel" onchange="applyFilter()">
+      <option value="newest">Mới nhất</option>
+      <option value="oldest">Cũ nhất</option>
+      <option value="amount_desc">Tiền cao nhất</option>
+      <option value="amount_asc">Tiền thấp nhất</option>
+    </select>
+    <select class="sel" id="pageSizeSel" onchange="pageSize=+this.value;currentPage=1;renderTable()">
+      <option value="10" selected>10 / trang</option>
+      <option value="20">20 / trang</option>
+      <option value="50">50 / trang</option>
+    </select>
+  </div>
+
+  <!-- Filter chips -->
+  <div class="chips">
+    <div class="chip active" onclick="setChip(this,'')">🎫 Tất cả</div>
+    <div class="chip" onclick="setChip(this,'PAID')">✅ PAID</div>
+    <div class="chip" onclick="setChip(this,'PENDING')">⏳ PENDING</div>
+    <div class="chip" onclick="setChip(this,'CANCELED')">❌ CANCELED</div>
+  </div>
+
+  <!-- Result info -->
+  <div class="result-info">
+    <span>Hiển thị <b id="showCount">0</b> / <b id="totalCount">0</b> booking</span>
+    <span id="pageInfo" style="font-size:12px;color:var(--text3);">Trang 1</span>
+  </div>
+
+  <!-- Table -->
+  <div class="panel">
+    <table class="tbl">
+      <thead>
+        <tr>
+          <th>#ID</th>
+          <th>Khách hàng</th>
+          <th>Tuyến đường</th>
+          <th>Khởi hành</th>
+          <th>Ghế đặt</th>
+          <th>Tổng tiền</th>
+          <th>Thanh toán</th>
+          <th>Trạng thái</th>
+          <th>Thao tác</th>
+        </tr>
+      </thead>
+      <tbody id="bookingBody"></tbody>
+    </table>
+    <div id="emptyState" class="empty" style="display:none;">
+      <div class="ei">🎫</div>
+      <p>Không tìm thấy booking nào</p>
+    </div>
+  </div>
+
+  <div class="pagination" id="paginationWrap"></div>
+
+</main>
+
+<!-- MODAL: View Detail -->
+<div class="modal-overlay" id="viewModal">
+  <div class="modal">
+    <div class="modal-head">
+      <h3>🎫 Chi tiết booking</h3>
+      <button class="modal-close" onclick="closeModal('viewModal')">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="view-hero">
+        <div class="view-av" id="vAvatar" style="background:linear-gradient(135deg,#00a8ff,#7c5ce7);">—</div>
+        <div style="flex:1;">
+          <div class="view-name" id="vName">—</div>
+          <div class="view-sub" id="vSub">—</div>
+        </div>
+        <span id="vStatusBadge"></span>
+      </div>
+      <div class="view-grid" id="vGrid"></div>
+    </div>
+    <div class="modal-foot">
+      <button class="btn-cancel-m" onclick="closeModal('viewModal')">Đóng</button>
+      <button class="btn-save-m" id="vMarkPaidBtn" style="display:none;" onclick="">✅ Xác nhận PAID</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL: Confirm Cancel -->
+<div class="modal-overlay" id="confirmModal">
+  <div class="modal sm">
+    <div class="modal-head">
+      <h3>⚠️ Xác nhận hủy</h3>
+      <button class="modal-close" onclick="closeModal('confirmModal')">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="confirm-center">
+        <div class="confirm-ico">❌</div>
+        <h3 id="confirmTitle">Hủy booking này?</h3>
+        <p id="confirmMsg">Trạng thái sẽ chuyển sang CANCELED. Ghế sẽ được giải phóng.</p>
+      </div>
+    </div>
+    <div class="modal-foot">
+      <button class="btn-cancel-m" onclick="closeModal('confirmModal')">Hủy</button>
+      <button class="btn-danger-m" id="confirmBtn">❌ Xác nhận hủy</button>
+    </div>
+  </div>
+</div>
+
+<script>
+/* ── Galaxy Canvas ── */
+(function(){
+  const cv=document.getElementById("gc"),ctx=cv.getContext("2d");
+  function mb32(s){s=s>>>0;return()=>{s+=0x6D2B79F5;let t=Math.imul(s^s>>>15,1|s);t^=t+Math.imul(t^t>>>7,61|t);return((t^t>>>14)>>>0)/4294967296;};}
+  function draw(){
+    cv.width=innerWidth;cv.height=innerHeight;
+    const g=ctx.createRadialGradient(cv.width*.5,cv.height*.3,0,cv.width*.5,cv.height*.3,cv.width*.85);
+    g.addColorStop(0,"#0c1830");g.addColorStop(.5,"#080f1c");g.addColorStop(1,"#04080f");
+    ctx.fillStyle=g;ctx.fillRect(0,0,cv.width,cv.height);
+    const rng=mb32(cv.width*cv.height+17);
+    const n=Math.min(340,Math.floor(cv.width*cv.height/4600));
+    for(let i=0;i<n;i++){
+      const x=rng()*cv.width,y=rng()*cv.height,r=rng()*1.4+.15,a=rng()*.7+.2;
+      const h=rng()<.11?180:rng()<.07?265:0;
+      ctx.beginPath();ctx.arc(x,y,r,0,Math.PI*2);
+      ctx.fillStyle=h===180?`rgba(0,255,224,${a*.5})`:h===265?`rgba(170,148,255,${a*.42})`:`rgba(255,255,255,${a})`;ctx.fill();
+    }
+    [{x:.10,y:.18,r:.14,c:"rgba(0,190,255,0.055)"},{x:.78,y:.68,r:.14,c:"rgba(120,75,240,0.065)"}].forEach(s=>{
+      const ng=ctx.createRadialGradient(s.x*cv.width,s.y*cv.height,0,s.x*cv.width,s.y*cv.height,s.r*cv.width);
+      ng.addColorStop(0,s.c);ng.addColorStop(1,"transparent");ctx.fillStyle=ng;ctx.fillRect(0,0,cv.width,cv.height);
+    });
+  }
+  draw();let rt;window.addEventListener("resize",()=>{clearTimeout(rt);rt=setTimeout(draw,200);});
+})();
+
+document.addEventListener("click",e=>{
+  const a=e.target.closest("a[href]");if(!a)return;
+  const h=a.getAttribute("href");if(!h||h==="#"||h.startsWith("http"))return;
+  e.preventDefault();
+  document.body.style.transition="opacity .2s";document.body.style.opacity="0";
+  setTimeout(()=>{window.location.href=h;},210);
+});
+
+/* ── State ── */
+const API="/api/bookings";
+let allBookings=[], filtered=[], currentPage=1, pageSize=10;
+
+function logout(){localStorage.clear();window.location.href="../auth/login.html";}
+function money(v){return Number(v||0).toLocaleString("vi-VN")+" đ";}
+function fmtDT(s){if(!s)return"—";try{const d=new Date(s);return d.toLocaleDateString("vi-VN",{day:"2-digit",month:"2-digit",year:"numeric"})+" "+d.getHours()+":"+String(d.getMinutes()).padStart(2,"0");}catch{return s;}}
+
+function toast(msg,type="info"){
+  const w=document.getElementById("toastWrap");
+  const el=document.createElement("div");el.className=`toast ${type}`;
+  el.innerHTML=`<span>${{success:"✅",error:"❌",info:"ℹ️"}[type]}</span><span>${msg}</span>`;
+  w.appendChild(el);
+  setTimeout(()=>{el.style.animation="toastOut .3s ease forwards";setTimeout(()=>el.remove(),320);},3200);
+}
+function closeModal(id){document.getElementById(id).classList.remove("open");}
+document.querySelectorAll(".modal-overlay").forEach(ov=>{
+  ov.addEventListener("click",e=>{if(e.target===ov)ov.classList.remove("open");});
+});
+
+/* ── Gradient seed by ID ── */
+const GRAD_COLORS=["#00a8ff,#7c5ce7","#e74c3c,#f39c12","#2ecc71,#00ffe0","#fd79a8,#e74c3c","#7c5ce7,#00a8ff","#f39c12,#2ecc71"];
+function gradFor(id){return GRAD_COLORS[Number(id)%GRAD_COLORS.length];}
+
+/* ── Load ── */
+async function loadBookings(){
+  try{
+    const res=await fetch(API,{signal:AbortSignal.timeout(5000)});
+    if(!res.ok)throw new Error();
+    const d=await res.json();
+    allBookings=Array.isArray(d)?d:(d.data||d.bookings||[]);
+    if(!allBookings.length)throw new Error("empty");
+  }catch{
+    // Demo fallback
+    allBookings=genDemo();
+  }
+  updateKPI();applyFilter();
+  toast(`Đã tải ${allBookings.length} booking`,"info");
+}
+
+function genDemo(){
+  const names=["Nguyễn Văn A","Trần Thị B","Lê Văn C","Phạm Minh D","Võ Thị E","Đặng Văn F","Hoàng Thị G","Bùi Văn H"];
+  const routes=[{o:"Hà Nội",d:"TP.HCM"},{o:"Hà Nội",d:"Đà Nẵng"},{o:"HCM",d:"Đà Lạt"},{o:"HN",d:"Hải Phòng"},{o:"HCM",d:"Cần Thơ"}];
+  const statuses=["PAID","PAID","PAID","PENDING","PENDING","CANCELED"];
+  const methods=["MOMO","ZALOPAY","BANK"];
+  return Array.from({length:35},(_,i)=>{
+    const rt=routes[i%routes.length];
+    const st=statuses[i%statuses.length];
+    return{
+      booking_id:1000+i,
+      user_id:10+i,full_name:names[i%names.length],
+      origin:rt.o,destination:rt.d,
+      departure_time:new Date(Date.now()+Math.random()*7*86400000).toISOString(),
+      booking_time:new Date(Date.now()-Math.random()*10*86400000).toISOString(),
+      total_amount:Math.floor(Math.random()*1200000+200000),
+      status:st,
+      payment_method:st!=="PENDING"?methods[i%methods.length]:null,
+      payment_status:st==="PAID"?"SUCCESS":st==="CANCELED"?"FAILED":null,
+      seats:[`${i%5+1}A`,`${i%5+1}B`].slice(0,i%2+1),
+      seat_types:["NORMAL","VIP"][i%2],
+      trip_id:200+i,plate_number:`51B-${10000+i}`,bus_type:i%3===0?"VIP":"Sleeper",
+    };
+  });
+}
+
+/* ── KPI ── */
+function updateKPI(){
+  document.getElementById("kTotal").textContent=allBookings.length;
+  document.getElementById("kPaid").textContent=allBookings.filter(b=>b.status==="PAID").length;
+  document.getElementById("kPending").textContent=allBookings.filter(b=>b.status==="PENDING").length;
+  document.getElementById("kCanceled").textContent=allBookings.filter(b=>b.status==="CANCELED").length;
+}
+
+/* ── Filters ── */
+function setChip(el,val){
+  document.querySelectorAll(".chip").forEach(c=>c.classList.remove("active"));
+  el.classList.add("active");
+  document.getElementById("statusFilter").value=val;
+  applyFilter();
+}
+function applyFilter(){
+  const q=(document.getElementById("searchInp").value||"").toLowerCase();
+  const st=document.getElementById("statusFilter").value;
+  const sort=document.getElementById("sortSel").value;
+  filtered=allBookings.filter(b=>{
+    const name=(b.full_name||"").toLowerCase();
+    const route=((b.origin||"")+" "+(b.destination||"")).toLowerCase();
+    const id=String(b.booking_id);
+    return(!q||name.includes(q)||route.includes(q)||id.includes(q))&&(!st||b.status===st);
+  });
+  if(sort==="oldest")filtered.sort((a,b)=>new Date(a.booking_time)-new Date(b.booking_time));
+  else if(sort==="amount_desc")filtered.sort((a,b)=>Number(b.total_amount)-Number(a.total_amount));
+  else if(sort==="amount_asc")filtered.sort((a,b)=>Number(a.total_amount)-Number(b.total_amount));
+  else filtered.sort((a,b)=>new Date(b.booking_time)-new Date(a.booking_time));
+  currentPage=1;renderTable();
+}
+
+/* ── Render ── */
+function renderTable(){
+  const tbody=document.getElementById("bookingBody");
+  const empty=document.getElementById("emptyState");
+  document.getElementById("totalCount").textContent=filtered.length;
+  if(!filtered.length){tbody.innerHTML="";empty.style.display="block";
+    document.getElementById("paginationWrap").innerHTML="";document.getElementById("showCount").textContent=0;return;}
+  empty.style.display="none";
+  const start=(currentPage-1)*pageSize;
+  const page=filtered.slice(start,start+pageSize);
+  document.getElementById("showCount").textContent=`${start+1}–${Math.min(start+pageSize,filtered.length)}`;
+
+  const bdgMap={PAID:"bdg-paid",PENDING:"bdg-pending",CANCELED:"bdg-canceled"};
+  const dotMap={PAID:"sdot-g",PENDING:"sdot-a",CANCELED:"sdot-r"};
+  const payIco={MOMO:"💜",ZALOPAY:"🔵",BANK:"🏦"};
+
+  tbody.innerHTML=page.map(b=>{
+    const initials=(b.full_name||"?").split(" ").map(w=>w[0]).join("").slice(0,2).toUpperCase();
+    const grad=gradFor(b.user_id||b.booking_id);
+    const seats=Array.isArray(b.seats)?b.seats.join(", "):b.seats||"—";
+    const payStr=b.payment_method?`${payIco[b.payment_method]||"💳"} ${b.payment_method}`:"—";
+    return`<tr>
+      <td style="font-weight:700;color:var(--text3);font-size:12px;">#${b.booking_id}</td>
+      <td>
+        <div style="display:flex;align-items:center;gap:9px;">
+          <div class="user-av" style="background:linear-gradient(135deg,${grad});">${initials}</div>
+          <div>
+            <div style="font-weight:700;font-size:13px;">${b.full_name||"—"}</div>
+            <div style="font-size:11px;color:var(--text3);">ID: ${b.user_id||"—"}</div>
+          </div>
+        </div>
+      </td>
+      <td>
+        <span style="font-weight:700;color:var(--text);">📍 ${b.origin||"?"}</span>
+        <span style="color:var(--text3);margin:0 4px;">→</span>
+        <span style="font-weight:700;color:var(--neon);">${b.destination||"?"}</span>
+        ${b.plate_number?`<div style="font-size:11px;color:var(--text3);margin-top:2px;">🪪 ${b.plate_number}</div>`:""}
+      </td>
+      <td style="color:var(--text2);font-size:12px;">${fmtDT(b.departure_time)}</td>
+      <td>
+        <div style="font-size:12.5px;font-weight:700;color:${b.seat_types==="VIP"?"#fd79a8":"#5dc8ff"};">
+          ${seats} <span style="font-size:10.5px;opacity:.7;">${b.seat_types||""}</span>
+        </div>
+      </td>
+      <td style="color:var(--amber);font-weight:800;font-size:13px;">${money(b.total_amount)}</td>
+      <td style="color:var(--text2);font-size:12.5px;">${payStr}</td>
+      <td><span class="bdg ${bdgMap[b.status]||"bdg-pending"}"><span class="sdot ${dotMap[b.status]||"sdot-a"}"></span>${b.status}</span></td>
+      <td>
+        <div style="display:flex;gap:5px;justify-content:center;">
+          <button class="act-btn act-view" onclick="viewBooking(${b.booking_id})">👁 Chi tiết</button>
+          ${b.status==="PENDING"?`<button class="act-btn act-paid" onclick="markPaid(${b.booking_id})">✅</button>`:""}
+          ${b.status!=="CANCELED"?`<button class="act-btn act-cancel" onclick="confirmCancel(${b.booking_id})">❌</button>`:""}
+        </div>
+      </td>
+    </tr>`;
+  }).join("");
+  renderPagination();
+}
+
+/* ── Pagination ── */
+function renderPagination(){
+  const total=Math.ceil(filtered.length/pageSize);
+  const pg=document.getElementById("paginationWrap");
+  document.getElementById("pageInfo").textContent=`Trang ${currentPage} / ${total||1}`;
+  if(total<=1){pg.innerHTML="";return;}
+  let html=`<button class="pg-btn" onclick="goPage(${currentPage-1})" ${currentPage<=1?"disabled":""}>‹</button>`;
+  for(let i=1;i<=total;i++){
+    if(total>7&&Math.abs(i-currentPage)>2&&i!==1&&i!==total){if(i===2||i===total-1)html+=`<span class="pg-dot">…</span>`;continue;}
+    html+=`<button class="pg-btn ${i===currentPage?"active":""}" onclick="goPage(${i})">${i}</button>`;
+  }
+  html+=`<button class="pg-btn" onclick="goPage(${currentPage+1})" ${currentPage>=total?"disabled":""}>›</button>`;
+  pg.innerHTML=html;
+}
+function goPage(p){const t=Math.ceil(filtered.length/pageSize);if(p<1||p>t)return;currentPage=p;renderTable();}
+
+/* ── View Detail ── */
+function viewBooking(id){
+  const b=allBookings.find(x=>x.booking_id==id);if(!b)return;
+  const initials=(b.full_name||"?").split(" ").map(w=>w[0]).join("").slice(0,2).toUpperCase();
+  const grad=gradFor(b.user_id||b.booking_id);
+  document.getElementById("vAvatar").textContent=initials;
+  document.getElementById("vAvatar").style.background=`linear-gradient(135deg,${grad})`;
+  document.getElementById("vName").textContent=b.full_name||"—";
+  document.getElementById("vSub").textContent=`Booking #${b.booking_id} · Đặt lúc ${fmtDT(b.booking_time)}`;
+  const bdgMap={PAID:"bdg-paid",PENDING:"bdg-pending",CANCELED:"bdg-canceled"};
+  document.getElementById("vStatusBadge").innerHTML=`<span class="bdg ${bdgMap[b.status]||"bdg-pending"}">${b.status}</span>`;
+  const seats=Array.isArray(b.seats)?b.seats.join(", "):b.seats||"—";
+  document.getElementById("vGrid").innerHTML=[
+    ["🆔 Booking ID","#"+b.booking_id],
+    ["👤 Hành khách",b.full_name||"—"],
+    ["🗺️ Tuyến đường",`${b.origin||"?"}  →  ${b.destination||"?"}`,true],
+    ["🚌 Trip ID","#"+(b.trip_id||"—")],
+    ["🪪 Biển số",b.plate_number||"—"],
+    ["⏰ Khởi hành",fmtDT(b.departure_time)],
+    ["📅 Thời gian đặt",fmtDT(b.booking_time)],
+    ["💰 Tổng tiền",money(b.total_amount)],
+    ["💳 Thanh toán",(b.payment_method||"—")+(b.payment_status?" · "+b.payment_status:"")],
+    ["💺 Ghế đặt",seats+(b.seat_types?" ("+b.seat_types+")":"")],
+    ["📊 Trạng thái",b.status||"—"],
+  ].map(([l,v,full])=>`<div class="vg-item ${full?"full":""}"><div class="vg-label">${l}</div><div class="vg-val">${v}</div></div>`).join("");
+  // Show mark paid btn only if pending
+  const paidBtn=document.getElementById("vMarkPaidBtn");
+  if(b.status==="PENDING"){paidBtn.style.display="inline-flex";paidBtn.onclick=()=>{closeModal("viewModal");markPaid(id);};}
+  else paidBtn.style.display="none";
+  document.getElementById("viewModal").classList.add("open");
+}
+
+/* ── Mark Paid ── */
+async function markPaid(id){
+  try{
+    await fetch(`${API}/${id}`,{method:"PUT",headers:{"Content-Type":"application/json"},body:JSON.stringify({status:"PAID"})});
+  }catch{}
+  const b=allBookings.find(x=>x.booking_id==id);
+  if(b)b.status="PAID";
+  toast(`Booking #${id} đã xác nhận PAID`,"success");
+  updateKPI();applyFilter();
+}
+
+/* ── Cancel ── */
+function confirmCancel(id){
+  const b=allBookings.find(x=>x.booking_id==id);if(!b)return;
+  document.getElementById("confirmTitle").textContent=`Hủy Booking #${id}?`;
+  document.getElementById("confirmMsg").innerHTML=`Khách hàng: <b>${b.full_name||"—"}</b><br>Tuyến: <b>${b.origin||"?"}→${b.destination||"?"}</b><br>Trạng thái sẽ chuyển sang <b>CANCELED</b>.`;
+  document.getElementById("confirmBtn").onclick=async()=>{
+    try{await fetch(`${API}/${id}`,{method:"PUT",headers:{"Content-Type":"application/json"},body:JSON.stringify({status:"CANCELED"})});}catch{}
+    const b=allBookings.find(x=>x.booking_id==id);
+    if(b)b.status="CANCELED";
+    toast(`Đã hủy Booking #${id}`,"info");
+    closeModal("confirmModal");updateKPI();applyFilter();
+  };
+  document.getElementById("confirmModal").classList.add("open");
+}
+
+/* ── Export CSV ── */
+function exportCSV(){
+  const h=["Booking ID","Khách hàng","User ID","Xuất phát","Điểm đến","Biển số","Khởi hành","Đặt lúc","Tổng tiền","Thanh toán","Ghế","Loại ghế","Trạng thái"];
+  const rows=allBookings.map(b=>[b.booking_id,b.full_name||"",b.user_id||"",b.origin||"",b.destination||"",
+    b.plate_number||"",fmtDT(b.departure_time),fmtDT(b.booking_time),b.total_amount||0,
+    b.payment_method||"",Array.isArray(b.seats)?b.seats.join("|"):b.seats||"",b.seat_types||"",b.status||""]);
+  const csv=[h,...rows].map(r=>r.map(v=>`"${String(v).replace(/"/g,'""')}"`).join(",")).join("\n");
+  const blob=new Blob(["\uFEFF"+csv],{type:"text/csv;charset=utf-8"});
+  const a=document.createElement("a");a.href=URL.createObjectURL(blob);
+  a.download=`bookings_${new Date().toISOString().slice(0,10)}.csv`;a.click();
+  toast("Đã xuất CSV booking!","success");
+}
+
+/* ── Init ── */
+loadBookings();
+</script>
+</body>
+</html>

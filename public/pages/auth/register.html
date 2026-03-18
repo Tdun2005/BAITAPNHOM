@@ -1,0 +1,441 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<title>Đăng ký - SmartBusAI</title>
+
+<style>
+
+*{
+margin:0;
+padding:0;
+box-sizing:border-box;
+font-family:"Segoe UI",Arial;
+}
+
+body{
+height:100vh;
+display:flex;
+align-items:center;
+justify-content:center;
+background:radial-gradient(circle at 20% 20%,#1a1a40,#000814 70%);
+overflow:hidden;
+color:white;
+}
+
+/* GALAXY BACKGROUND */
+
+body::before,
+body::after{
+content:"";
+position:absolute;
+width:200%;
+height:200%;
+
+background-image:
+radial-gradient(2px 2px at 20px 30px,#fff,transparent),
+radial-gradient(2px 2px at 40px 70px,#8bd3ff,transparent),
+radial-gradient(1px 1px at 90px 40px,#ffffff,transparent),
+radial-gradient(2px 2px at 130px 80px,#caa6ff,transparent);
+
+background-size:200px 200px;
+
+animation:starsMove 120s linear infinite;
+
+opacity:0.35;
+}
+
+body::after{
+animation-duration:180s;
+opacity:0.2;
+}
+
+@keyframes starsMove{
+from{transform:translateY(0);}
+to{transform:translateY(-2000px);}
+}
+
+/* CONTAINER */
+
+.container{
+display:flex;
+gap:80px;
+align-items:center;
+z-index:2;
+}
+
+/* INTRO */
+
+.intro{
+width:460px;
+}
+
+.badge{
+display:inline-block;
+padding:6px 12px;
+border-radius:20px;
+background:rgba(0,200,255,0.15);
+border:1px solid rgba(0,200,255,0.4);
+font-size:12px;
+margin-bottom:15px;
+}
+
+.intro h1{
+font-size:42px;
+margin-bottom:15px;
+background:linear-gradient(90deg,#7aa6ff,#c084ff,#ff7edb);
+-webkit-background-clip:text;
+color:transparent;
+}
+
+.intro p{
+color:#cfd8ff;
+line-height:1.7;
+margin-bottom:25px;
+}
+
+.features{
+display:flex;
+flex-direction:column;
+gap:12px;
+}
+
+.feature{
+display:flex;
+align-items:center;
+gap:12px;
+padding:12px 14px;
+background:rgba(255,255,255,0.05);
+border-radius:10px;
+border:1px solid rgba(255,255,255,0.08);
+}
+
+/* REGISTER CARD */
+
+.register-wrapper{
+
+width:420px;
+max-height:85vh;
+
+padding:35px;
+
+overflow-y:auto;
+
+background:rgba(15,20,40,0.85);
+
+backdrop-filter:blur(30px);
+
+border-radius:18px;
+
+border:1px solid rgba(255,255,255,0.25);
+
+box-shadow:
+0 0 30px rgba(0,140,255,0.3),
+0 0 80px rgba(140,0,255,0.25);
+
+}
+
+.register-wrapper::-webkit-scrollbar{
+width:6px;
+}
+
+.register-wrapper::-webkit-scrollbar-thumb{
+background:#7aa6ff;
+border-radius:10px;
+}
+
+h2{
+text-align:center;
+margin-bottom:25px;
+font-size:26px;
+background:linear-gradient(90deg,#7aa6ff,#ff7edb);
+-webkit-background-clip:text;
+color:transparent;
+}
+
+/* INPUT */
+
+.input-group{
+margin-bottom:16px;
+}
+
+label{
+font-size:13px;
+color:#cfd8ff;
+}
+
+input,select{
+width:100%;
+padding:11px;
+margin-top:6px;
+
+border-radius:10px;
+
+border:1px solid rgba(255,255,255,0.2);
+
+background:rgba(0,0,0,0.45);
+
+color:white;
+}
+
+input:focus,select:focus{
+outline:none;
+border-color:#7aa6ff;
+box-shadow:0 0 8px #7aa6ff;
+}
+
+/* PASSWORD STRENGTH */
+
+.strength-bar{
+height:6px;
+background:#222;
+border-radius:5px;
+margin-top:6px;
+overflow:hidden;
+}
+
+.strength-fill{
+height:100%;
+width:0%;
+transition:0.3s;
+}
+
+/* ERROR */
+
+.error-text{
+font-size:12px;
+color:#ff6b6b;
+margin-top:4px;
+min-height:14px;
+}
+
+/* BUTTON */
+
+button{
+width:100%;
+padding:13px;
+border:none;
+border-radius:10px;
+font-weight:bold;
+cursor:pointer;
+transition:0.3s;
+}
+
+.register-btn{
+
+background:linear-gradient(135deg,#00c6ff,#7a5cff,#ff7edb);
+
+color:white;
+
+margin-top:10px;
+
+}
+
+.register-btn:hover{
+
+transform:translateY(-2px);
+
+box-shadow:
+0 0 12px #7aa6ff,
+0 0 20px #ff7edb;
+
+}
+
+.back-btn{
+
+margin-top:12px;
+
+background:#222;
+
+color:white;
+
+}
+
+.back-btn:hover{
+background:#333;
+}
+
+/* MESSAGE */
+
+.message{
+text-align:center;
+margin-top:12px;
+font-size:14px;
+}
+
+.success{color:#7cffb2;}
+.error{color:#ff6b6b;}
+
+</style>
+<script src="/js/api.js"></script>
+</head>
+
+<body>
+
+<div class="container">
+
+<!-- INTRO -->
+
+<div class="intro">
+
+<div class="badge">🚀 AI Smart Transportation Platform</div>
+
+<h1>Tạo tài khoản SmartBusAI</h1>
+
+<p>
+Tham gia hệ thống đặt vé xe thông minh tích hợp AI giúp tối ưu vận hành,
+phân tích nhu cầu hành khách và quản lý dữ liệu vận tải hiệu quả.
+</p>
+
+<div class="features">
+
+<div class="feature">🤖 AI tối ưu tuyến xe</div>
+<div class="feature">⚡ Đặt vé nhanh chóng</div>
+<div class="feature">📊 Quản lý vận hành thông minh</div>
+<div class="feature">🔒 Bảo mật hệ thống cao</div>
+
+</div>
+
+</div>
+
+<!-- REGISTER FORM -->
+
+<div class="register-wrapper">
+
+<h2>Đăng ký tài khoản</h2>
+
+<form id="registerForm">
+
+<div class="input-group">
+<label>Tên đăng nhập</label>
+<input type="text" id="username" name="username" required>
+<div class="error-text" id="usernameError"></div>
+</div>
+
+<div class="input-group">
+<label>Họ và tên</label>
+<input type="text" id="full_name" name="full_name" required>
+</div>
+
+<div class="input-group">
+<label>Email</label>
+<input type="email" id="email" name="email" required>
+<div class="error-text" id="emailError"></div>
+</div>
+
+<div class="input-group">
+<label>Mật khẩu</label>
+<input type="password" id="password" name="password" required>
+
+<div class="strength-bar">
+<div class="strength-fill" id="strengthFill"></div>
+</div>
+
+<div class="error-text" id="passwordError"></div>
+
+</div>
+
+<div class="input-group">
+<label>Số điện thoại</label>
+<input type="text" id="phone" name="phone">
+<div class="error-text" id="phoneError"></div>
+</div>
+
+<div class="input-group">
+<label>Tỉnh / Thành phố</label>
+<select id="province" name="province" required></select>
+</div>
+
+<div class="input-group">
+<label>Quận / Huyện</label>
+<select id="district" name="district" required></select>
+</div>
+
+<button type="submit" class="register-btn" id="submitBtn">Tạo tài khoản</button>
+
+</form>
+
+<button class="back-btn" onclick="location.href='login.html'">Quay lại đăng nhập</button>
+
+<p id="message" class="message"></p>
+
+</div>
+
+</div>
+
+<script src="/data/vietnam-location.json"></script>
+<script>
+
+/* GIỮ NGUYÊN JS CỦA MÀY */
+
+let locationData={};
+
+fetch("/data/vietnam-location.json")
+.then(res=>res.json())
+.then(data=>{
+locationData=data;
+initProvince();
+});
+
+function initProvince(){
+
+const provinceSelect=document.getElementById("province");
+const districtSelect=document.getElementById("district");
+
+provinceSelect.innerHTML="<option value=''>Chọn tỉnh</option>";
+districtSelect.innerHTML="<option value=''>Chọn quận/huyện</option>";
+
+Object.keys(locationData).forEach(p=>{
+const op=document.createElement("option");
+op.value=p;
+op.textContent=p;
+provinceSelect.appendChild(op);
+});
+
+provinceSelect.addEventListener("change",()=>{
+
+const districts=locationData[provinceSelect.value]||[];
+
+districtSelect.innerHTML="<option value=''>Chọn quận/huyện</option>";
+
+districts.forEach(d=>{
+const op=document.createElement("option");
+op.value=d;
+op.textContent=d;
+districtSelect.appendChild(op);
+});
+
+});
+
+}
+
+/* PASSWORD STRENGTH */
+
+const password=document.getElementById("password");
+
+password.addEventListener("input",()=>{
+
+const val=password.value;
+
+let strength=0;
+
+if(val.length>=8) strength++;
+if(/[A-Z]/.test(val)) strength++;
+if(/[0-9]/.test(val)) strength++;
+if(/[^A-Za-z0-9]/.test(val)) strength++;
+
+const fill=document.getElementById("strengthFill");
+
+fill.style.width=(strength*25)+"%";
+
+if(strength<=1) fill.style.background="red";
+else if(strength==2) fill.style.background="orange";
+else if(strength==3) fill.style.background="gold";
+else fill.style.background="green";
+
+});
+
+</script>
+
+</body>
+</html>

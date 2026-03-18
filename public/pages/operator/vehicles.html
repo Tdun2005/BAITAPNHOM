@@ -1,0 +1,818 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Quản lý Phương Tiện — SmartBusAI Operator</title>
+<style>
+:root{
+  --bg:#04080f;--neon:#00ffe0;--neon2:#00a8ff;--purple:#7c5ce7;
+  --amber:#f39c12;--green:#2ecc71;--red:#e74c3c;--pink:#fd79a8;
+  --glass:rgba(255,255,255,0.055);--glass2:rgba(255,255,255,0.10);
+  --border:rgba(255,255,255,0.09);--border2:rgba(255,255,255,0.16);
+  --hh:62px;--text:#e8f4f8;--text2:rgba(255,255,255,.52);--text3:rgba(255,255,255,.30);
+}
+*{box-sizing:border-box;margin:0;padding:0;font-family:"Segoe UI",Arial,sans-serif;}
+html{background:var(--bg);min-height:100vh;}
+body{color:var(--text);background:transparent;overflow-x:hidden;animation:pageIn .3s ease;}
+@keyframes pageIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+
+/* ── Galaxy ── */
+#gc{position:fixed;inset:0;z-index:-3;pointer-events:none;}
+.neb{position:fixed;inset:0;z-index:-2;pointer-events:none;
+  background:radial-gradient(ellipse at 10% 18%,rgba(0,255,224,.07) 0%,transparent 40%),
+    radial-gradient(ellipse at 88% 78%,rgba(124,92,231,.08) 0%,transparent 44%),
+    radial-gradient(ellipse at 52% 4%,rgba(0,164,255,.06) 0%,transparent 38%);}
+.pl1{position:fixed;width:110px;height:110px;top:70px;right:85px;border-radius:50%;z-index:-1;pointer-events:none;
+  background:radial-gradient(circle at 30% 30%,#d0c8ff,#7c5ce7 44%,#1a0a40 78%);
+  box-shadow:0 0 50px rgba(124,92,231,.5),0 0 100px rgba(124,92,231,.18);}
+.pl2{position:fixed;width:50px;height:50px;bottom:75px;left:90px;border-radius:50%;z-index:-1;pointer-events:none;
+  background:radial-gradient(circle at 38% 38%,#fff,#00d4ff 52%,#001a33 82%);
+  box-shadow:0 0 32px rgba(0,212,255,.5);animation:pfloat 12s ease-in-out infinite;}
+@keyframes pfloat{0%,100%{transform:translateY(0)}50%{transform:translateY(-14px)}}
+.mt{position:fixed;width:2px;height:50px;pointer-events:none;z-index:-1;
+  background:linear-gradient(rgba(255,255,255,.8),transparent);transform:rotate(42deg);animation:mt linear infinite;}
+.mt:nth-child(1){top:7%;left:13%;animation-duration:17s;}
+.mt:nth-child(2){top:33%;left:58%;animation-duration:22s;animation-delay:5s;}
+.mt:nth-child(3){top:62%;left:80%;animation-duration:19s;animation-delay:10s;}
+@keyframes mt{0%{opacity:1;transform:translate3d(0,0,0) rotate(42deg)}100%{opacity:0;transform:translate3d(580px,580px,0) rotate(42deg)}}
+
+/* ── HEADER ── */
+.hdr{position:sticky;top:0;z-index:3000;height:var(--hh);display:flex;align-items:center;
+  background:rgba(4,8,15,0.82);backdrop-filter:blur(18px);border-bottom:1px solid var(--border);padding:0 32px;}
+.hdr-logo{display:flex;align-items:center;gap:10px;text-decoration:none;flex-shrink:0;}
+.hdr-logo-ic{width:34px;height:34px;border-radius:9px;font-size:18px;
+  background:linear-gradient(135deg,#00ffe0,#00a8ff);display:flex;align-items:center;justify-content:center;
+  box-shadow:0 0 14px rgba(0,255,224,.38);}
+.hdr-logo-tx{font-size:16px;font-weight:800;background:linear-gradient(90deg,#00ffe0,#7eb8ff);
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;}
+.hdr-sep{width:1px;height:30px;background:var(--border);margin:0 18px;flex-shrink:0;}
+.hdr-role{background:rgba(0,255,224,.10);border:1px solid rgba(0,255,224,.22);color:var(--neon);
+  font-size:11px;font-weight:800;padding:4px 10px;border-radius:20px;text-transform:uppercase;letter-spacing:.6px;flex-shrink:0;}
+.hdr-nav{display:flex;align-items:center;gap:4px;margin-left:auto;}
+.hdr-nav a{text-decoration:none;color:var(--text2);font-size:12.5px;font-weight:600;padding:7px 12px;
+  border-radius:8px;border:1px solid transparent;transition:all .2s;white-space:nowrap;}
+.hdr-nav a:hover{color:var(--neon);background:rgba(0,255,224,.08);border-color:rgba(0,255,224,.20);}
+.hdr-nav a.active{color:var(--neon);background:rgba(0,255,224,.10);border-color:rgba(0,255,224,.25);}
+.hdr-actions{display:flex;align-items:center;gap:8px;margin-left:16px;flex-shrink:0;}
+.op-chip{display:flex;align-items:center;gap:7px;background:var(--glass);border:1px solid var(--border);
+  border-radius:20px;padding:5px 12px 5px 6px;}
+.op-avatar{width:26px;height:26px;border-radius:50%;background:linear-gradient(135deg,#00a8ff,#00ffe0);
+  display:flex;align-items:center;justify-content:center;font-size:13px;}
+.op-name{font-size:12px;font-weight:600;}
+.btn-logout{background:rgba(231,76,60,.12);border:1px solid rgba(231,76,60,.28);color:#e74c3c;
+  padding:7px 14px;border-radius:9px;font-size:12px;font-weight:700;cursor:pointer;
+  font-family:"Segoe UI",Arial,sans-serif;transition:all .2s;}
+.btn-logout:hover{background:rgba(231,76,60,.26);color:#fff;}
+
+/* ── MAIN ── */
+.main{max-width:1440px;margin:0 auto;padding:28px 32px 60px;}
+.pg-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:26px;flex-wrap:wrap;gap:14px;}
+.pg-head-left h1{font-size:22px;font-weight:800;}
+.pg-head-left p{font-size:13px;color:var(--text2);margin-top:3px;}
+.pg-actions{display:flex;align-items:center;gap:10px;flex-wrap:wrap;}
+.btn{border:none;border-radius:11px;padding:10px 18px;font-size:13px;font-weight:700;cursor:pointer;
+  font-family:"Segoe UI",Arial,sans-serif;transition:all .22s;display:inline-flex;align-items:center;gap:7px;}
+.btn-add{background:linear-gradient(135deg,#00ffe0,#00a8ff);color:#04080f;box-shadow:0 0 18px rgba(0,255,224,.28);}
+.btn-add:hover{transform:translateY(-2px);box-shadow:0 4px 24px rgba(0,255,224,.5);}
+.btn-sec{background:var(--glass2);border:1px solid var(--border);color:var(--text2);}
+.btn-sec:hover{color:var(--neon);border-color:rgba(0,255,224,.25);}
+.btn-export{background:rgba(124,92,231,.14);border:1px solid rgba(124,92,231,.28);color:#a29bfe;}
+.btn-export:hover{background:rgba(124,92,231,.28);}
+
+/* ── KPI ── */
+.kpi-strip{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:22px;}
+.kpi-card{background:var(--glass);border:1px solid var(--border);border-radius:16px;
+  padding:18px 20px;position:relative;overflow:hidden;transition:transform .25s,box-shadow .25s;}
+.kpi-card:hover{transform:translateY(-3px);box-shadow:0 12px 40px rgba(0,0,0,.4);}
+.kpi-card::before{content:"";position:absolute;inset:0;border-radius:16px;
+  background:linear-gradient(135deg,var(--k-bg,rgba(0,255,224,.04)),transparent 65%);pointer-events:none;}
+.kpi-ico{font-size:22px;margin-bottom:8px;}
+.kpi-val{font-size:28px;font-weight:800;color:var(--k-col,var(--neon));line-height:1;}
+.kpi-label{font-size:11.5px;color:var(--text2);margin-top:5px;font-weight:500;}
+
+/* ── TOOLBAR ── */
+.toolbar{display:flex;align-items:center;gap:12px;flex-wrap:wrap;background:var(--glass);
+  border:1px solid var(--border);border-radius:16px;padding:14px 18px;margin-bottom:18px;}
+.search-wrap{position:relative;flex:1;min-width:220px;}
+.s-ico{position:absolute;left:12px;top:50%;transform:translateY(-50%);font-size:14px;color:var(--text3);pointer-events:none;}
+.inp-search{width:100%;padding:10px 14px 10px 34px;border-radius:11px;
+  background:rgba(255,255,255,.07);border:1px solid var(--border2);color:var(--text);
+  font-size:13px;font-family:"Segoe UI",Arial,sans-serif;outline:none;transition:border .2s;}
+.inp-search::placeholder{color:var(--text3);}
+.inp-search:focus{border-color:rgba(0,255,224,.4);box-shadow:0 0 0 3px rgba(0,255,224,.08);}
+.sel{padding:10px 13px;border-radius:11px;background:rgba(255,255,255,.07);
+  border:1px solid var(--border2);color:var(--text);font-size:13px;
+  font-family:"Segoe UI",Arial,sans-serif;outline:none;cursor:pointer;transition:border .2s;}
+.sel:focus{border-color:rgba(0,255,224,.4);}
+.sel option{background:#0d1827;}
+
+/* Filter chips */
+.chips{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:20px;}
+.chip{padding:5px 13px;border-radius:20px;font-size:11.5px;font-weight:600;cursor:pointer;
+  border:1px solid var(--border);color:var(--text2);background:var(--glass);transition:all .2s;}
+.chip:hover,.chip.active{color:var(--neon);background:rgba(0,255,224,.10);border-color:rgba(0,255,224,.30);box-shadow:0 0 10px rgba(0,255,224,.12);}
+
+/* Results info */
+.result-info{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;}
+.result-info span{font-size:12.5px;color:var(--text2);}
+.result-info span b{color:var(--neon);}
+
+/* ── VEHICLE CARDS GRID ── */
+.vehicle-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:18px;}
+@media(max-width:1100px){.vehicle-grid{grid-template-columns:repeat(2,1fr);}}
+@media(max-width:700px){.vehicle-grid{grid-template-columns:1fr;}}
+
+.vc{background:var(--glass);border:1px solid var(--border);border-radius:18px;
+  overflow:hidden;transition:transform .22s,box-shadow .22s;}
+.vc:hover{transform:translateY(-3px);box-shadow:0 12px 40px rgba(0,0,0,.5);}
+
+/* Card header */
+.vc-head{padding:16px 20px 14px;border-bottom:1px solid var(--border);
+  display:flex;align-items:flex-start;justify-content:space-between;gap:10px;}
+.vc-plate-wrap{display:flex;align-items:center;gap:10px;}
+.vc-plate-icon{width:44px;height:44px;border-radius:12px;display:flex;align-items:center;
+  justify-content:center;font-size:20px;flex-shrink:0;}
+.vc-plate-icon.available{background:rgba(0,255,224,.10);border:1px solid rgba(0,255,224,.22);}
+.vc-plate-icon.maintenance{background:rgba(231,76,60,.10);border:1px solid rgba(231,76,60,.22);}
+.vc-plate{font-size:16px;font-weight:800;color:var(--neon);letter-spacing:.8px;}
+.vc-type-tag{font-size:11.5px;color:var(--text2);margin-top:2px;}
+
+/* Status badge */
+.vc-status{display:inline-flex;align-items:center;gap:5px;padding:4px 10px;border-radius:20px;font-size:11px;font-weight:700;flex-shrink:0;}
+.vc-status.available{background:rgba(0,255,224,.12);border:1px solid rgba(0,255,224,.25);color:var(--neon);}
+.vc-status.maintenance{background:rgba(231,76,60,.12);border:1px solid rgba(231,76,60,.25);color:#e74c3c;}
+.sdot{width:6px;height:6px;border-radius:50%;display:inline-block;}
+.sdot-g{background:#00ffe0;box-shadow:0 0 5px #00ffe0;}
+.sdot-r{background:#e74c3c;box-shadow:0 0 5px #e74c3c;}
+
+/* Card body */
+.vc-body{padding:14px 20px;}
+.vc-info-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px;}
+.vc-info-box{background:rgba(255,255,255,.04);border:1px solid var(--border);border-radius:11px;padding:10px 12px;}
+.vc-info-label{font-size:10px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:.5px;}
+.vc-info-val{font-size:13.5px;font-weight:700;color:var(--text);margin-top:3px;}
+.vc-info-val.neon{color:var(--neon);}
+.vc-info-val.pink{color:#fd79a8;}
+
+/* Seat type pills */
+.vc-seats-row{display:flex;align-items:center;gap:8px;margin-bottom:14px;flex-wrap:wrap;}
+.seat-pill{padding:3px 10px;border-radius:10px;font-size:11.5px;font-weight:700;}
+.seat-pill.vip{background:rgba(253,121,168,.14);color:#fd79a8;border:1px solid rgba(253,121,168,.25);}
+.seat-pill.normal{background:rgba(0,168,255,.12);color:#5dc8ff;border:1px solid rgba(0,168,255,.22);}
+
+/* Card footer */
+.vc-foot{display:flex;align-items:center;gap:7px;padding:12px 20px;
+  border-top:1px solid var(--border);background:rgba(255,255,255,.02);}
+.act-btn{border:none;border-radius:9px;padding:7px 13px;cursor:pointer;font-size:12px;
+  font-weight:700;transition:all .2s;font-family:"Segoe UI",Arial,sans-serif;display:inline-flex;align-items:center;gap:4px;flex:1;justify-content:center;}
+.act-view{background:rgba(0,168,255,.12);color:#5dc8ff;border:1px solid rgba(0,168,255,.2);}
+.act-view:hover{background:rgba(0,168,255,.25);}
+.act-edit{background:rgba(243,156,18,.12);color:#f9c858;border:1px solid rgba(243,156,18,.2);}
+.act-edit:hover{background:rgba(243,156,18,.25);}
+.act-toggle-avail{background:rgba(0,255,224,.10);color:var(--neon);border:1px solid rgba(0,255,224,.22);}
+.act-toggle-avail:hover{background:rgba(0,255,224,.22);}
+.act-toggle-maint{background:rgba(231,76,60,.10);color:#e74c3c;border:1px solid rgba(231,76,60,.18);}
+.act-toggle-maint:hover{background:rgba(231,76,60,.24);}
+.act-del{background:rgba(231,76,60,.08);color:#e74c3c;border:1px solid rgba(231,76,60,.15);}
+.act-del:hover{background:rgba(231,76,60,.22);}
+
+/* Empty state */
+.empty{text-align:center;padding:60px 20px;color:var(--text2);}
+.empty .ei{font-size:52px;margin-bottom:16px;opacity:.4;}
+.empty h3{font-size:16px;font-weight:700;color:var(--text);margin-bottom:8px;}
+
+/* Pagination */
+.pagination{display:flex;align-items:center;justify-content:center;gap:6px;padding-top:24px;}
+.pg-btn{background:var(--glass);border:1px solid var(--border);color:var(--text2);
+  width:36px;height:36px;border-radius:9px;cursor:pointer;font-size:13px;font-weight:600;
+  transition:all .2s;font-family:"Segoe UI",Arial,sans-serif;}
+.pg-btn:hover,.pg-btn.active{background:rgba(0,255,224,.12);border-color:rgba(0,255,224,.3);color:var(--neon);}
+.pg-btn:disabled{opacity:.3;cursor:not-allowed;}
+.pg-dot{font-size:12px;color:var(--text3);}
+
+/* ── MODALS ── */
+.modal-overlay{position:fixed;inset:0;z-index:4000;background:rgba(0,0,0,.65);
+  backdrop-filter:blur(8px);display:none;align-items:center;justify-content:center;}
+.modal-overlay.open{display:flex;}
+.modal{width:540px;max-width:96vw;max-height:90vh;
+  background:linear-gradient(160deg,#0d1827 0%,#080f1c 100%);
+  border:1px solid var(--border2);border-radius:22px;
+  box-shadow:0 30px 80px rgba(0,0,0,.7),0 0 0 1px rgba(0,255,224,.06);
+  overflow:hidden;animation:modalIn .28s cubic-bezier(.22,.61,.36,1);display:flex;flex-direction:column;}
+.modal.sm{max-width:420px;}
+@keyframes modalIn{from{opacity:0;transform:translateY(20px) scale(.96)}to{opacity:1;transform:translateY(0) scale(1)}}
+.modal-head{padding:20px 24px 16px;border-bottom:1px solid var(--border);
+  display:flex;align-items:center;justify-content:space-between;flex-shrink:0;}
+.modal-head h3{font-size:16px;font-weight:800;display:flex;align-items:center;gap:9px;}
+.modal-close{background:rgba(255,255,255,.08);border:1px solid var(--border);color:var(--text2);
+  width:30px;height:30px;border-radius:8px;cursor:pointer;font-size:15px;transition:all .2s;}
+.modal-close:hover{background:rgba(231,76,60,.2);color:#e74c3c;}
+.modal-body{padding:22px 24px;overflow-y:auto;flex:1;}
+.modal-body::-webkit-scrollbar{width:4px;}
+.modal-body::-webkit-scrollbar-thumb{background:rgba(255,255,255,.12);border-radius:2px;}
+.modal-foot{padding:16px 24px;border-top:1px solid var(--border);
+  display:flex;justify-content:flex-end;gap:10px;flex-shrink:0;}
+
+/* Form */
+.form-row{display:grid;grid-template-columns:1fr 1fr;gap:13px;margin-bottom:13px;}
+.form-row.full{grid-template-columns:1fr;}
+.form-row.three{grid-template-columns:1fr 1fr 1fr;}
+.form-group{display:flex;flex-direction:column;gap:6px;}
+.form-group label{font-size:11px;font-weight:700;color:var(--text2);text-transform:uppercase;letter-spacing:.5px;}
+.form-control{padding:10px 13px;border-radius:10px;background:rgba(255,255,255,.07);
+  border:1px solid var(--border2);color:var(--text);font-size:13px;font-family:"Segoe UI",Arial,sans-serif;
+  outline:none;transition:border .2s;}
+.form-control::placeholder{color:var(--text3);}
+.form-control:focus{border-color:rgba(0,255,224,.45);box-shadow:0 0 0 3px rgba(0,255,224,.08);}
+select.form-control{cursor:pointer;}
+select.form-control option{background:#0d1827;}
+.form-divider{border:none;border-top:1px solid var(--border);margin:14px 0;}
+.form-sec-title{font-size:10.5px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:.8px;margin-bottom:10px;}
+
+.btn-cancel-m{background:rgba(255,255,255,.07);border:1px solid var(--border);color:var(--text2);
+  border-radius:10px;padding:10px 18px;font-size:13px;font-weight:700;cursor:pointer;
+  font-family:"Segoe UI",Arial,sans-serif;transition:all .2s;}
+.btn-cancel-m:hover{background:rgba(255,255,255,.12);}
+.btn-save-m{background:linear-gradient(135deg,#00ffe0,#00a8ff);color:#04080f;border:none;
+  box-shadow:0 0 16px rgba(0,255,224,.3);border-radius:10px;padding:10px 18px;
+  font-size:13px;font-weight:700;cursor:pointer;font-family:"Segoe UI",Arial,sans-serif;transition:all .2s;}
+.btn-save-m:hover{transform:translateY(-2px);}
+.btn-danger-m{background:linear-gradient(135deg,#e74c3c,#c0392b);color:#fff;border:none;
+  border-radius:10px;padding:10px 18px;font-size:13px;font-weight:700;cursor:pointer;
+  font-family:"Segoe UI",Arial,sans-serif;transition:all .2s;}
+
+/* View modal */
+.view-hero{display:flex;align-items:center;gap:14px;margin-bottom:18px;
+  background:rgba(0,255,224,.05);border:1px solid rgba(0,255,224,.14);border-radius:14px;padding:16px;}
+.view-icon{width:56px;height:56px;border-radius:14px;background:rgba(0,255,224,.10);
+  border:1px solid rgba(0,255,224,.25);display:flex;align-items:center;justify-content:center;
+  font-size:26px;flex-shrink:0;}
+.view-plate{font-size:20px;font-weight:800;color:var(--neon);letter-spacing:1px;}
+.view-sub{font-size:12px;color:var(--text2);margin-top:3px;}
+.view-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;}
+.vg-item{background:rgba(255,255,255,.04);border:1px solid var(--border);border-radius:11px;padding:11px 13px;}
+.vg-item.full{grid-column:1/-1;}
+.vg-label{font-size:10px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:.5px;}
+.vg-val{font-size:13px;font-weight:700;color:var(--text);margin-top:4px;}
+
+/* Confirm modal */
+.confirm-center{text-align:center;padding:8px 0;}
+.confirm-ico{font-size:48px;margin-bottom:12px;}
+.confirm-center h3{font-size:16px;font-weight:800;margin-bottom:8px;}
+.confirm-center p{font-size:13px;color:var(--text2);line-height:1.6;}
+
+/* Toast */
+.toast-wrap{position:fixed;top:80px;right:24px;z-index:9999;display:flex;flex-direction:column;gap:10px;}
+.toast{padding:12px 16px;border-radius:12px;font-size:13px;font-weight:600;backdrop-filter:blur(12px);
+  box-shadow:0 8px 30px rgba(0,0,0,.4);display:flex;align-items:center;gap:8px;
+  animation:toastIn .3s cubic-bezier(.22,.61,.36,1);min-width:240px;}
+@keyframes toastIn{from{opacity:0;transform:translateX(30px)}to{opacity:1;transform:translateX(0)}}
+@keyframes toastOut{from{opacity:1;transform:translateX(0)}to{opacity:0;transform:translateX(30px)}}
+.toast.success{background:rgba(46,204,113,.16);border:1px solid rgba(46,204,113,.35);color:#2ecc71;}
+.toast.error{background:rgba(231,76,60,.16);border:1px solid rgba(231,76,60,.35);color:#e74c3c;}
+.toast.info{background:rgba(0,168,255,.16);border:1px solid rgba(0,168,255,.35);color:#5dc8ff;}
+</style>
+<script src="/js/api.js"></script>
+</head>
+<body>
+
+<canvas id="gc"></canvas>
+<div class="neb"></div><div class="pl1"></div><div class="pl2"></div>
+<div class="mt"></div><div class="mt"></div><div class="mt"></div>
+<div class="toast-wrap" id="toastWrap"></div>
+
+<!-- HEADER -->
+<header class="hdr">
+  <a class="hdr-logo" href="operator.html">
+    <div class="hdr-logo-ic">🚌</div>
+    <div class="hdr-logo-tx">SmartBusAI</div>
+  </a>
+  <div class="hdr-sep"></div>
+  <span class="hdr-role">Nhà xe</span>
+  <nav class="hdr-nav">
+    <a href="operator.html">Tổng quan</a>
+    <a href="trips.html">Chuyến xe</a>
+    <a href="bookings.html">Đặt vé</a>
+    <a href="vehicles.html" class="active">Phương tiện</a>
+    <a href="seats.html">Sơ đồ ghế</a>
+    <a href="revenue.html">Doanh thu</a>
+  </nav>
+  <div class="hdr-actions">
+    <div class="op-chip">
+      <div class="op-avatar">🏢</div>
+      <span class="op-name">Nhà xe</span>
+    </div>
+    <button class="btn-logout" onclick="logout()">🚪 Đăng xuất</button>
+  </div>
+</header>
+
+<main class="main">
+
+  <div class="pg-head">
+    <div class="pg-head-left">
+      <h1>🚍 Quản lý Phương Tiện</h1>
+      <p>Quản lý đội xe — BUS table · plate_number · bus_type · total_seats · status</p>
+    </div>
+    <div class="pg-actions">
+      <button class="btn btn-export" onclick="exportCSV()">📥 Xuất CSV</button>
+      <button class="btn btn-sec" onclick="loadVehicles()">🔄 Làm mới</button>
+      <button class="btn btn-add" onclick="openAdd()">＋ Thêm xe mới</button>
+    </div>
+  </div>
+
+  <!-- KPI -->
+  <div class="kpi-strip">
+    <div class="kpi-card" style="--k-bg:rgba(0,255,224,.05);--k-col:#00ffe0;">
+      <div class="kpi-ico">🚍</div>
+      <div class="kpi-val" id="kTotal">—</div>
+      <div class="kpi-label">Tổng số xe</div>
+    </div>
+    <div class="kpi-card" style="--k-bg:rgba(0,255,224,.04);--k-col:#2ecc71;">
+      <div class="kpi-ico">🟢</div>
+      <div class="kpi-val" id="kAvail">—</div>
+      <div class="kpi-label">AVAILABLE</div>
+    </div>
+    <div class="kpi-card" style="--k-bg:rgba(231,76,60,.05);--k-col:#e74c3c;">
+      <div class="kpi-ico">🔧</div>
+      <div class="kpi-val" id="kMaint">—</div>
+      <div class="kpi-label">MAINTENANCE</div>
+    </div>
+    <div class="kpi-card" style="--k-bg:rgba(253,121,168,.05);--k-col:#fd79a8;">
+      <div class="kpi-ico">💺</div>
+      <div class="kpi-val" id="kSeats">—</div>
+      <div class="kpi-label">Tổng số ghế</div>
+    </div>
+  </div>
+
+  <!-- Toolbar -->
+  <div class="toolbar">
+    <div class="search-wrap">
+      <span class="s-ico">🔍</span>
+      <input class="inp-search" id="searchInp" placeholder="Tìm biển số, loại xe..." oninput="applyFilter()">
+    </div>
+    <select class="sel" id="statusFilter" onchange="applyFilter()">
+      <option value="">Tất cả trạng thái</option>
+      <option value="AVAILABLE">AVAILABLE</option>
+      <option value="MAINTENANCE">MAINTENANCE</option>
+    </select>
+    <select class="sel" id="typeFilter" onchange="applyFilter()">
+      <option value="">Tất cả loại xe</option>
+      <option value="Limousine">Limousine</option>
+      <option value="Sleeper">Sleeper</option>
+      <option value="VIP">VIP</option>
+      <option value="Express">Express</option>
+    </select>
+    <select class="sel" id="sortSel" onchange="applyFilter()">
+      <option value="default">Mặc định</option>
+      <option value="seats_desc">Nhiều ghế nhất</option>
+      <option value="seats_asc">Ít ghế nhất</option>
+      <option value="plate_az">Biển số A→Z</option>
+    </select>
+  </div>
+
+  <!-- Filter chips -->
+  <div class="chips">
+    <div class="chip active" onclick="setChip(this,'')">🚍 Tất cả</div>
+    <div class="chip" onclick="setChip(this,'AVAILABLE')">🟢 Sẵn sàng</div>
+    <div class="chip" onclick="setChip(this,'MAINTENANCE')">🔧 Bảo trì</div>
+  </div>
+
+  <!-- Result info -->
+  <div class="result-info">
+    <span>Hiển thị <b id="showCount">0</b> / <b id="totalCount">0</b> phương tiện</span>
+    <span id="pageInfo" style="color:var(--text3);font-size:12px;">Trang 1</span>
+  </div>
+
+  <!-- Grid -->
+  <div id="vehicleGrid" class="vehicle-grid"></div>
+  <div id="emptyState" class="empty" style="display:none;">
+    <div class="ei">🚍</div>
+    <h3>Không tìm thấy xe nào</h3>
+    <p>Thay đổi bộ lọc hoặc thêm xe mới vào đội</p>
+  </div>
+
+  <!-- Pagination -->
+  <div class="pagination" id="paginationWrap"></div>
+
+</main>
+
+<!-- MODAL: Add / Edit -->
+<div class="modal-overlay" id="formModal">
+  <div class="modal">
+    <div class="modal-head">
+      <h3><span id="formIco">➕</span> <span id="formTitle">Thêm xe mới</span></h3>
+      <button class="modal-close" onclick="closeModal('formModal')">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="form-sec-title">Thông tin xe — BUS table</div>
+      <div class="form-row">
+        <div class="form-group">
+          <label>Biển số xe * (plate_number)</label>
+          <input class="form-control" id="f_plate" placeholder="VD: 51B-12345">
+        </div>
+        <div class="form-group">
+          <label>Loại xe (bus_type)</label>
+          <input class="form-control" id="f_type" placeholder="Limousine, Sleeper, VIP...">
+        </div>
+      </div>
+      <div class="form-row three">
+        <div class="form-group">
+          <label>Tổng ghế * (total_seats)</label>
+          <input class="form-control" id="f_seats" type="number" placeholder="40" min="1" max="100">
+        </div>
+        <div class="form-group">
+          <label>Ghế VIP (%)</label>
+          <input class="form-control" id="f_vip_pct" type="number" placeholder="35" min="0" max="100">
+        </div>
+        <div class="form-group">
+          <label>Trạng thái</label>
+          <select class="form-control" id="f_status">
+            <option value="AVAILABLE">AVAILABLE</option>
+            <option value="MAINTENANCE">MAINTENANCE</option>
+          </select>
+        </div>
+      </div>
+      <div class="form-divider"></div>
+      <div class="form-sec-title">Ghi chú thêm</div>
+      <div class="form-row full">
+        <div class="form-group">
+          <label>Mô tả / Ghi chú</label>
+          <input class="form-control" id="f_note" placeholder="VD: Xe mới mua, có Wifi, USB...">
+        </div>
+      </div>
+    </div>
+    <div class="modal-foot">
+      <button class="btn-cancel-m" onclick="closeModal('formModal')">Hủy</button>
+      <button class="btn-save-m" id="formSaveBtn" onclick="saveVehicle()">💾 Lưu xe</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL: View Detail -->
+<div class="modal-overlay" id="viewModal">
+  <div class="modal">
+    <div class="modal-head">
+      <h3>🚍 Chi tiết phương tiện</h3>
+      <button class="modal-close" onclick="closeModal('viewModal')">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="view-hero">
+        <div class="view-icon">🚌</div>
+        <div>
+          <div class="view-plate" id="vPlate">—</div>
+          <div class="view-sub" id="vSub">—</div>
+        </div>
+      </div>
+      <div class="view-grid" id="vGrid"></div>
+    </div>
+    <div class="modal-foot">
+      <button class="btn-cancel-m" onclick="closeModal('viewModal')">Đóng</button>
+      <button class="btn-save-m" id="vEditBtn">✏️ Chỉnh sửa</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL: Confirm Delete -->
+<div class="modal-overlay" id="confirmModal">
+  <div class="modal sm">
+    <div class="modal-head">
+      <h3>⚠️ Xác nhận xóa</h3>
+      <button class="modal-close" onclick="closeModal('confirmModal')">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="confirm-center">
+        <div class="confirm-ico">🗑️</div>
+        <h3 id="confirmTitle">Xóa phương tiện?</h3>
+        <p id="confirmMsg">Xe này sẽ bị xóa vĩnh viễn. Tất cả dữ liệu ghế liên quan có thể bị ảnh hưởng.</p>
+      </div>
+    </div>
+    <div class="modal-foot">
+      <button class="btn-cancel-m" onclick="closeModal('confirmModal')">Hủy</button>
+      <button class="btn-danger-m" id="confirmBtn">🗑️ Xóa</button>
+    </div>
+  </div>
+</div>
+
+<script>
+/* ── Galaxy Canvas ── */
+(function(){
+  const cv=document.getElementById("gc"),ctx=cv.getContext("2d");
+  function mb32(s){s=s>>>0;return()=>{s+=0x6D2B79F5;let t=Math.imul(s^s>>>15,1|s);t^=t+Math.imul(t^t>>>7,61|t);return((t^t>>>14)>>>0)/4294967296;};}
+  function draw(){
+    cv.width=innerWidth;cv.height=innerHeight;
+    const g=ctx.createRadialGradient(cv.width*.5,cv.height*.3,0,cv.width*.5,cv.height*.3,cv.width*.85);
+    g.addColorStop(0,"#0c1830");g.addColorStop(.5,"#080f1c");g.addColorStop(1,"#04080f");
+    ctx.fillStyle=g;ctx.fillRect(0,0,cv.width,cv.height);
+    const rng=mb32(cv.width*cv.height+11);
+    const n=Math.min(340,Math.floor(cv.width*cv.height/4600));
+    for(let i=0;i<n;i++){
+      const x=rng()*cv.width,y=rng()*cv.height,r=rng()*1.4+.15,a=rng()*.7+.2;
+      const h=rng()<.11?180:rng()<.07?265:0;
+      ctx.beginPath();ctx.arc(x,y,r,0,Math.PI*2);
+      ctx.fillStyle=h===180?`rgba(0,255,224,${a*.5})`:h===265?`rgba(170,148,255,${a*.42})`:`rgba(255,255,255,${a})`;ctx.fill();
+    }
+    [{x:.10,y:.18,r:.14,c:"rgba(0,190,255,0.055)"},{x:.78,y:.68,r:.14,c:"rgba(120,75,240,0.065)"}].forEach(s=>{
+      const ng=ctx.createRadialGradient(s.x*cv.width,s.y*cv.height,0,s.x*cv.width,s.y*cv.height,s.r*cv.width);
+      ng.addColorStop(0,s.c);ng.addColorStop(1,"transparent");ctx.fillStyle=ng;ctx.fillRect(0,0,cv.width,cv.height);
+    });
+  }
+  draw();let rt;window.addEventListener("resize",()=>{clearTimeout(rt);rt=setTimeout(draw,200);});
+})();
+
+document.addEventListener("click",e=>{
+  const a=e.target.closest("a[href]");if(!a)return;
+  const h=a.getAttribute("href");if(!h||h==="#"||h.startsWith("http"))return;
+  e.preventDefault();
+  document.body.style.transition="opacity .2s";document.body.style.opacity="0";
+  setTimeout(()=>{window.location.href=h;},210);
+});
+
+/* ── State ── */
+const API="/api/buses";
+let allVehicles=[], filteredVehicles=[], editingId=null;
+let currentPage=1; const PAGE_SIZE=9;
+
+function logout(){localStorage.clear();window.location.href="../auth/login.html";}
+
+function toast(msg,type="info"){
+  const w=document.getElementById("toastWrap");
+  const el=document.createElement("div");el.className=`toast ${type}`;
+  el.innerHTML=`<span>${{success:"✅",error:"❌",info:"ℹ️"}[type]}</span><span>${msg}</span>`;
+  w.appendChild(el);
+  setTimeout(()=>{el.style.animation="toastOut .3s ease forwards";setTimeout(()=>el.remove(),320);},3200);
+}
+function closeModal(id){document.getElementById(id).classList.remove("open");}
+document.querySelectorAll(".modal-overlay").forEach(ov=>{
+  ov.addEventListener("click",e=>{if(e.target===ov)ov.classList.remove("open");});
+});
+
+/* ── Load ── */
+async function loadVehicles(){
+  try{
+    const res=await fetch(API,{signal:AbortSignal.timeout(5000)});
+    if(!res.ok)throw new Error();
+    const d=await res.json();
+    allVehicles=Array.isArray(d)?d:(d.data||d.buses||[]);
+    if(!allVehicles.length)throw new Error("empty");
+  }catch{
+    allVehicles=[
+      {bus_id:1,plate_number:"51B-12345",bus_type:"Limousine",total_seats:34,status:"AVAILABLE",vip_pct:40,note:"Wifi, USB, Điều hòa"},
+      {bus_id:2,plate_number:"51B-67890",bus_type:"Sleeper",total_seats:40,status:"AVAILABLE",vip_pct:30,note:"Giường nằm cao cấp"},
+      {bus_id:3,plate_number:"30A-11111",bus_type:"VIP Express",total_seats:28,status:"MAINTENANCE",vip_pct:60,note:"Đang bảo dưỡng định kỳ"},
+      {bus_id:4,plate_number:"43C-22222",bus_type:"Express",total_seats:44,status:"AVAILABLE",vip_pct:20,note:""},
+      {bus_id:5,plate_number:"79B-33333",bus_type:"Sleeper",total_seats:36,status:"AVAILABLE",vip_pct:35,note:"Ghế ngả 180 độ"},
+      {bus_id:6,plate_number:"92A-44444",bus_type:"Limousine",total_seats:32,status:"MAINTENANCE",vip_pct:50,note:"Thay lốp xe"},
+    ];
+  }
+  applyFilter();
+  updateKPI();
+}
+
+/* ── KPI ── */
+function updateKPI(){
+  document.getElementById("kTotal").textContent=allVehicles.length;
+  document.getElementById("kAvail").textContent=allVehicles.filter(v=>v.status==="AVAILABLE").length;
+  document.getElementById("kMaint").textContent=allVehicles.filter(v=>v.status==="MAINTENANCE").length;
+  document.getElementById("kSeats").textContent=allVehicles.reduce((s,v)=>s+Number(v.total_seats||0),0);
+}
+
+/* ── Filters ── */
+function setChip(el,val){
+  document.querySelectorAll(".chip").forEach(c=>c.classList.remove("active"));
+  el.classList.add("active");
+  document.getElementById("statusFilter").value=val;
+  applyFilter();
+}
+
+function applyFilter(){
+  const q=(document.getElementById("searchInp").value||"").toLowerCase();
+  const st=document.getElementById("statusFilter").value;
+  const tp=document.getElementById("typeFilter").value;
+  const sort=document.getElementById("sortSel").value;
+
+  filteredVehicles=allVehicles.filter(v=>{
+    const plate=(v.plate_number||"").toLowerCase();
+    const type=(v.bus_type||"").toLowerCase();
+    return(!q||plate.includes(q)||type.includes(q))
+      &&(!st||v.status===st)
+      &&(!tp||(v.bus_type||"").toLowerCase().includes(tp.toLowerCase()));
+  });
+
+  if(sort==="seats_desc")filteredVehicles.sort((a,b)=>Number(b.total_seats)-Number(a.total_seats));
+  else if(sort==="seats_asc")filteredVehicles.sort((a,b)=>Number(a.total_seats)-Number(b.total_seats));
+  else if(sort==="plate_az")filteredVehicles.sort((a,b)=>(a.plate_number||"").localeCompare(b.plate_number||""));
+
+  currentPage=1;renderGrid();
+}
+
+/* ── Render ── */
+function renderGrid(){
+  const grid=document.getElementById("vehicleGrid");
+  const empty=document.getElementById("emptyState");
+  document.getElementById("totalCount").textContent=filteredVehicles.length;
+
+  if(!filteredVehicles.length){grid.innerHTML="";empty.style.display="block";
+    document.getElementById("paginationWrap").innerHTML="";
+    document.getElementById("showCount").textContent=0;return;}
+  empty.style.display="none";
+
+  const start=(currentPage-1)*PAGE_SIZE;
+  const page=filteredVehicles.slice(start,start+PAGE_SIZE);
+  document.getElementById("showCount").textContent=`${start+1}–${Math.min(start+PAGE_SIZE,filteredVehicles.length)}`;
+
+  grid.innerHTML=page.map(v=>buildCard(v)).join("");
+  renderPagination();
+}
+
+function buildCard(v){
+  const isAvail=v.status==="AVAILABLE";
+  const vipSeats=Math.round(Number(v.total_seats||0)*Number(v.vip_pct||35)/100);
+  const normalSeats=Number(v.total_seats||0)-vipSeats;
+  const ico=isAvail?"🚌":"🔧";
+  const statusCls=isAvail?"available":"maintenance";
+  return`<div class="vc">
+    <div class="vc-head">
+      <div class="vc-plate-wrap">
+        <div class="vc-plate-icon ${statusCls}">${ico}</div>
+        <div>
+          <div class="vc-plate">${v.plate_number||"—"}</div>
+          <div class="vc-type-tag">🚌 ${v.bus_type||"—"}</div>
+        </div>
+      </div>
+      <span class="vc-status ${statusCls}">
+        <span class="sdot ${isAvail?"sdot-g":"sdot-r"}"></span>${v.status}
+      </span>
+    </div>
+    <div class="vc-body">
+      <div class="vc-info-grid">
+        <div class="vc-info-box">
+          <div class="vc-info-label">💺 Tổng ghế</div>
+          <div class="vc-info-val neon">${v.total_seats||0}</div>
+        </div>
+        <div class="vc-info-box">
+          <div class="vc-info-label">🆔 Bus ID</div>
+          <div class="vc-info-val" style="color:var(--text3);">#${v.bus_id}</div>
+        </div>
+      </div>
+      <div class="vc-seats-row">
+        <span class="seat-pill vip">👑 VIP · ${vipSeats}</span>
+        <span class="seat-pill normal">🪑 Thường · ${normalSeats}</span>
+      </div>
+      ${v.note?`<div style="font-size:11.5px;color:var(--text3);padding:6px 10px;background:rgba(255,255,255,.03);border-radius:8px;border:1px solid var(--border);">📝 ${v.note}</div>`:""}
+    </div>
+    <div class="vc-foot">
+      <button class="act-btn act-view" onclick="viewVehicle(${v.bus_id})">👁 Xem</button>
+      <button class="act-btn act-edit" onclick="openEdit(${v.bus_id})">✏️ Sửa</button>
+      <button class="act-btn ${isAvail?"act-toggle-maint":"act-toggle-avail"}" onclick="toggleStatus(${v.bus_id})">
+        ${isAvail?"🔧 Bảo trì":"✅ Hoạt động"}
+      </button>
+      <button class="act-btn act-del" onclick="confirmDelete(${v.bus_id})" style="flex:0;padding:7px 10px;">🗑</button>
+    </div>
+  </div>`;
+}
+
+/* ── Pagination ── */
+function renderPagination(){
+  const total=Math.ceil(filteredVehicles.length/PAGE_SIZE);
+  const pg=document.getElementById("paginationWrap");
+  document.getElementById("pageInfo").textContent=`Trang ${currentPage} / ${total||1}`;
+  if(total<=1){pg.innerHTML="";return;}
+  let html=`<button class="pg-btn" onclick="goPage(${currentPage-1})" ${currentPage<=1?"disabled":""}>‹</button>`;
+  for(let i=1;i<=total;i++){
+    if(total>7&&Math.abs(i-currentPage)>2&&i!==1&&i!==total){
+      if(i===2||i===total-1)html+=`<span class="pg-dot">…</span>`;continue;
+    }
+    html+=`<button class="pg-btn ${i===currentPage?"active":""}" onclick="goPage(${i})">${i}</button>`;
+  }
+  html+=`<button class="pg-btn" onclick="goPage(${currentPage+1})" ${currentPage>=total?"disabled":""}>›</button>`;
+  pg.innerHTML=html;
+}
+function goPage(p){const t=Math.ceil(filteredVehicles.length/PAGE_SIZE);if(p<1||p>t)return;currentPage=p;renderGrid();}
+
+/* ── View ── */
+function viewVehicle(id){
+  const v=allVehicles.find(x=>x.bus_id==id);if(!v)return;
+  const isAvail=v.status==="AVAILABLE";
+  document.getElementById("vPlate").textContent=v.plate_number||"—";
+  document.getElementById("vSub").innerHTML=`${isAvail?"🟢":"🔴"} ${v.status} · ${v.bus_type||"—"}`;
+  const vipSeats=Math.round(Number(v.total_seats||0)*Number(v.vip_pct||35)/100);
+  document.getElementById("vGrid").innerHTML=[
+    ["🆔 Bus ID","#"+v.bus_id],["🪪 Biển số",v.plate_number||"—"],
+    ["🚌 Loại xe",v.bus_type||"—"],["📊 Trạng thái",v.status||"—"],
+    ["💺 Tổng ghế",v.total_seats||0],["👑 Ghế VIP",vipSeats],
+    ["🪑 Ghế thường",(Number(v.total_seats||0)-vipSeats)],["📝 Ghi chú",v.note||"—","full"],
+  ].map(([l,val,c])=>`<div class="vg-item ${c||""}"><div class="vg-label">${l}</div><div class="vg-val">${val}</div></div>`).join("");
+  document.getElementById("vEditBtn").onclick=()=>{closeModal("viewModal");openEdit(id);};
+  document.getElementById("viewModal").classList.add("open");
+}
+
+/* ── Add / Edit ── */
+function openAdd(){
+  editingId=null;
+  document.getElementById("formIco").textContent="➕";
+  document.getElementById("formTitle").textContent="Thêm xe mới";
+  document.getElementById("formSaveBtn").textContent="💾 Thêm xe";
+  ["f_plate","f_type","f_note"].forEach(id=>document.getElementById(id).value="");
+  document.getElementById("f_seats").value="";
+  document.getElementById("f_vip_pct").value="35";
+  document.getElementById("f_status").value="AVAILABLE";
+  document.getElementById("formModal").classList.add("open");
+}
+
+function openEdit(id){
+  const v=allVehicles.find(x=>x.bus_id==id);if(!v)return;
+  editingId=id;
+  document.getElementById("formIco").textContent="✏️";
+  document.getElementById("formTitle").textContent="Chỉnh sửa phương tiện";
+  document.getElementById("formSaveBtn").textContent="💾 Cập nhật";
+  document.getElementById("f_plate").value=v.plate_number||"";
+  document.getElementById("f_type").value=v.bus_type||"";
+  document.getElementById("f_seats").value=v.total_seats||"";
+  document.getElementById("f_vip_pct").value=v.vip_pct||35;
+  document.getElementById("f_status").value=v.status||"AVAILABLE";
+  document.getElementById("f_note").value=v.note||"";
+  document.getElementById("formModal").classList.add("open");
+}
+
+async function saveVehicle(){
+  const plate=document.getElementById("f_plate").value.trim();
+  const seats=document.getElementById("f_seats").value;
+  if(!plate||!seats){toast("Vui lòng điền biển số và tổng ghế *","error");return;}
+  const data={
+    plate_number:plate,
+    bus_type:document.getElementById("f_type").value.trim()||"Express",
+    total_seats:Number(seats),
+    status:document.getElementById("f_status").value,
+    vip_pct:Number(document.getElementById("f_vip_pct").value)||35,
+    note:document.getElementById("f_note").value.trim(),
+  };
+  try{
+    const url=editingId?`${API}/${editingId}`:API;
+    const method=editingId?"PUT":"POST";
+    const res=await fetch(url,{method,headers:{"Content-Type":"application/json"},body:JSON.stringify(data)});
+    if(!res.ok)throw new Error();
+    toast(editingId?"Cập nhật xe thành công!":"Thêm xe mới thành công!","success");
+    closeModal("formModal");loadVehicles();
+  }catch{
+    // Apply locally for demo
+    if(editingId){
+      const idx=allVehicles.findIndex(v=>v.bus_id==editingId);
+      if(idx>=0)allVehicles[idx]={...allVehicles[idx],...data};
+    }else{
+      const newId=Math.max(0,...allVehicles.map(v=>v.bus_id))+1;
+      allVehicles.push({bus_id:newId,...data});
+    }
+    toast(editingId?"Đã cập nhật (demo)":"Đã thêm xe mới (demo)","success");
+    closeModal("formModal");applyFilter();updateKPI();
+  }
+}
+
+/* ── Toggle status ── */
+async function toggleStatus(id){
+  const v=allVehicles.find(x=>x.bus_id==id);if(!v)return;
+  const newStatus=v.status==="AVAILABLE"?"MAINTENANCE":"AVAILABLE";
+  try{
+    const res=await fetch(`${API}/status/${id}`,{method:"PUT",headers:{"Content-Type":"application/json"},body:JSON.stringify({status:newStatus})});
+    if(!res.ok)throw new Error();
+  }catch{}
+  v.status=newStatus;
+  toast(`Xe ${v.plate_number} → ${newStatus}`,"info");
+  applyFilter();updateKPI();
+}
+
+/* ── Delete ── */
+function confirmDelete(id){
+  const v=allVehicles.find(x=>x.bus_id==id);if(!v)return;
+  document.getElementById("confirmTitle").textContent=`Xóa xe ${v.plate_number}?`;
+  document.getElementById("confirmMsg").textContent=`Xe ${v.plate_number} (${v.bus_type||""}) sẽ bị xóa vĩnh viễn. Dữ liệu ghế (SEAT) liên quan có thể bị ảnh hưởng.`;
+  document.getElementById("confirmBtn").onclick=async()=>{
+    try{
+      await fetch(`${API}/${id}`,{method:"DELETE"});
+    }catch{}
+    allVehicles=allVehicles.filter(v=>v.bus_id!=id);
+    toast("Đã xóa phương tiện","info");
+    closeModal("confirmModal");applyFilter();updateKPI();
+  };
+  document.getElementById("confirmModal").classList.add("open");
+}
+
+/* ── Export CSV ── */
+function exportCSV(){
+  const h=["Bus ID","Biển số","Loại xe","Tổng ghế","Ghế VIP","Ghế Thường","Trạng thái","Ghi chú"];
+  const rows=allVehicles.map(v=>{
+    const vip=Math.round(Number(v.total_seats||0)*Number(v.vip_pct||35)/100);
+    return[v.bus_id,v.plate_number||"",v.bus_type||"",v.total_seats||0,vip,(Number(v.total_seats||0)-vip),v.status||"",v.note||""];
+  });
+  const csv=[h,...rows].map(r=>r.map(v=>`"${String(v).replace(/"/g,'""')}"`).join(",")).join("\n");
+  const blob=new Blob(["\uFEFF"+csv],{type:"text/csv;charset=utf-8"});
+  const a=document.createElement("a");a.href=URL.createObjectURL(blob);
+  a.download=`vehicles_${new Date().toISOString().slice(0,10)}.csv`;a.click();
+  toast("Đã xuất CSV đội xe!","success");
+}
+
+/* ── Init ── */
+loadVehicles();
+</script>
+</body>
+</html>

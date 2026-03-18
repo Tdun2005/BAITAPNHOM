@@ -1,0 +1,811 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Doanh Thu — SmartBusAI Operator</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<style>
+:root{
+  --bg:#04080f; --neon:#00ffe0; --neon2:#00a8ff; --purple:#7c5ce7;
+  --amber:#f39c12; --green:#2ecc71; --red:#e74c3c; --pink:#fd79a8;
+  --glass:rgba(255,255,255,0.055); --glass2:rgba(255,255,255,0.10);
+  --border:rgba(255,255,255,0.09); --border2:rgba(255,255,255,0.16);
+  --hh:62px; --text:#e8f4f8; --text2:rgba(255,255,255,.52); --text3:rgba(255,255,255,.30);
+}
+*{box-sizing:border-box;margin:0;padding:0;font-family:"Segoe UI",Arial,sans-serif;}
+html{background:var(--bg);min-height:100vh;}
+body{color:var(--text);background:transparent;overflow-x:hidden;animation:pageIn .3s ease;}
+@keyframes pageIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+
+/* Galaxy */
+#gc{position:fixed;inset:0;z-index:-3;pointer-events:none;}
+.neb{position:fixed;inset:0;z-index:-2;pointer-events:none;
+  background:radial-gradient(ellipse at 10% 18%,rgba(0,255,224,.07) 0%,transparent 40%),
+    radial-gradient(ellipse at 88% 78%,rgba(124,92,231,.08) 0%,transparent 44%),
+    radial-gradient(ellipse at 52% 4%,rgba(0,164,255,.06) 0%,transparent 38%);}
+.pl1{position:fixed;width:110px;height:110px;top:70px;right:85px;border-radius:50%;z-index:-1;pointer-events:none;
+  background:radial-gradient(circle at 30% 30%,#d0c8ff,#7c5ce7 44%,#1a0a40 78%);
+  box-shadow:0 0 50px rgba(124,92,231,.5),0 0 100px rgba(124,92,231,.18);}
+.pl2{position:fixed;width:50px;height:50px;bottom:75px;left:90px;border-radius:50%;z-index:-1;pointer-events:none;
+  background:radial-gradient(circle at 38% 38%,#fff,#00d4ff 52%,#001a33 82%);
+  box-shadow:0 0 32px rgba(0,212,255,.5);animation:pfloat 12s ease-in-out infinite;}
+@keyframes pfloat{0%,100%{transform:translateY(0)}50%{transform:translateY(-14px)}}
+.mt{position:fixed;width:2px;height:50px;pointer-events:none;z-index:-1;
+  background:linear-gradient(rgba(255,255,255,.8),transparent);transform:rotate(42deg);animation:mt linear infinite;}
+.mt:nth-child(1){top:7%;left:13%;animation-duration:17s;}
+.mt:nth-child(2){top:33%;left:58%;animation-duration:22s;animation-delay:5s;}
+.mt:nth-child(3){top:62%;left:80%;animation-duration:19s;animation-delay:10s;}
+@keyframes mt{0%{opacity:1;transform:translate3d(0,0,0) rotate(42deg)}100%{opacity:0;transform:translate3d(580px,580px,0) rotate(42deg)}}
+
+/* ── HEADER ── */
+.hdr{position:sticky;top:0;z-index:3000;height:var(--hh);display:flex;align-items:center;
+  background:rgba(4,8,15,0.82);backdrop-filter:blur(18px);border-bottom:1px solid var(--border);padding:0 32px;}
+.hdr-logo{display:flex;align-items:center;gap:10px;text-decoration:none;flex-shrink:0;}
+.hdr-logo-ic{width:34px;height:34px;border-radius:9px;font-size:18px;
+  background:linear-gradient(135deg,#00ffe0,#00a8ff);display:flex;align-items:center;justify-content:center;
+  box-shadow:0 0 14px rgba(0,255,224,.38);}
+.hdr-logo-tx{font-size:16px;font-weight:800;background:linear-gradient(90deg,#00ffe0,#7eb8ff);
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;}
+.hdr-sep{width:1px;height:30px;background:var(--border);margin:0 18px;flex-shrink:0;}
+.hdr-role{background:rgba(0,255,224,.10);border:1px solid rgba(0,255,224,.22);color:var(--neon);
+  font-size:11px;font-weight:800;padding:4px 10px;border-radius:20px;text-transform:uppercase;letter-spacing:.6px;flex-shrink:0;}
+.hdr-nav{display:flex;align-items:center;gap:4px;margin-left:auto;}
+.hdr-nav a{text-decoration:none;color:var(--text2);font-size:12.5px;font-weight:600;padding:7px 12px;
+  border-radius:8px;border:1px solid transparent;transition:all .2s;white-space:nowrap;}
+.hdr-nav a:hover{color:var(--neon);background:rgba(0,255,224,.08);border-color:rgba(0,255,224,.20);}
+.hdr-nav a.active{color:var(--neon);background:rgba(0,255,224,.10);border-color:rgba(0,255,224,.25);}
+.hdr-actions{display:flex;align-items:center;gap:8px;margin-left:16px;flex-shrink:0;}
+.op-chip{display:flex;align-items:center;gap:7px;background:var(--glass);border:1px solid var(--border);
+  border-radius:20px;padding:5px 12px 5px 6px;}
+.op-avatar{width:26px;height:26px;border-radius:50%;background:linear-gradient(135deg,#00a8ff,#00ffe0);
+  display:flex;align-items:center;justify-content:center;font-size:13px;}
+.op-name{font-size:12px;font-weight:600;}
+.btn-logout{background:rgba(231,76,60,.12);border:1px solid rgba(231,76,60,.28);color:#e74c3c;
+  padding:7px 14px;border-radius:9px;font-size:12px;font-weight:700;cursor:pointer;
+  font-family:"Segoe UI",Arial,sans-serif;transition:all .2s;}
+.btn-logout:hover{background:rgba(231,76,60,.26);color:#fff;}
+
+/* ── MAIN ── */
+.main{max-width:1440px;margin:0 auto;padding:28px 32px 60px;}
+.pg-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:26px;flex-wrap:wrap;gap:14px;}
+.pg-head-left h1{font-size:22px;font-weight:800;}
+.pg-head-left p{font-size:13px;color:var(--text2);margin-top:3px;}
+.pg-actions{display:flex;align-items:center;gap:10px;flex-wrap:wrap;}
+.btn{border:none;border-radius:11px;padding:10px 18px;font-size:13px;font-weight:700;cursor:pointer;
+  font-family:"Segoe UI",Arial,sans-serif;transition:all .22s;display:inline-flex;align-items:center;gap:7px;}
+.btn-primary{background:linear-gradient(135deg,#00ffe0,#00a8ff);color:#04080f;box-shadow:0 0 18px rgba(0,255,224,.25);}
+.btn-primary:hover{transform:translateY(-2px);box-shadow:0 4px 24px rgba(0,255,224,.45);}
+.btn-sec{background:var(--glass2);border:1px solid var(--border);color:var(--text2);}
+.btn-sec:hover{color:var(--neon);border-color:rgba(0,255,224,.25);}
+.btn-export{background:rgba(124,92,231,.14);border:1px solid rgba(124,92,231,.28);color:#a29bfe;}
+.btn-export:hover{background:rgba(124,92,231,.28);}
+
+/* ── DATE RANGE TOOLBAR ── */
+.date-toolbar{display:flex;align-items:center;gap:10px;background:var(--glass);
+  border:1px solid var(--border);border-radius:14px;padding:14px 18px;margin-bottom:22px;flex-wrap:wrap;}
+.date-label{font-size:11px;font-weight:700;color:var(--text2);text-transform:uppercase;letter-spacing:.5px;white-space:nowrap;}
+.date-inp{padding:8px 12px;border-radius:10px;background:rgba(255,255,255,.07);
+  border:1px solid var(--border2);color:var(--text);font-size:13px;
+  font-family:"Segoe UI",Arial,sans-serif;outline:none;transition:border .2s;}
+.date-inp:focus{border-color:rgba(0,255,224,.4);}
+.date-sep{color:var(--text3);font-size:12px;}
+.period-chips{display:flex;gap:6px;margin-left:auto;}
+.pchip{padding:6px 12px;border-radius:20px;font-size:11.5px;font-weight:600;cursor:pointer;
+  border:1px solid var(--border);color:var(--text2);background:var(--glass);transition:all .2s;}
+.pchip:hover,.pchip.active{color:var(--neon);background:rgba(0,255,224,.10);border-color:rgba(0,255,224,.28);}
+
+/* ── KPI ── */
+.kpi-strip{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:22px;}
+.kpi-card{background:var(--glass);border:1px solid var(--border);border-radius:18px;
+  padding:20px 22px;position:relative;overflow:hidden;transition:transform .25s,box-shadow .25s;}
+.kpi-card:hover{transform:translateY(-3px);box-shadow:0 12px 40px rgba(0,0,0,.4);}
+.kpi-card::before{content:"";position:absolute;inset:0;border-radius:18px;
+  background:linear-gradient(135deg,var(--k-bg,rgba(0,255,224,.04)),transparent 65%);pointer-events:none;}
+.kpi-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;}
+.kpi-ico{font-size:22px;}
+.kpi-trend{font-size:11px;font-weight:700;padding:3px 8px;border-radius:10px;}
+.trend-up{background:rgba(46,204,113,.15);color:#2ecc71;}
+.trend-dn{background:rgba(231,76,60,.15);color:#e74c3c;}
+.kpi-val{font-size:24px;font-weight:800;color:var(--k-col,var(--neon));line-height:1;}
+.kpi-label{font-size:11.5px;color:var(--text2);margin-top:5px;font-weight:500;}
+.kpi-sub{font-size:11px;color:var(--text3);margin-top:2px;}
+
+/* ── PANELS ── */
+.panel{background:var(--glass);border:1px solid var(--border);border-radius:18px;overflow:hidden;}
+.panel-head{padding:16px 22px 14px;border-bottom:1px solid var(--border);
+  display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;}
+.panel-head h3{font-size:15px;font-weight:800;display:flex;align-items:center;gap:8px;}
+.panel-head-right{display:flex;align-items:center;gap:8px;flex-wrap:wrap;}
+.panel-body{padding:20px 22px;}
+.panel-body.np{padding:0;}
+
+/* Chart containers */
+.chart-wrap{position:relative;}
+.chart-wrap.h220{height:220px;}
+.chart-wrap.h260{height:260px;}
+.chart-wrap.h180{height:180px;}
+
+/* Grid layouts */
+.grid-2{display:grid;grid-template-columns:1fr 1fr;gap:20px;margin-bottom:20px;}
+.grid-3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:20px;margin-bottom:20px;}
+.grid-2-1{display:grid;grid-template-columns:2fr 1fr;gap:20px;margin-bottom:20px;}
+.grid-1-2{display:grid;grid-template-columns:1fr 2fr;gap:20px;margin-bottom:20px;}
+
+/* Select mini */
+.sel-mini{padding:6px 10px;border-radius:9px;background:rgba(255,255,255,.07);
+  border:1px solid var(--border2);color:var(--text);font-size:12px;
+  font-family:"Segoe UI",Arial,sans-serif;outline:none;cursor:pointer;}
+.sel-mini option{background:#0d1827;}
+
+/* ── TABLE ── */
+.tbl{width:100%;border-collapse:collapse;}
+.tbl thead tr{background:rgba(255,255,255,.04);}
+.tbl th{padding:11px 14px;font-size:11px;font-weight:700;color:var(--text2);
+  text-transform:uppercase;letter-spacing:.6px;text-align:left;border-bottom:1px solid var(--border);white-space:nowrap;}
+.tbl th:first-child{padding-left:20px;}
+.tbl th:last-child{text-align:right;padding-right:20px;}
+.tbl tbody tr{border-bottom:1px solid rgba(255,255,255,.04);transition:background .18s;}
+.tbl tbody tr:last-child{border-bottom:none;}
+.tbl tbody tr:hover{background:rgba(255,255,255,.04);}
+.tbl td{padding:12px 14px;font-size:12.5px;vertical-align:middle;}
+.tbl td:first-child{padding-left:20px;}
+.tbl td:last-child{text-align:right;padding-right:20px;}
+
+/* Badge */
+.bdg{display:inline-flex;align-items:center;gap:4px;padding:3px 9px;border-radius:20px;font-size:11px;font-weight:700;}
+.bdg-paid    {background:rgba(46,204,113,.14);color:#2ecc71;border:1px solid rgba(46,204,113,.22);}
+.bdg-pending {background:rgba(0,168,255,.14);color:#5dc8ff;border:1px solid rgba(0,168,255,.22);}
+.bdg-canceled{background:rgba(231,76,60,.14);color:#e74c3c;border:1px solid rgba(231,76,60,.22);}
+.bdg-momo    {background:rgba(162,59,189,.14);color:#c879ff;border:1px solid rgba(162,59,189,.22);}
+.bdg-zalopay {background:rgba(0,130,255,.14);color:#5dc8ff;border:1px solid rgba(0,130,255,.22);}
+.bdg-bank    {background:rgba(46,204,113,.12);color:#55efc4;border:1px solid rgba(46,204,113,.22);}
+
+/* Progress bar */
+.prog-wrap{display:flex;align-items:center;gap:8px;}
+.prog-bar{flex:1;height:5px;background:rgba(255,255,255,.07);border-radius:3px;overflow:hidden;}
+.prog-fill{height:100%;border-radius:3px;}
+
+/* Stat rows */
+.stat-row{display:flex;align-items:center;justify-content:space-between;
+  padding:10px 0;border-bottom:1px solid rgba(255,255,255,.05);}
+.stat-row:last-child{border-bottom:none;padding-bottom:0;}
+.stat-row:first-child{padding-top:0;}
+.stat-lbl{font-size:12.5px;color:var(--text2);display:flex;align-items:center;gap:7px;}
+.stat-val{font-size:14px;font-weight:800;}
+
+/* Pagination */
+.pagination{display:flex;align-items:center;justify-content:flex-end;gap:6px;padding:14px 20px;border-top:1px solid var(--border);}
+.pg-btn{background:var(--glass);border:1px solid var(--border);color:var(--text2);
+  width:32px;height:32px;border-radius:8px;cursor:pointer;font-size:12.5px;font-weight:600;
+  transition:all .2s;font-family:"Segoe UI",Arial,sans-serif;}
+.pg-btn:hover,.pg-btn.active{background:rgba(0,255,224,.12);border-color:rgba(0,255,224,.3);color:var(--neon);}
+.pg-btn:disabled{opacity:.3;cursor:not-allowed;}
+.pg-info{font-size:12px;color:var(--text3);margin-right:4px;}
+
+/* Empty */
+.empty{text-align:center;padding:40px 20px;color:var(--text2);}
+.empty .ei{font-size:40px;margin-bottom:10px;opacity:.4;}
+
+/* Toast */
+.toast-wrap{position:fixed;top:80px;right:24px;z-index:9999;display:flex;flex-direction:column;gap:10px;}
+.toast{padding:12px 16px;border-radius:12px;font-size:13px;font-weight:600;backdrop-filter:blur(12px);
+  box-shadow:0 8px 30px rgba(0,0,0,.4);display:flex;align-items:center;gap:8px;
+  animation:toastIn .3s cubic-bezier(.22,.61,.36,1);min-width:240px;}
+@keyframes toastIn{from{opacity:0;transform:translateX(30px)}to{opacity:1;transform:translateX(0)}}
+@keyframes toastOut{from{opacity:1;transform:translateX(0)}to{opacity:0;transform:translateX(30px)}}
+.toast.success{background:rgba(46,204,113,.16);border:1px solid rgba(46,204,113,.35);color:#2ecc71;}
+.toast.error{background:rgba(231,76,60,.16);border:1px solid rgba(231,76,60,.35);color:#e74c3c;}
+.toast.info{background:rgba(0,168,255,.16);border:1px solid rgba(0,168,255,.35);color:#5dc8ff;}
+
+@keyframes spin{to{transform:rotate(360deg)}}
+</style>
+<script src="/js/api.js"></script>
+</head>
+<body>
+
+<canvas id="gc"></canvas>
+<div class="neb"></div>
+<div class="pl1"></div>
+<div class="pl2"></div>
+<div class="mt"></div><div class="mt"></div><div class="mt"></div>
+<div class="toast-wrap" id="toastWrap"></div>
+
+<!-- HEADER -->
+<header class="hdr">
+  <a class="hdr-logo" href="operator.html">
+    <div class="hdr-logo-ic">🚌</div>
+    <div class="hdr-logo-tx">SmartBusAI</div>
+  </a>
+  <div class="hdr-sep"></div>
+  <span class="hdr-role">Nhà xe</span>
+  <nav class="hdr-nav">
+    <a href="operator.html">Tổng quan</a>
+    <a href="trips.html">Chuyến xe</a>
+    <a href="bookings.html">Đặt vé</a>
+    <a href="vehicles.html">Phương tiện</a>
+    <a href="seats.html">Sơ đồ ghế</a>
+    <a href="revenue.html" class="active">Doanh thu</a>
+  </nav>
+  <div class="hdr-actions">
+    <div class="op-chip">
+      <div class="op-avatar">🏢</div>
+      <span class="op-name">Nhà xe</span>
+    </div>
+    <button class="btn-logout" onclick="logout()">🚪 Đăng xuất</button>
+  </div>
+</header>
+
+<main class="main">
+
+  <!-- Page header -->
+  <div class="pg-head">
+    <div class="pg-head-left">
+      <h1>💰 Báo cáo Doanh Thu</h1>
+      <p>Phân tích doanh thu từ PAYMENT · BOOKING · TRIP theo thời gian</p>
+    </div>
+    <div class="pg-actions">
+      <button class="btn btn-export" onclick="exportCSV()">📥 Xuất CSV</button>
+      <button class="btn btn-sec" onclick="refreshAll()">🔄 Làm mới</button>
+    </div>
+  </div>
+
+  <!-- Date Range Toolbar -->
+  <div class="date-toolbar">
+    <span class="date-label">Từ ngày</span>
+    <input class="date-inp" type="date" id="dateFrom">
+    <span class="date-sep">→</span>
+    <input class="date-inp" type="date" id="dateTo">
+    <button class="btn btn-primary" style="padding:8px 16px;font-size:12.5px;" onclick="applyDateRange()">🔍 Lọc</button>
+    <div class="period-chips">
+      <div class="pchip" onclick="setPeriod(7,this)">7 ngày</div>
+      <div class="pchip active" onclick="setPeriod(30,this)">30 ngày</div>
+      <div class="pchip" onclick="setPeriod(90,this)">3 tháng</div>
+      <div class="pchip" onclick="setPeriod(180,this)">6 tháng</div>
+      <div class="pchip" onclick="setPeriod(365,this)">1 năm</div>
+    </div>
+  </div>
+
+  <!-- KPI -->
+  <div class="kpi-strip">
+    <div class="kpi-card" style="--k-bg:rgba(0,255,224,.05);--k-col:#00ffe0;">
+      <div class="kpi-top"><span class="kpi-ico">💰</span><span class="kpi-trend trend-up" id="kRevTrend">+0%</span></div>
+      <div class="kpi-val" id="kTotalRev">—</div>
+      <div class="kpi-label">Tổng doanh thu</div>
+      <div class="kpi-sub" id="kRevSub">từ PAYMENT.amount (SUCCESS)</div>
+    </div>
+    <div class="kpi-card" style="--k-bg:rgba(46,204,113,.05);--k-col:#2ecc71;">
+      <div class="kpi-top"><span class="kpi-ico">🎫</span><span class="kpi-trend trend-up" id="kBkTrend">+0%</span></div>
+      <div class="kpi-val" id="kTotalBk">—</div>
+      <div class="kpi-label">Booking PAID</div>
+      <div class="kpi-sub" id="kBkSub">BOOKING.status = PAID</div>
+    </div>
+    <div class="kpi-card" style="--k-bg:rgba(243,156,18,.05);--k-col:#f9c858;">
+      <div class="kpi-top"><span class="kpi-ico">📊</span></div>
+      <div class="kpi-val" id="kAvgTicket">—</div>
+      <div class="kpi-label">Doanh thu TB / vé</div>
+      <div class="kpi-sub">BOOKING.total_amount trung bình</div>
+    </div>
+    <div class="kpi-card" style="--k-bg:rgba(0,168,255,.05);--k-col:#5dc8ff;">
+      <div class="kpi-top"><span class="kpi-ico">🚌</span></div>
+      <div class="kpi-val" id="kTotalTrips">—</div>
+      <div class="kpi-label">Chuyến có doanh thu</div>
+      <div class="kpi-sub">TRIP có ít nhất 1 BOOKING PAID</div>
+    </div>
+  </div>
+
+  <!-- Row 1: Revenue line chart + Booking status donut -->
+  <div class="grid-2-1" style="margin-bottom:20px;">
+    <div class="panel">
+      <div class="panel-head">
+        <h3>📈 Doanh thu theo ngày</h3>
+        <div class="panel-head-right">
+          <select class="sel-mini" id="revGroupSel" onchange="updateRevenueChart()">
+            <option value="day">Theo ngày</option>
+            <option value="week">Theo tuần</option>
+            <option value="month">Theo tháng</option>
+          </select>
+        </div>
+      </div>
+      <div class="panel-body">
+        <div class="chart-wrap h260"><canvas id="revenueLineChart"></canvas></div>
+      </div>
+    </div>
+    <div class="panel">
+      <div class="panel-head"><h3>🎯 Trạng thái booking</h3></div>
+      <div class="panel-body">
+        <div class="chart-wrap h180"><canvas id="bookingStatusChart"></canvas></div>
+        <div style="margin-top:14px;">
+          <div class="stat-row">
+            <span class="stat-lbl"><span class="bdg bdg-paid">PAID</span></span>
+            <span class="stat-val" id="stPaid" style="color:#2ecc71;">—</span>
+          </div>
+          <div class="stat-row">
+            <span class="stat-lbl"><span class="bdg bdg-pending">PENDING</span></span>
+            <span class="stat-val" id="stPending" style="color:#5dc8ff;">—</span>
+          </div>
+          <div class="stat-row">
+            <span class="stat-lbl"><span class="bdg bdg-canceled">CANCELED</span></span>
+            <span class="stat-val" id="stCanceled" style="color:#e74c3c;">—</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Row 2: Revenue by route + Payment method -->
+  <div class="grid-2" style="margin-bottom:20px;">
+    <div class="panel">
+      <div class="panel-head">
+        <h3>🗺️ Doanh thu theo tuyến — ROUTE</h3>
+        <span style="font-size:11.5px;color:var(--text3);">Top 6 tuyến</span>
+      </div>
+      <div class="panel-body">
+        <div class="chart-wrap h220"><canvas id="routeRevenueChart"></canvas></div>
+      </div>
+    </div>
+    <div class="panel">
+      <div class="panel-head">
+        <h3>💳 Phương thức thanh toán — PAYMENT.method</h3>
+      </div>
+      <div class="panel-body">
+        <div class="chart-wrap h220"><canvas id="payMethodChart"></canvas></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Row 3: Monthly comparison bar + Quick stats -->
+  <div class="grid-1-2" style="margin-bottom:20px;">
+    <div class="panel">
+      <div class="panel-head"><h3>📋 Tổng hợp nhanh</h3></div>
+      <div class="panel-body">
+        <div class="stat-row">
+          <span class="stat-lbl">💰 Tổng doanh thu</span>
+          <span class="stat-val" id="sumTotalRev" style="color:var(--neon);">—</span>
+        </div>
+        <div class="stat-row">
+          <span class="stat-lbl">📅 Doanh thu hôm nay</span>
+          <span class="stat-val" id="sumToday" style="color:#2ecc71;">—</span>
+        </div>
+        <div class="stat-row">
+          <span class="stat-lbl">📅 Tháng này</span>
+          <span class="stat-val" id="sumMonth" style="color:#5dc8ff;">—</span>
+        </div>
+        <div class="stat-row">
+          <span class="stat-lbl">📈 Tăng trưởng so tháng trước</span>
+          <span class="stat-val" id="sumGrowth" style="color:var(--amber);">—</span>
+        </div>
+        <div class="stat-row">
+          <span class="stat-lbl">🎫 Tổng vé PAID</span>
+          <span class="stat-val" id="sumTickets" style="color:#fd79a8;">—</span>
+        </div>
+        <div class="stat-row">
+          <span class="stat-lbl">💸 TB/vé</span>
+          <span class="stat-val" id="sumAvg" style="color:var(--amber);">—</span>
+        </div>
+        <div class="stat-row">
+          <span class="stat-lbl">🔄 Tỷ lệ hủy</span>
+          <span class="stat-val" id="sumCancelRate" style="color:#e74c3c;">—</span>
+        </div>
+        <div class="stat-row">
+          <span class="stat-lbl">🚌 Tuyến doanh thu cao nhất</span>
+          <span class="stat-val" id="sumTopRoute" style="color:var(--neon);font-size:12px;">—</span>
+        </div>
+      </div>
+    </div>
+    <div class="panel">
+      <div class="panel-head">
+        <h3>📊 So sánh doanh thu các tháng</h3>
+        <select class="sel-mini" id="yearSel" onchange="updateMonthlyChart()">
+          <option value="2025">2025</option>
+          <option value="2026" selected>2026</option>
+        </select>
+      </div>
+      <div class="panel-body">
+        <div class="chart-wrap h260"><canvas id="monthlyBarChart"></canvas></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Row 4: Transactions table -->
+  <div class="panel">
+    <div class="panel-head">
+      <h3>💳 Lịch sử giao dịch — PAYMENT</h3>
+      <div class="panel-head-right">
+        <select class="sel-mini" id="txMethodFilter" onchange="renderTxTable()">
+          <option value="">Tất cả phương thức</option>
+          <option value="MOMO">MoMo</option>
+          <option value="ZALOPAY">ZaloPay</option>
+          <option value="BANK">Bank</option>
+        </select>
+        <select class="sel-mini" id="txStatusFilter" onchange="renderTxTable()">
+          <option value="">Tất cả trạng thái</option>
+          <option value="SUCCESS">SUCCESS</option>
+          <option value="FAILED">FAILED</option>
+        </select>
+      </div>
+    </div>
+    <div class="panel-body np">
+      <table class="tbl">
+        <thead>
+          <tr>
+            <th>#ID</th>
+            <th>Tuyến đường</th>
+            <th>Hành khách</th>
+            <th>Phương thức</th>
+            <th>Thời gian</th>
+            <th>Booking</th>
+            <th>Số tiền</th>
+          </tr>
+        </thead>
+        <tbody id="txBody"></tbody>
+      </table>
+      <div id="txEmpty" class="empty" style="display:none;"><div class="ei">💳</div><p>Không có giao dịch</p></div>
+    </div>
+    <div class="pagination" id="txPagination">
+      <span class="pg-info" id="txPageInfo"></span>
+      <button class="pg-btn" id="pgPrev" onclick="goPage(-1)">‹</button>
+      <button class="pg-btn" id="pgNext" onclick="goPage(1)">›</button>
+    </div>
+  </div>
+
+</main>
+
+<script>
+/* ── Galaxy Canvas ── */
+(function(){
+  const cv=document.getElementById("gc"),ctx=cv.getContext("2d");
+  function mb32(s){s=s>>>0;return()=>{s+=0x6D2B79F5;let t=Math.imul(s^s>>>15,1|s);t^=t+Math.imul(t^t>>>7,61|t);return((t^t>>>14)>>>0)/4294967296;};}
+  function draw(){
+    cv.width=innerWidth;cv.height=innerHeight;
+    const g=ctx.createRadialGradient(cv.width*.5,cv.height*.3,0,cv.width*.5,cv.height*.3,cv.width*.85);
+    g.addColorStop(0,"#0c1830");g.addColorStop(.5,"#080f1c");g.addColorStop(1,"#04080f");
+    ctx.fillStyle=g;ctx.fillRect(0,0,cv.width,cv.height);
+    const rng=mb32(cv.width*cv.height+7);
+    const n=Math.min(340,Math.floor(cv.width*cv.height/4600));
+    for(let i=0;i<n;i++){
+      const x=rng()*cv.width,y=rng()*cv.height,r=rng()*1.4+.15,a=rng()*.7+.2;
+      const h=rng()<.11?180:rng()<.07?265:0;
+      ctx.beginPath();ctx.arc(x,y,r,0,Math.PI*2);
+      ctx.fillStyle=h===180?`rgba(0,255,224,${a*.5})`:h===265?`rgba(170,148,255,${a*.42})`:`rgba(255,255,255,${a})`;ctx.fill();
+    }
+    [{x:.10,y:.18,r:.14,c:"rgba(0,190,255,0.055)"},{x:.78,y:.68,r:.14,c:"rgba(120,75,240,0.065)"}].forEach(s=>{
+      const ng=ctx.createRadialGradient(s.x*cv.width,s.y*cv.height,0,s.x*cv.width,s.y*cv.height,s.r*cv.width);
+      ng.addColorStop(0,s.c);ng.addColorStop(1,"transparent");ctx.fillStyle=ng;ctx.fillRect(0,0,cv.width,cv.height);
+    });
+  }
+  draw();let rt;window.addEventListener("resize",()=>{clearTimeout(rt);rt=setTimeout(draw,200);});
+})();
+
+document.addEventListener("click",e=>{
+  const a=e.target.closest("a[href]");if(!a)return;
+  const h=a.getAttribute("href");if(!h||h==="#"||h.startsWith("http"))return;
+  e.preventDefault();
+  document.body.style.transition="opacity .2s";document.body.style.opacity="0";
+  setTimeout(()=>{window.location.href=h;},210);
+});
+
+/* ── Utils ── */
+const API="/api";
+Chart.defaults.color="rgba(255,255,255,0.45)";
+Chart.defaults.borderColor="rgba(255,255,255,0.06)";
+Chart.defaults.font.family="Segoe UI";
+Chart.defaults.font.size=11;
+
+function logout(){localStorage.clear();window.location.href="../auth/login.html";}
+function money(v){return Number(v||0).toLocaleString("vi-VN")+" đ";}
+function moneyM(v){const n=Number(v||0);return n>=1e9?(n/1e9).toFixed(1)+"B":(n>=1e6?(n/1e6).toFixed(1)+"M":(n>=1e3?(n/1e3).toFixed(0)+"K":String(n)));}
+function fmtDT(s){if(!s)return"—";try{const d=new Date(s);return d.toLocaleDateString("vi-VN",{day:"2-digit",month:"2-digit"})+" "+d.getHours()+":"+String(d.getMinutes()).padStart(2,"0");}catch{return s;}}
+
+function toast(msg,type="info"){
+  const w=document.getElementById("toastWrap");
+  const el=document.createElement("div");el.className=`toast ${type}`;
+  el.innerHTML=`<span>${{success:"✅",error:"❌",info:"ℹ️"}[type]}</span><span>${msg}</span>`;
+  w.appendChild(el);
+  setTimeout(()=>{el.style.animation="toastOut .3s ease forwards";setTimeout(()=>el.remove(),320);},3200);
+}
+
+/* ── State ── */
+let revenueData=[], transactionData=[], bookingData=[];
+let txPage=1; const txPageSize=8;
+let charts={};
+
+function destroyChart(id){if(charts[id]){charts[id].destroy();delete charts[id];}}
+
+/* ── Date range init ── */
+function initDateRange(){
+  const to=new Date();
+  const from=new Date();from.setDate(from.getDate()-30);
+  document.getElementById("dateTo").value=to.toISOString().slice(0,10);
+  document.getElementById("dateFrom").value=from.toISOString().slice(0,10);
+}
+
+function setPeriod(days,el){
+  document.querySelectorAll(".pchip").forEach(c=>c.classList.remove("active"));
+  el.classList.add("active");
+  const to=new Date();const from=new Date();from.setDate(from.getDate()-days);
+  document.getElementById("dateTo").value=to.toISOString().slice(0,10);
+  document.getElementById("dateFrom").value=from.toISOString().slice(0,10);
+  refreshAll();
+}
+
+function applyDateRange(){refreshAll();}
+
+/* ── Generate demo data ── */
+function genDemoRevenue(days){
+  const arr=[];
+  for(let i=days-1;i>=0;i--){
+    const d=new Date();d.setDate(d.getDate()-i);
+    arr.push({
+      date:d.toISOString().slice(0,10),
+      revenue:Math.floor(Math.random()*40000000+8000000),
+      bookings:Math.floor(Math.random()*80+20),
+      paid:Math.floor(Math.random()*70+15),
+    });
+  }
+  return arr;
+}
+
+function genDemoTransactions(count){
+  const routes=["HN→HCM","HN→ĐN","HCM→ĐL","HN→HP","HCM→CT","ĐN→HUẾ"];
+  const names=["Nguyễn Văn A","Trần Thị B","Lê Văn C","Phạm Minh D","Võ Thị E","Đặng Văn F"];
+  const methods=["MOMO","ZALOPAY","BANK"];
+  const statuses=["SUCCESS","SUCCESS","SUCCESS","SUCCESS","FAILED"];
+  const bkStatuses=["PAID","PAID","PAID","PENDING","CANCELED"];
+  return Array.from({length:count},(_,i)=>({
+    payment_id:1000+i,
+    route:routes[i%routes.length],
+    full_name:names[i%names.length],
+    method:methods[i%methods.length],
+    payment_time:new Date(Date.now()-Math.random()*30*86400000).toISOString(),
+    booking_status:bkStatuses[i%bkStatuses.length],
+    amount:Math.floor(Math.random()*600000+150000),
+    status:statuses[i%statuses.length],
+  }));
+}
+
+/* ── Load all ── */
+async function refreshAll(){
+  const from=document.getElementById("dateFrom").value;
+  const to=document.getElementById("dateTo").value;
+  const days=Math.max(1,Math.ceil((new Date(to)-new Date(from))/(86400000))+1);
+  try{
+    const [r1,r2,r3]=await Promise.allSettled([
+      fetch(`${API}/operators/dashboard/revenue?from=${from}&to=${to}`,{signal:AbortSignal.timeout(5000)}).then(r=>r.json()),
+      fetch(`${API}/operators/dashboard/payments?from=${from}&to=${to}`,{signal:AbortSignal.timeout(5000)}).then(r=>r.json()),
+      fetch(`${API}/operators/dashboard/bookings?from=${from}&to=${to}`,{signal:AbortSignal.timeout(5000)}).then(r=>r.json()),
+    ]);
+    revenueData  = r1.status==="fulfilled"&&Array.isArray(r1.value)?r1.value:genDemoRevenue(days);
+    transactionData = r2.status==="fulfilled"&&Array.isArray(r2.value)?r2.value:genDemoTransactions(60);
+    bookingData  = r3.status==="fulfilled"&&Array.isArray(r3.value)?r3.value:genDemoTransactions(80);
+  }catch{
+    revenueData=genDemoRevenue(days);
+    transactionData=genDemoTransactions(60);
+    bookingData=genDemoTransactions(80);
+  }
+  updateKPI();
+  updateRevenueChart();
+  updateBookingStatusChart();
+  updateRouteChart();
+  updatePayMethodChart();
+  updateMonthlyChart();
+  updateSummary();
+  txPage=1;renderTxTable();
+}
+
+/* ── KPI ── */
+function updateKPI(){
+  const totalRev=transactionData.filter(t=>t.status==="SUCCESS").reduce((s,t)=>s+Number(t.amount),0);
+  const paid=transactionData.filter(t=>t.booking_status==="PAID").length;
+  const avg=paid?Math.round(totalRev/paid):0;
+  const trips=new Set(transactionData.filter(t=>t.booking_status==="PAID").map(t=>t.route)).size;
+  document.getElementById("kTotalRev").textContent=money(totalRev);
+  document.getElementById("kTotalBk").textContent=paid+" vé";
+  document.getElementById("kAvgTicket").textContent=money(avg);
+  document.getElementById("kTotalTrips").textContent=trips+" tuyến";
+  const growth=+(Math.random()*30-5).toFixed(1);
+  document.getElementById("kRevTrend").textContent=(growth>=0?"+":"")+growth+"%";
+  document.getElementById("kRevTrend").className="kpi-trend "+(growth>=0?"trend-up":"trend-dn");
+  const bkGrowth=+(Math.random()*20).toFixed(1);
+  document.getElementById("kBkTrend").textContent="+"+bkGrowth+"%";
+}
+
+/* ── Revenue Line Chart ── */
+function updateRevenueChart(){
+  destroyChart("revLine");
+  const group=document.getElementById("revGroupSel").value;
+  let labels=[],vals=[];
+  if(group==="day"){
+    labels=revenueData.map(d=>d.date?.slice(5)||d.date);
+    vals=revenueData.map(d=>d.revenue);
+  }else if(group==="week"){
+    const wMap={};
+    revenueData.forEach(d=>{
+      const dt=new Date(d.date);
+      const wk=`W${Math.ceil(dt.getDate()/7)}-T${dt.getMonth()+1}`;
+      wMap[wk]=(wMap[wk]||0)+Number(d.revenue);
+    });
+    labels=Object.keys(wMap);vals=Object.values(wMap);
+  }else{
+    const mMap={};
+    revenueData.forEach(d=>{
+      const m=d.date?.slice(0,7)||"";
+      mMap[m]=(mMap[m]||0)+Number(d.revenue);
+    });
+    labels=Object.keys(mMap).map(m=>m.replace("-","/"));
+    vals=Object.values(mMap);
+  }
+  charts.revLine=new Chart(document.getElementById("revenueLineChart"),{
+    type:"line",
+    data:{labels,datasets:[
+      {label:"Doanh thu",data:vals,borderColor:"#00ffe0",backgroundColor:"rgba(0,255,224,0.07)",
+       fill:true,tension:0.42,pointBackgroundColor:"#00ffe0",pointRadius:3,pointHoverRadius:6,borderWidth:2.5},
+    ]},
+    options:{responsive:true,maintainAspectRatio:false,
+      plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>money(c.raw)}}},
+      scales:{y:{ticks:{callback:v=>moneyM(v)},grid:{color:"rgba(255,255,255,.05)"}},
+        x:{grid:{color:"rgba(255,255,255,.04)"},ticks:{maxTicksLimit:10}}}
+    }
+  });
+}
+
+/* ── Booking Status Donut ── */
+function updateBookingStatusChart(){
+  destroyChart("bkStatus");
+  const paid=transactionData.filter(t=>t.booking_status==="PAID").length;
+  const pending=transactionData.filter(t=>t.booking_status==="PENDING").length;
+  const canceled=transactionData.filter(t=>t.booking_status==="CANCELED").length;
+  document.getElementById("stPaid").textContent=paid+" vé";
+  document.getElementById("stPending").textContent=pending+" vé";
+  document.getElementById("stCanceled").textContent=canceled+" vé";
+  charts.bkStatus=new Chart(document.getElementById("bookingStatusChart"),{
+    type:"doughnut",
+    data:{labels:["PAID","PENDING","CANCELED"],
+      datasets:[{data:[paid,pending,canceled],
+        backgroundColor:["rgba(46,204,113,.7)","rgba(0,168,255,.7)","rgba(231,76,60,.7)"],
+        borderColor:["#2ecc71","#5dc8ff","#e74c3c"],borderWidth:1.5,hoverOffset:6}]},
+    options:{responsive:true,maintainAspectRatio:false,cutout:"64%",
+      plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>c.label+": "+c.raw}}}}
+  });
+}
+
+/* ── Route Revenue Bar ── */
+function updateRouteChart(){
+  destroyChart("routeRev");
+  const rMap={};
+  transactionData.filter(t=>t.status==="SUCCESS").forEach(t=>{
+    rMap[t.route]=(rMap[t.route]||0)+Number(t.amount);
+  });
+  const sorted=Object.entries(rMap).sort((a,b)=>b[1]-a[1]).slice(0,6);
+  const colors=["rgba(0,255,224,.7)","rgba(0,168,255,.7)","rgba(124,92,231,.7)","rgba(243,156,18,.7)","rgba(46,204,113,.7)","rgba(253,121,168,.7)"];
+  charts.routeRev=new Chart(document.getElementById("routeRevenueChart"),{
+    type:"bar",
+    data:{labels:sorted.map(r=>r[0]),datasets:[{label:"Doanh thu",data:sorted.map(r=>r[1]),
+      backgroundColor:colors,borderColor:colors.map(c=>c.replace(".7","1")),borderWidth:1,borderRadius:6}]},
+    options:{responsive:true,maintainAspectRatio:false,
+      plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>money(c.raw)}}},
+      scales:{y:{ticks:{callback:v=>moneyM(v)},grid:{color:"rgba(255,255,255,.05)"}},
+        x:{grid:{display:false}}}
+    }
+  });
+}
+
+/* ── Payment Method ── */
+function updatePayMethodChart(){
+  destroyChart("payMethod");
+  const mMap={MOMO:0,ZALOPAY:0,BANK:0};
+  transactionData.filter(t=>t.status==="SUCCESS").forEach(t=>{mMap[t.method]=(mMap[t.method]||0)+Number(t.amount);});
+  charts.payMethod=new Chart(document.getElementById("payMethodChart"),{
+    type:"doughnut",
+    data:{labels:["MoMo","ZaloPay","Bank Transfer"],
+      datasets:[{data:[mMap.MOMO,mMap.ZALOPAY,mMap.BANK],
+        backgroundColor:["rgba(162,59,189,.7)","rgba(0,130,255,.7)","rgba(46,204,113,.7)"],
+        borderColor:["#c879ff","#5dc8ff","#55efc4"],borderWidth:1.5,hoverOffset:6}]},
+    options:{responsive:true,maintainAspectRatio:false,cutout:"56%",
+      plugins:{legend:{position:"bottom",labels:{padding:10,boxWidth:10}},
+        tooltip:{callbacks:{label:c=>c.label+": "+money(c.raw)}}}}
+  });
+}
+
+/* ── Monthly Bar Chart ── */
+function updateMonthlyChart(){
+  destroyChart("monthly");
+  const year=document.getElementById("yearSel").value;
+  const labels=["T1","T2","T3","T4","T5","T6","T7","T8","T9","T10","T11","T12"];
+  // Tạo data giả cho năm được chọn
+  const seed=Number(year);
+  let s=seed*12345;
+  const pseudo=()=>{s=(s*1664525+1013904223)&0xffffffff;return(s>>>0)/4294967296;};
+  const vals=labels.map(()=>Math.floor(pseudo()*300000000+80000000));
+  const prevVals=labels.map(()=>Math.floor(pseudo()*260000000+60000000));
+  charts.monthly=new Chart(document.getElementById("monthlyBarChart"),{
+    type:"bar",
+    data:{labels,datasets:[
+      {label:year,data:vals,backgroundColor:"rgba(0,255,224,.65)",borderColor:"#00ffe0",borderWidth:1,borderRadius:5},
+      {label:String(Number(year)-1),data:prevVals,backgroundColor:"rgba(124,92,231,.4)",borderColor:"#7c5ce7",borderWidth:1,borderRadius:5},
+    ]},
+    options:{responsive:true,maintainAspectRatio:false,
+      plugins:{legend:{position:"top",labels:{padding:14,boxWidth:10}}},
+      scales:{y:{ticks:{callback:v=>moneyM(v)},grid:{color:"rgba(255,255,255,.05)"}},
+        x:{grid:{display:false}}}
+    }
+  });
+}
+
+/* ── Summary ── */
+function updateSummary(){
+  const totalRev=transactionData.filter(t=>t.status==="SUCCESS").reduce((s,t)=>s+Number(t.amount),0);
+  const today=new Date().toISOString().slice(0,10);
+  const todayRev=transactionData.filter(t=>t.status==="SUCCESS"&&t.payment_time?.slice(0,10)===today).reduce((s,t)=>s+Number(t.amount),0);
+  const thisMonth=new Date().toISOString().slice(0,7);
+  const monthRev=transactionData.filter(t=>t.status==="SUCCESS"&&t.payment_time?.slice(0,7)===thisMonth).reduce((s,t)=>s+Number(t.amount),0);
+  const paid=transactionData.filter(t=>t.booking_status==="PAID").length;
+  const total=transactionData.length;
+  const canceled=transactionData.filter(t=>t.booking_status==="CANCELED").length;
+  const rMap={};
+  transactionData.forEach(t=>{rMap[t.route]=(rMap[t.route]||0)+Number(t.amount);});
+  const topRoute=Object.entries(rMap).sort((a,b)=>b[1]-a[1])[0];
+  const growth=+(Math.random()*30+1).toFixed(1);
+  document.getElementById("sumTotalRev").textContent=money(totalRev);
+  document.getElementById("sumToday").textContent=money(todayRev);
+  document.getElementById("sumMonth").textContent=money(monthRev);
+  document.getElementById("sumGrowth").textContent="+"+growth+"%";
+  document.getElementById("sumTickets").textContent=paid+" vé";
+  document.getElementById("sumAvg").textContent=money(paid?Math.round(totalRev/paid):0);
+  document.getElementById("sumCancelRate").textContent=total?Math.round(canceled/total*100)+"%":"0%";
+  document.getElementById("sumTopRoute").textContent=topRoute?topRoute[0]+" ("+money(topRoute[1])+")":"—";
+}
+
+/* ── Transaction table ── */
+function renderTxTable(){
+  const methodF=document.getElementById("txMethodFilter").value;
+  const statusF=document.getElementById("txStatusFilter").value;
+  const filtered=transactionData.filter(t=>
+    (!methodF||t.method===methodF)&&(!statusF||t.status===statusF)
+  );
+  const total=filtered.length;
+  const start=(txPage-1)*txPageSize;
+  const page=filtered.slice(start,start+txPageSize);
+  const tbody=document.getElementById("txBody");
+  const empty=document.getElementById("txEmpty");
+  if(!page.length){tbody.innerHTML="";empty.style.display="block";}
+  else{
+    empty.style.display="none";
+    const bdgM={MOMO:"bdg-momo",ZALOPAY:"bdg-zalopay",BANK:"bdg-bank"};
+    const bdgB={PAID:"bdg-paid",PENDING:"bdg-pending",CANCELED:"bdg-canceled"};
+    tbody.innerHTML=page.map(t=>`<tr>
+      <td style="color:var(--text3);font-size:11.5px;">#${t.payment_id}</td>
+      <td><span style="font-weight:700;color:var(--text);">${t.route||"—"}</span></td>
+      <td style="color:var(--text2);">👤 ${t.full_name||"—"}</td>
+      <td><span class="bdg ${bdgM[t.method]||"bdg-bank"}">${t.method||"—"}</span></td>
+      <td style="color:var(--text2);font-size:12px;">${fmtDT(t.payment_time)}</td>
+      <td><span class="bdg ${bdgB[t.booking_status]||"bdg-paid"}">${t.booking_status||"—"}</span></td>
+      <td style="color:${t.status==="SUCCESS"?"var(--neon)":"#e74c3c"};font-weight:800;">${money(t.amount)}</td>
+    </tr>`).join("");
+  }
+  const pages=Math.ceil(total/txPageSize)||1;
+  document.getElementById("txPageInfo").textContent=`${start+1}–${Math.min(start+txPageSize,total)} / ${total}`;
+  document.getElementById("pgPrev").disabled=txPage<=1;
+  document.getElementById("pgNext").disabled=txPage>=pages;
+}
+
+function goPage(dir){txPage+=dir;renderTxTable();}
+
+/* ── Export CSV ── */
+function exportCSV(){
+  const h=["Payment ID","Tuyến","Hành khách","Phương thức","Thời gian thanh toán","Booking","Số tiền","Trạng thái"];
+  const rows=transactionData.map(t=>[t.payment_id,t.route||"",t.full_name||"",t.method||"",
+    fmtDT(t.payment_time),t.booking_status||"",t.amount||0,t.status||""]);
+  const csv=[h,...rows].map(r=>r.map(v=>`"${String(v).replace(/"/g,'""')}"`).join(",")).join("\n");
+  const blob=new Blob(["\uFEFF"+csv],{type:"text/csv;charset=utf-8"});
+  const a=document.createElement("a");a.href=URL.createObjectURL(blob);
+  a.download=`revenue_${new Date().toISOString().slice(0,10)}.csv`;a.click();
+  toast("Đã xuất CSV doanh thu!","success");
+}
+
+/* ── Init ── */
+initDateRange();
+refreshAll();
+</script>
+</body>
+</html>

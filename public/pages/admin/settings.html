@@ -1,0 +1,1008 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Cấu hình hệ thống — SmartBusAI Admin</title>
+<style>
+:root{
+  --bg:#04080f; --neon:#00ffe0; --neon2:#00a8ff; --purple:#7c5ce7;
+  --amber:#f39c12; --green:#2ecc71; --red:#e74c3c; --pink:#fd79a8;
+  --glass:rgba(255,255,255,0.055); --glass2:rgba(255,255,255,0.10);
+  --border:rgba(255,255,255,0.09); --border2:rgba(255,255,255,0.16);
+  --hh:62px; --text:#e8f4f8; --text2:rgba(255,255,255,.52); --text3:rgba(255,255,255,.30);
+}
+*{box-sizing:border-box;margin:0;padding:0;font-family:"Segoe UI",Arial,sans-serif;}
+html{background:var(--bg);min-height:100vh;}
+body{color:var(--text);background:transparent;overflow-x:hidden;animation:pageIn .3s ease;}
+@keyframes pageIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+
+/* Galaxy */
+#gc{position:fixed;inset:0;z-index:-3;pointer-events:none;}
+.neb{position:fixed;inset:0;z-index:-2;pointer-events:none;
+  background:
+    radial-gradient(ellipse at 10% 18%,rgba(0,255,224,.07) 0%,transparent 40%),
+    radial-gradient(ellipse at 88% 78%,rgba(124,92,231,.08) 0%,transparent 44%),
+    radial-gradient(ellipse at 52% 4%,rgba(0,164,255,.06) 0%,transparent 38%);}
+.pl1{position:fixed;width:120px;height:120px;top:70px;right:85px;border-radius:50%;z-index:-1;pointer-events:none;
+  background:radial-gradient(circle at 30% 30%,#d0c8ff,#7c5ce7 44%,#1a0a40 78%);
+  box-shadow:0 0 55px rgba(124,92,231,.5),0 0 110px rgba(124,92,231,.18);}
+.pl2{position:fixed;width:55px;height:55px;bottom:75px;left:105px;border-radius:50%;z-index:-1;pointer-events:none;
+  background:radial-gradient(circle at 38% 38%,#fff,#00d4ff 52%,#001a33 82%);
+  box-shadow:0 0 36px rgba(0,212,255,.5);animation:pfloat 12s ease-in-out infinite;}
+@keyframes pfloat{0%,100%{transform:translateY(0)}50%{transform:translateY(-15px)}}
+.mt{position:fixed;width:2px;height:52px;pointer-events:none;z-index:-1;
+  background:linear-gradient(rgba(255,255,255,.8),transparent);
+  transform:rotate(42deg);animation:mt linear infinite;}
+.mt:nth-child(1){top:7%;left:13%;animation-duration:17s;}
+.mt:nth-child(2){top:33%;left:58%;animation-duration:22s;animation-delay:5s;}
+.mt:nth-child(3){top:62%;left:80%;animation-duration:19s;animation-delay:10s;}
+@keyframes mt{0%{transform:translate3d(0,0,0) rotate(42deg);opacity:1}100%{transform:translate3d(580px,580px,0) rotate(42deg);opacity:0}}
+
+/* HEADER */
+.hdr{position:sticky;top:0;z-index:3000;height:var(--hh);display:flex;align-items:center;
+  background:rgba(4,8,15,0.82);backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px);
+  border-bottom:1px solid var(--border);padding:0 32px;}
+.hdr-logo{display:flex;align-items:center;gap:10px;text-decoration:none;flex-shrink:0;}
+.hdr-logo-ic{width:34px;height:34px;border-radius:9px;font-size:18px;
+  background:linear-gradient(135deg,#00ffe0,#00a8ff);display:flex;align-items:center;justify-content:center;
+  box-shadow:0 0 14px rgba(0,255,224,.38);}
+.hdr-logo-tx{font-size:16px;font-weight:800;background:linear-gradient(90deg,#00ffe0,#7eb8ff);
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;}
+.hdr-sep{width:1px;height:30px;background:var(--border);margin:0 20px;flex-shrink:0;}
+.hdr-title{font-size:13px;font-weight:600;color:var(--text2);flex-shrink:0;}
+.hdr-nav{display:flex;align-items:center;gap:4px;margin-left:auto;}
+.hdr-nav a{text-decoration:none;color:var(--text2);font-size:12.5px;font-weight:600;padding:7px 13px;
+  border-radius:8px;border:1px solid transparent;transition:all .2s;white-space:nowrap;}
+.hdr-nav a:hover{color:var(--neon);background:rgba(0,255,224,.08);border-color:rgba(0,255,224,.20);}
+.hdr-nav a.active{color:var(--neon);background:rgba(0,255,224,.10);border-color:rgba(0,255,224,.25);}
+.hdr-actions{display:flex;align-items:center;gap:8px;margin-left:16px;flex-shrink:0;}
+.hdr-badge{position:relative;background:var(--glass);border:1px solid var(--border);border-radius:8px;
+  padding:7px 10px;cursor:pointer;font-size:16px;transition:background .2s;}
+.hdr-badge:hover{background:var(--glass2);}
+.badge-dot{position:absolute;top:5px;right:5px;width:7px;height:7px;background:var(--red);border-radius:50%;}
+.admin-chip{display:flex;align-items:center;gap:7px;background:var(--glass);border:1px solid var(--border);
+  border-radius:20px;padding:5px 12px 5px 6px;}
+.admin-avatar{width:26px;height:26px;border-radius:50%;background:linear-gradient(135deg,#7c5ce7,#00ffe0);
+  display:flex;align-items:center;justify-content:center;font-size:13px;}
+.admin-name{font-size:12px;font-weight:600;}
+.btn-logout{background:rgba(231,76,60,.12);border:1px solid rgba(231,76,60,.28);color:#e74c3c;
+  padding:7px 14px;border-radius:9px;font-size:12px;font-weight:700;cursor:pointer;
+  font-family:"Segoe UI",Arial,sans-serif;transition:all .2s;}
+.btn-logout:hover{background:rgba(231,76,60,.26);color:#fff;}
+
+/* MAIN */
+.main{max-width:1200px;margin:0 auto;padding:28px 32px 60px;}
+
+.pg-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:28px;gap:16px;flex-wrap:wrap;}
+.pg-head-left h1{font-size:22px;font-weight:800;}
+.pg-head-left p{font-size:13px;color:var(--text2);margin-top:3px;}
+
+/* LAYOUT: sidebar + content */
+.settings-layout{display:grid;grid-template-columns:220px 1fr;gap:20px;align-items:start;}
+
+/* SIDEBAR TABS */
+.settings-nav{background:var(--glass);border:1px solid var(--border);border-radius:16px;padding:10px;position:sticky;top:80px;}
+.snav-label{font-size:10px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:.8px;padding:8px 12px 4px;}
+.snav-item{display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:10px;
+  cursor:pointer;font-size:13px;font-weight:600;color:var(--text2);transition:all .2s;margin-bottom:2px;}
+.snav-item:hover{color:var(--text);background:var(--glass2);}
+.snav-item.active{color:var(--neon);background:rgba(0,255,224,.10);border:1px solid rgba(0,255,224,.20);}
+.snav-item .sico{font-size:16px;flex-shrink:0;}
+.snav-divider{height:1px;background:var(--border);margin:8px 4px;}
+
+/* SETTINGS PANELS */
+.settings-panels{display:flex;flex-direction:column;gap:0;}
+.settings-panel{display:none;}
+.settings-panel.active{display:flex;flex-direction:column;gap:20px;}
+
+/* CARD */
+.s-card{background:var(--glass);border:1px solid var(--border);border-radius:18px;overflow:hidden;}
+.s-card-head{padding:18px 22px 14px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:10px;}
+.s-card-head h3{font-size:15px;font-weight:800;color:var(--text);}
+.s-card-head p{font-size:12px;color:var(--text2);margin-top:2px;}
+.s-card-ico{font-size:20px;flex-shrink:0;}
+.s-card-body{padding:22px;}
+
+/* Form elements */
+.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;}
+.form-grid.full{grid-template-columns:1fr;}
+.form-group{display:flex;flex-direction:column;gap:7px;}
+.form-group label{font-size:11.5px;font-weight:700;color:var(--text2);text-transform:uppercase;letter-spacing:.5px;
+  display:flex;align-items:center;gap:6px;}
+.form-control{padding:11px 14px;border-radius:11px;background:rgba(255,255,255,.07);
+  border:1px solid var(--border2);color:var(--text);font-size:13px;font-family:"Segoe UI",Arial,sans-serif;
+  outline:none;transition:border .2s,box-shadow .2s;}
+.form-control::placeholder{color:var(--text3);}
+.form-control:focus{border-color:rgba(0,255,224,.45);box-shadow:0 0 0 3px rgba(0,255,224,.08);}
+select.form-control{cursor:pointer;}
+select.form-control option{background:#0d1827;}
+.form-hint{font-size:11px;color:var(--text3);}
+
+/* Input with prefix */
+.inp-wrap{position:relative;}
+.inp-prefix{position:absolute;left:13px;top:50%;transform:translateY(-50%);font-size:13px;color:var(--text3);pointer-events:none;}
+.inp-suffix{position:absolute;right:13px;top:50%;transform:translateY(-50%);font-size:12px;font-weight:700;color:var(--text3);pointer-events:none;}
+.form-control.has-prefix{padding-left:30px;}
+.form-control.has-suffix{padding-right:36px;}
+
+/* Toggle switch */
+.toggle-row{display:flex;align-items:center;justify-content:space-between;padding:14px 0;
+  border-bottom:1px solid rgba(255,255,255,.05);}
+.toggle-row:last-child{border-bottom:none;padding-bottom:0;}
+.toggle-row:first-child{padding-top:0;}
+.toggle-left{display:flex;align-items:center;gap:12px;}
+.toggle-ico{font-size:20px;flex-shrink:0;}
+.toggle-label{font-size:13.5px;font-weight:600;color:var(--text);}
+.toggle-sub{font-size:11.5px;color:var(--text3);margin-top:2px;}
+
+.toggle{position:relative;width:44px;height:24px;flex-shrink:0;}
+.toggle input{opacity:0;width:0;height:0;}
+.toggle-slider{position:absolute;cursor:pointer;inset:0;background:rgba(255,255,255,.12);
+  border-radius:24px;transition:.3s;border:1px solid var(--border);}
+.toggle-slider:before{content:"";position:absolute;width:18px;height:18px;left:2px;top:2px;
+  background:#fff;border-radius:50%;transition:.3s;box-shadow:0 1px 4px rgba(0,0,0,.4);}
+.toggle input:checked + .toggle-slider{background:rgba(0,255,224,.25);border-color:rgba(0,255,224,.4);}
+.toggle input:checked + .toggle-slider:before{transform:translateX(20px);background:var(--neon);}
+
+/* Payment method cards */
+.payment-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;}
+.pay-card{background:rgba(255,255,255,.04);border:1px solid var(--border);border-radius:14px;
+  padding:16px;display:flex;flex-direction:column;align-items:center;gap:8px;
+  cursor:pointer;transition:all .2s;position:relative;}
+.pay-card:hover{background:rgba(255,255,255,.07);}
+.pay-card.active{border-color:rgba(0,255,224,.35);background:rgba(0,255,224,.07);box-shadow:0 0 18px rgba(0,255,224,.10);}
+.pay-card input[type="checkbox"]{position:absolute;top:10px;right:10px;width:16px;height:16px;accent-color:var(--neon);cursor:pointer;}
+.pay-ico{font-size:28px;}
+.pay-name{font-size:13px;font-weight:700;}
+.pay-desc{font-size:11px;color:var(--text3);text-align:center;}
+
+/* Range slider */
+.range-wrap{display:flex;align-items:center;gap:14px;}
+.range-wrap input[type="range"]{flex:1;accent-color:var(--neon);height:4px;cursor:pointer;}
+.range-val{min-width:46px;text-align:right;font-size:13px;font-weight:800;color:var(--neon);}
+
+/* Divider */
+.s-divider{height:1px;background:var(--border);margin:18px 0;}
+.s-section-title{font-size:11px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:.8px;margin-bottom:14px;}
+
+/* Buttons */
+.btn{border:none;border-radius:11px;padding:11px 20px;font-size:13px;font-weight:700;cursor:pointer;
+  font-family:"Segoe UI",Arial,sans-serif;transition:all .22s;display:inline-flex;align-items:center;gap:8px;}
+.btn-save{background:linear-gradient(135deg,#00ffe0,#00a8ff);color:#04080f;box-shadow:0 0 18px rgba(0,255,224,.3);}
+.btn-save:hover{transform:translateY(-2px);box-shadow:0 4px 24px rgba(0,255,224,.5);}
+.btn-secondary{background:var(--glass2);border:1px solid var(--border);color:var(--text2);}
+.btn-secondary:hover{color:var(--text);border-color:var(--border2);}
+.btn-danger{background:rgba(231,76,60,.15);border:1px solid rgba(231,76,60,.28);color:#e74c3c;}
+.btn-danger:hover{background:rgba(231,76,60,.28);}
+.btn-wrap{display:flex;align-items:center;gap:10px;margin-top:22px;flex-wrap:wrap;}
+
+/* Info box */
+.info-box{background:rgba(0,168,255,.08);border:1px solid rgba(0,168,255,.2);
+  border-radius:12px;padding:14px 16px;display:flex;align-items:flex-start;gap:10px;margin-bottom:16px;}
+.info-box-ico{font-size:18px;flex-shrink:0;margin-top:1px;}
+.info-box-text{font-size:12.5px;color:var(--text2);line-height:1.6;}
+.warn-box{background:rgba(243,156,18,.08);border:1px solid rgba(243,156,18,.22);
+  border-radius:12px;padding:14px 16px;display:flex;align-items:flex-start;gap:10px;margin-top:16px;}
+.warn-box-ico{font-size:18px;flex-shrink:0;}
+.warn-box-text{font-size:12.5px;color:rgba(243,156,18,.85);line-height:1.6;}
+
+/* AI Config */
+.ai-status-row{display:flex;align-items:center;justify-content:space-between;
+  background:rgba(0,255,224,.05);border:1px solid rgba(0,255,224,.15);
+  border-radius:14px;padding:16px 20px;margin-bottom:16px;}
+.ai-status-left{display:flex;align-items:center;gap:12px;}
+.ai-dot{width:10px;height:10px;border-radius:50%;background:var(--neon);
+  box-shadow:0 0 8px var(--neon);animation:pulse 2s infinite;}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
+.ai-status-label{font-size:13px;font-weight:700;color:var(--neon);}
+.ai-status-sub{font-size:11px;color:var(--text3);margin-top:2px;}
+.ai-score{font-size:22px;font-weight:800;color:var(--neon);}
+
+/* System info */
+.sys-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;}
+.sys-item{background:rgba(255,255,255,.04);border:1px solid var(--border);border-radius:12px;padding:14px 16px;}
+.sys-item-label{font-size:10.5px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:.6px;}
+.sys-item-val{font-size:14px;font-weight:700;color:var(--text);margin-top:6px;}
+.sys-item-val.green{color:var(--green);}
+.sys-item-val.amber{color:var(--amber);}
+
+/* Log list */
+.log-list{display:flex;flex-direction:column;gap:8px;max-height:240px;overflow-y:auto;}
+.log-list::-webkit-scrollbar{width:3px;}
+.log-list::-webkit-scrollbar-thumb{background:rgba(255,255,255,.1);border-radius:2px;}
+.log-item{background:rgba(255,255,255,.03);border:1px solid var(--border);border-radius:10px;
+  padding:10px 14px;display:flex;align-items:center;gap:12px;}
+.log-time{font-size:11px;color:var(--text3);flex-shrink:0;font-family:monospace;}
+.log-msg{font-size:12.5px;color:var(--text2);flex:1;}
+.log-type{font-size:10.5px;font-weight:700;padding:2px 8px;border-radius:10px;flex-shrink:0;}
+.log-info{background:rgba(0,168,255,.14);color:#5dc8ff;}
+.log-warn{background:rgba(243,156,18,.14);color:#f9c858;}
+.log-error{background:rgba(231,76,60,.14);color:#e74c3c;}
+.log-success{background:rgba(46,204,113,.14);color:#2ecc71;}
+
+/* Toast */
+.toast-wrap{position:fixed;top:80px;right:24px;z-index:9999;display:flex;flex-direction:column;gap:10px;}
+.toast{padding:13px 18px;border-radius:13px;font-size:13px;font-weight:600;
+  backdrop-filter:blur(12px);box-shadow:0 8px 30px rgba(0,0,0,.4);
+  display:flex;align-items:center;gap:10px;animation:toastIn .3s cubic-bezier(.22,.61,.36,1);min-width:260px;}
+@keyframes toastIn{from{opacity:0;transform:translateX(30px)}to{opacity:1;transform:translateX(0)}}
+@keyframes toastOut{from{opacity:1;transform:translateX(0)}to{opacity:0;transform:translateX(30px)}}
+.toast.success{background:rgba(46,204,113,.16);border:1px solid rgba(46,204,113,.35);color:#2ecc71;}
+.toast.error{background:rgba(231,76,60,.16);border:1px solid rgba(231,76,60,.35);color:#e74c3c;}
+.toast.info{background:rgba(0,168,255,.16);border:1px solid rgba(0,168,255,.35);color:#5dc8ff;}
+
+/* Saved indicator */
+.saved-dot{width:8px;height:8px;border-radius:50%;background:var(--green);box-shadow:0 0 6px var(--green);display:inline-block;}
+</style>
+<script src="/js/api.js"></script>
+</head>
+<body>
+
+<canvas id="gc"></canvas>
+<div class="neb"></div>
+<div class="pl1"></div>
+<div class="pl2"></div>
+<div class="mt"></div><div class="mt"></div><div class="mt"></div>
+<div class="toast-wrap" id="toastWrap"></div>
+
+<!-- HEADER -->
+<header class="hdr">
+  <a class="hdr-logo" href="admin.html">
+    <div class="hdr-logo-ic">🚌</div>
+    <div class="hdr-logo-tx">SmartBusAI</div>
+  </a>
+  <div class="hdr-sep"></div>
+  <span class="hdr-title">ADMIN PANEL</span>
+  <nav class="hdr-nav">
+    <a href="admin.html">Dashboard</a>
+    <a href="users.html">Người dùng</a>
+    <a href="operators.html">Nhà xe</a>
+    <a href="settings.html" class="active">Cấu hình</a>
+    <a href="support.html">Hỗ trợ</a>
+  </nav>
+  <div class="hdr-actions">
+    <div class="hdr-badge">🔔<div class="badge-dot"></div></div>
+    <div class="admin-chip">
+      <div class="admin-avatar">👑</div>
+      <span class="admin-name">Admin</span>
+    </div>
+    <button class="btn-logout" onclick="logout()">🚪 Đăng xuất</button>
+  </div>
+</header>
+
+<!-- MAIN -->
+<main class="main">
+
+  <div class="pg-head">
+    <div class="pg-head-left">
+      <h1>⚙️ Cấu hình hệ thống</h1>
+      <p>Quản lý tham số vận hành, tích hợp thanh toán, AI và bảo mật</p>
+    </div>
+    <div style="display:flex;align-items:center;gap:10px;">
+      <span class="saved-dot"></span>
+      <span style="font-size:12px;color:var(--text3);" id="savedLabel">Tất cả thay đổi đã được lưu</span>
+    </div>
+  </div>
+
+  <div class="settings-layout">
+
+    <!-- SIDEBAR NAV -->
+    <nav class="settings-nav">
+      <div class="snav-label">Cấu hình</div>
+      <div class="snav-item active" onclick="switchTab('general')"><span class="sico">🛠️</span> Cài đặt chung</div>
+      <div class="snav-item" onclick="switchTab('payment')"><span class="sico">💳</span> Thanh toán</div>
+      <div class="snav-item" onclick="switchTab('booking')"><span class="sico">🎫</span> Đặt vé & Vận hành</div>
+      <div class="snav-item" onclick="switchTab('ai')"><span class="sico">🤖</span> AI & Gợi ý</div>
+      <div class="snav-divider"></div>
+      <div class="snav-label">Hệ thống</div>
+      <div class="snav-item" onclick="switchTab('security')"><span class="sico">🔐</span> Bảo mật</div>
+      <div class="snav-item" onclick="switchTab('notifications')"><span class="sico">🔔</span> Thông báo</div>
+      <div class="snav-item" onclick="switchTab('system')"><span class="sico">🖥️</span> Hệ thống & Log</div>
+    </nav>
+
+    <!-- PANELS -->
+    <div class="settings-panels">
+
+      <!-- ─── GENERAL ─── -->
+      <div class="settings-panel active" id="panel-general">
+
+        <div class="s-card">
+          <div class="s-card-head">
+            <span class="s-card-ico">🌐</span>
+            <div>
+              <h3>Thông tin ứng dụng</h3>
+              <p>Tên, mô tả và thông tin liên hệ chính thức</p>
+            </div>
+          </div>
+          <div class="s-card-body">
+            <div class="form-grid">
+              <div class="form-group">
+                <label>Tên hệ thống</label>
+                <input class="form-control" id="appName" value="SmartBusAI">
+              </div>
+              <div class="form-group">
+                <label>Ngôn ngữ mặc định</label>
+                <select class="form-control" id="lang">
+                  <option value="vi" selected>🇻🇳 Tiếng Việt</option>
+                  <option value="en">🇺🇸 English</option>
+                </select>
+              </div>
+            </div>
+            <div class="form-grid" style="margin-top:14px;">
+              <div class="form-group">
+                <label>Email hỗ trợ</label>
+                <input class="form-control" id="supportEmail" type="email" value="support@smartbusai.vn">
+              </div>
+              <div class="form-group">
+                <label>Hotline</label>
+                <input class="form-control" id="hotline" value="1900 6789">
+              </div>
+            </div>
+            <div class="form-grid full" style="margin-top:14px;">
+              <div class="form-group">
+                <label>Website chính thức</label>
+                <div class="inp-wrap">
+                  <span class="inp-prefix">🌐</span>
+                  <input class="form-control has-prefix" id="website" value="https://smartbusai.vn">
+                </div>
+              </div>
+            </div>
+            <div class="btn-wrap">
+              <button class="btn btn-save" onclick="saveSection('general')">💾 Lưu cài đặt</button>
+              <button class="btn btn-secondary" onclick="resetSection('general')">↺ Khôi phục</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="s-card">
+          <div class="s-card-head">
+            <span class="s-card-ico">⚡</span>
+            <div>
+              <h3>Tính năng hệ thống</h3>
+              <p>Bật/tắt các chức năng trong ứng dụng</p>
+            </div>
+          </div>
+          <div class="s-card-body">
+            <div class="toggle-row">
+              <div class="toggle-left">
+                <span class="toggle-ico">🛡️</span>
+                <div><div class="toggle-label">Chế độ bảo trì</div><div class="toggle-sub">Tạm dừng toàn bộ dịch vụ cho người dùng</div></div>
+              </div>
+              <label class="toggle"><input type="checkbox" id="t_maintenance"><span class="toggle-slider"></span></label>
+            </div>
+            <div class="toggle-row">
+              <div class="toggle-left">
+                <span class="toggle-ico">📱</span>
+                <div><div class="toggle-label">Cho phép đặt vé qua app</div><div class="toggle-sub">Kênh mobile booking</div></div>
+              </div>
+              <label class="toggle"><input type="checkbox" id="t_mobile_booking" checked><span class="toggle-slider"></span></label>
+            </div>
+            <div class="toggle-row">
+              <div class="toggle-left">
+                <span class="toggle-ico">✍️</span>
+                <div><div class="toggle-label">Cho phép viết đánh giá</div><div class="toggle-sub">Hành khách có thể gửi review sau chuyến đi</div></div>
+              </div>
+              <label class="toggle"><input type="checkbox" id="t_review" checked><span class="toggle-slider"></span></label>
+            </div>
+            <div class="toggle-row">
+              <div class="toggle-left">
+                <span class="toggle-ico">🔔</span>
+                <div><div class="toggle-label">Thông báo đẩy (Push)</div><div class="toggle-sub">Gửi thông báo realtime đến thiết bị người dùng</div></div>
+              </div>
+              <label class="toggle"><input type="checkbox" id="t_push" checked><span class="toggle-slider"></span></label>
+            </div>
+          </div>
+        </div>
+
+      </div><!-- end panel-general -->
+
+      <!-- ─── PAYMENT ─── -->
+      <div class="settings-panel" id="panel-payment">
+
+        <div class="s-card">
+          <div class="s-card-head">
+            <span class="s-card-ico">💳</span>
+            <div><h3>Phương thức thanh toán</h3><p>Kích hoạt cổng thanh toán theo PAYMENT.method trong ERD</p></div>
+          </div>
+          <div class="s-card-body">
+            <div class="payment-grid">
+              <div class="pay-card active" id="pc_momo" onclick="togglePayCard('momo')">
+                <input type="checkbox" id="pm_momo" checked onchange="syncPayCard('momo')">
+                <div class="pay-ico">💜</div>
+                <div class="pay-name">MoMo</div>
+                <div class="pay-desc">Ví điện tử MoMo</div>
+              </div>
+              <div class="pay-card active" id="pc_zalopay" onclick="togglePayCard('zalopay')">
+                <input type="checkbox" id="pm_zalopay" checked onchange="syncPayCard('zalopay')">
+                <div class="pay-ico">🔵</div>
+                <div class="pay-name">ZaloPay</div>
+                <div class="pay-desc">Ví ZaloPay / Zalo</div>
+              </div>
+              <div class="pay-card active" id="pc_bank" onclick="togglePayCard('bank')">
+                <input type="checkbox" id="pm_bank" checked onchange="syncPayCard('bank')">
+                <div class="pay-ico">🏦</div>
+                <div class="pay-name">BANK</div>
+                <div class="pay-desc">Chuyển khoản ngân hàng</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="s-card">
+          <div class="s-card-head">
+            <span class="s-card-ico">💰</span>
+            <div><h3>Cài đặt phí & Thanh toán</h3><p>Phí nền tảng và quy định xử lý tiền</p></div>
+          </div>
+          <div class="s-card-body">
+            <div class="form-grid">
+              <div class="form-group">
+                <label>Phí hệ thống (%)</label>
+                <div class="inp-wrap">
+                  <input class="form-control has-suffix" id="systemFee" type="number" min="0" max="30" value="5">
+                  <span class="inp-suffix">%</span>
+                </div>
+                <div class="form-hint">Phí thu trên mỗi giao dịch thành công</div>
+              </div>
+              <div class="form-group">
+                <label>Số tiền tối thiểu (VNĐ)</label>
+                <div class="inp-wrap">
+                  <input class="form-control has-suffix" id="minAmount" type="number" value="10000">
+                  <span class="inp-suffix">đ</span>
+                </div>
+                <div class="form-hint">Giá trị đặt vé thấp nhất cho phép</div>
+              </div>
+              <div class="form-group">
+                <label>Timeout thanh toán (phút)</label>
+                <div class="inp-wrap">
+                  <input class="form-control has-suffix" id="payTimeout" type="number" value="15">
+                  <span class="inp-suffix">phút</span>
+                </div>
+              </div>
+              <div class="form-group">
+                <label>Tự động hoàn tiền CANCELED</label>
+                <select class="form-control" id="refundMode">
+                  <option value="auto">Tự động 100%</option>
+                  <option value="manual">Duyệt thủ công</option>
+                  <option value="none">Không hoàn tiền</option>
+                </select>
+              </div>
+            </div>
+            <div class="btn-wrap">
+              <button class="btn btn-save" onclick="saveSection('payment')">💾 Lưu cấu hình</button>
+            </div>
+          </div>
+        </div>
+
+      </div><!-- end panel-payment -->
+
+      <!-- ─── BOOKING ─── -->
+      <div class="settings-panel" id="panel-booking">
+
+        <div class="s-card">
+          <div class="s-card-head">
+            <span class="s-card-ico">🎫</span>
+            <div><h3>Quy định đặt vé</h3><p>Liên kết BOOKING, TRIP, SEAT trong ERD</p></div>
+          </div>
+          <div class="s-card-body">
+            <div class="form-grid">
+              <div class="form-group">
+                <label>Thời gian hủy vé (giờ)</label>
+                <div class="inp-wrap">
+                  <input class="form-control has-suffix" id="cancelTime" type="number" value="24">
+                  <span class="inp-suffix">giờ</span>
+                </div>
+                <div class="form-hint">Trước giờ khởi hành bao nhiêu tiếng được hủy</div>
+              </div>
+              <div class="form-group">
+                <label>Số vé tối đa / lần đặt</label>
+                <input class="form-control" id="maxTickets" type="number" value="4">
+              </div>
+              <div class="form-group">
+                <label>Trạng thái mặc định booking mới</label>
+                <select class="form-control" id="defaultStatus">
+                  <option value="PENDING" selected>PENDING — Chờ thanh toán</option>
+                  <option value="PAID">PAID — Thanh toán ngay</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <label>Tự động hủy PENDING sau (phút)</label>
+                <div class="inp-wrap">
+                  <input class="form-control has-suffix" id="autoCancel" type="number" value="30">
+                  <span class="inp-suffix">phút</span>
+                </div>
+              </div>
+            </div>
+            <div class="s-divider"></div>
+            <div class="s-section-title">Chính sách ghế — SEAT.seat_type</div>
+            <div class="form-grid">
+              <div class="form-group">
+                <label>Phụ phí ghế VIP (%)</label>
+                <div class="inp-wrap">
+                  <input class="form-control has-suffix" id="vipSurcharge" type="number" value="20">
+                  <span class="inp-suffix">%</span>
+                </div>
+              </div>
+              <div class="form-group">
+                <label>Giữ ghế timeout (phút)</label>
+                <div class="inp-wrap">
+                  <input class="form-control has-suffix" id="seatHold" type="number" value="10">
+                  <span class="inp-suffix">phút</span>
+                </div>
+              </div>
+            </div>
+            <div class="btn-wrap">
+              <button class="btn btn-save" onclick="saveSection('booking')">💾 Lưu cấu hình</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="s-card">
+          <div class="s-card-head">
+            <span class="s-card-ico">🚌</span>
+            <div><h3>Vận hành chuyến xe — TRIP</h3><p>Cài đặt liên quan TRIP.status và tuyến đường</p></div>
+          </div>
+          <div class="s-card-body">
+            <div class="toggle-row">
+              <div class="toggle-left">
+                <span class="toggle-ico">⏰</span>
+                <div><div class="toggle-label">Tự động đóng TRIP khi hết ghế</div><div class="toggle-sub">Chuyển OPEN → FULL khi available_seats = 0</div></div>
+              </div>
+              <label class="toggle"><input type="checkbox" id="t_autoFull" checked><span class="toggle-slider"></span></label>
+            </div>
+            <div class="toggle-row">
+              <div class="toggle-left">
+                <span class="toggle-ico">🔄</span>
+                <div><div class="toggle-label">Cho phép đặt vé chuyến CANCELED</div><div class="toggle-sub">Nếu nhà xe mở lại booking sau khi hủy</div></div>
+              </div>
+              <label class="toggle"><input type="checkbox" id="t_canceledBook"><span class="toggle-slider"></span></label>
+            </div>
+          </div>
+        </div>
+
+      </div><!-- end panel-booking -->
+
+      <!-- ─── AI ─── -->
+      <div class="settings-panel" id="panel-ai">
+
+        <div class="s-card">
+          <div class="s-card-head">
+            <span class="s-card-ico">🤖</span>
+            <div><h3>Trạng thái AI Engine</h3><p>AI_RECOMMENDATION & USER_BEHAVIOR từ ERD</p></div>
+          </div>
+          <div class="s-card-body">
+            <div class="ai-status-row">
+              <div class="ai-status-left">
+                <div class="ai-dot"></div>
+                <div>
+                  <div class="ai-status-label">AI Engine đang hoạt động</div>
+                  <div class="ai-status-sub">Model: claude-sonnet · Uptime 99.7%</div>
+                </div>
+              </div>
+              <div class="ai-score">97%</div>
+            </div>
+            <div class="form-grid">
+              <div class="form-group">
+                <label>Số gợi ý tối đa / user</label>
+                <input class="form-control" id="aiMaxRec" type="number" value="10">
+              </div>
+              <div class="form-group">
+                <label>Ngưỡng score tối thiểu</label>
+                <div class="inp-wrap">
+                  <input class="form-control has-suffix" id="aiMinScore" type="number" step="0.1" min="0" max="1" value="0.6">
+                  <span class="inp-suffix">/1.0</span>
+                </div>
+              </div>
+              <div class="form-group">
+                <label>Cập nhật gợi ý mỗi (giờ)</label>
+                <div class="inp-wrap">
+                  <input class="form-control has-suffix" id="aiRefresh" type="number" value="6">
+                  <span class="inp-suffix">giờ</span>
+                </div>
+              </div>
+              <div class="form-group">
+                <label>Giữ lịch sử hành vi (ngày)</label>
+                <div class="inp-wrap">
+                  <input class="form-control has-suffix" id="behaviorRetain" type="number" value="90">
+                  <span class="inp-suffix">ngày</span>
+                </div>
+                <div class="form-hint">USER_BEHAVIOR.action_time giữ lại bao nhiêu ngày</div>
+              </div>
+            </div>
+            <div class="s-divider"></div>
+            <div class="toggle-row">
+              <div class="toggle-left">
+                <span class="toggle-ico">🧠</span>
+                <div><div class="toggle-label">Bật AI gợi ý chuyến đi</div><div class="toggle-sub">Gợi ý dựa trên AI_RECOMMENDATION.score</div></div>
+              </div>
+              <label class="toggle"><input type="checkbox" id="t_aiRec" checked><span class="toggle-slider"></span></label>
+            </div>
+            <div class="toggle-row">
+              <div class="toggle-left">
+                <span class="toggle-ico">📊</span>
+                <div><div class="toggle-label">Thu thập dữ liệu hành vi</div><div class="toggle-sub">Ghi vào bảng USER_BEHAVIOR</div></div>
+              </div>
+              <label class="toggle"><input type="checkbox" id="t_behavior" checked><span class="toggle-slider"></span></label>
+            </div>
+            <div class="toggle-row">
+              <div class="toggle-left">
+                <span class="toggle-ico">💬</span>
+                <div><div class="toggle-label">AI Chatbot hỗ trợ hành khách</div><div class="toggle-sub">Tư vấn chuyến xe, gợi ý tuyến đường</div></div>
+              </div>
+              <label class="toggle"><input type="checkbox" id="t_chatbot" checked><span class="toggle-slider"></span></label>
+            </div>
+            <div class="btn-wrap">
+              <button class="btn btn-save" onclick="saveSection('ai')">💾 Lưu cấu hình AI</button>
+              <button class="btn btn-secondary" onclick="retrain()">🔄 Retrain model</button>
+            </div>
+          </div>
+        </div>
+
+      </div><!-- end panel-ai -->
+
+      <!-- ─── SECURITY ─── -->
+      <div class="settings-panel" id="panel-security">
+
+        <div class="s-card">
+          <div class="s-card-head">
+            <span class="s-card-ico">🔐</span>
+            <div><h3>Bảo mật tài khoản</h3><p>Chính sách đăng nhập và xác thực</p></div>
+          </div>
+          <div class="s-card-body">
+            <div class="form-grid">
+              <div class="form-group">
+                <label>Số lần đăng nhập sai tối đa</label>
+                <input class="form-control" id="maxLogin" type="number" value="5">
+              </div>
+              <div class="form-group">
+                <label>Khóa tài khoản (phút)</label>
+                <div class="inp-wrap">
+                  <input class="form-control has-suffix" id="lockTime" type="number" value="30">
+                  <span class="inp-suffix">phút</span>
+                </div>
+              </div>
+              <div class="form-group">
+                <label>Thời hạn JWT Token (giờ)</label>
+                <div class="inp-wrap">
+                  <input class="form-control has-suffix" id="jwtExp" type="number" value="24">
+                  <span class="inp-suffix">giờ</span>
+                </div>
+              </div>
+              <div class="form-group">
+                <label>Độ dài mật khẩu tối thiểu</label>
+                <input class="form-control" id="minPw" type="number" value="8">
+              </div>
+            </div>
+            <div class="s-divider"></div>
+            <div class="toggle-row">
+              <div class="toggle-left">
+                <span class="toggle-ico">📧</span>
+                <div><div class="toggle-label">Xác thực email khi đăng ký</div><div class="toggle-sub">Gửi OTP/link xác nhận qua email</div></div>
+              </div>
+              <label class="toggle"><input type="checkbox" id="t_verifyEmail" checked><span class="toggle-slider"></span></label>
+            </div>
+            <div class="toggle-row">
+              <div class="toggle-left">
+                <span class="toggle-ico">📱</span>
+                <div><div class="toggle-label">Xác thực 2 bước (2FA)</div><div class="toggle-sub">Yêu cầu OTP khi đăng nhập từ thiết bị mới</div></div>
+              </div>
+              <label class="toggle"><input type="checkbox" id="t_2fa"><span class="toggle-slider"></span></label>
+            </div>
+            <div class="toggle-row">
+              <div class="toggle-left">
+                <span class="toggle-ico">🚫</span>
+                <div><div class="toggle-label">Tự động khóa USER.status = BLOCKED</div><div class="toggle-sub">Khi vượt quá số lần đăng nhập sai</div></div>
+              </div>
+              <label class="toggle"><input type="checkbox" id="t_autoBlock" checked><span class="toggle-slider"></span></label>
+            </div>
+            <div class="btn-wrap">
+              <button class="btn btn-save" onclick="saveSection('security')">💾 Lưu bảo mật</button>
+            </div>
+          </div>
+        </div>
+
+      </div><!-- end panel-security -->
+
+      <!-- ─── NOTIFICATIONS ─── -->
+      <div class="settings-panel" id="panel-notifications">
+
+        <div class="s-card">
+          <div class="s-card-head">
+            <span class="s-card-ico">🔔</span>
+            <div><h3>Cài đặt thông báo</h3><p>Email và push notification cho từng sự kiện</p></div>
+          </div>
+          <div class="s-card-body">
+            <div class="s-section-title">Email tự động</div>
+            <div class="toggle-row">
+              <div class="toggle-left">
+                <span class="toggle-ico">✅</span>
+                <div><div class="toggle-label">Xác nhận đặt vé thành công</div><div class="toggle-sub">BOOKING.status = PAID</div></div>
+              </div>
+              <label class="toggle"><input type="checkbox" id="n_bookingPaid" checked><span class="toggle-slider"></span></label>
+            </div>
+            <div class="toggle-row">
+              <div class="toggle-left">
+                <span class="toggle-ico">❌</span>
+                <div><div class="toggle-label">Thông báo hủy vé</div><div class="toggle-sub">BOOKING.status = CANCELED</div></div>
+              </div>
+              <label class="toggle"><input type="checkbox" id="n_bookingCancel" checked><span class="toggle-slider"></span></label>
+            </div>
+            <div class="toggle-row">
+              <div class="toggle-left">
+                <span class="toggle-ico">⏰</span>
+                <div><div class="toggle-label">Nhắc nhở trước chuyến đi</div><div class="toggle-sub">Gửi email/push trước 2 giờ khởi hành</div></div>
+              </div>
+              <label class="toggle"><input type="checkbox" id="n_tripRemind" checked><span class="toggle-slider"></span></label>
+            </div>
+            <div class="toggle-row">
+              <div class="toggle-left">
+                <span class="toggle-ico">⭐</span>
+                <div><div class="toggle-label">Mời đánh giá sau chuyến đi</div><div class="toggle-sub">Gửi link review khi chuyến kết thúc</div></div>
+              </div>
+              <label class="toggle"><input type="checkbox" id="n_review" checked><span class="toggle-slider"></span></label>
+            </div>
+            <div class="s-divider"></div>
+            <div class="form-grid">
+              <div class="form-group">
+                <label>SMTP Server</label>
+                <input class="form-control" id="smtpHost" value="smtp.gmail.com">
+              </div>
+              <div class="form-group">
+                <label>SMTP Port</label>
+                <input class="form-control" id="smtpPort" type="number" value="587">
+              </div>
+              <div class="form-group">
+                <label>Tên người gửi</label>
+                <input class="form-control" id="smtpName" value="SmartBusAI">
+              </div>
+              <div class="form-group">
+                <label>Email người gửi</label>
+                <input class="form-control" id="smtpFrom" value="no-reply@smartbusai.vn">
+              </div>
+            </div>
+            <div class="btn-wrap">
+              <button class="btn btn-save" onclick="saveSection('notifications')">💾 Lưu thông báo</button>
+              <button class="btn btn-secondary" onclick="sendTestEmail()">📧 Gửi email test</button>
+            </div>
+          </div>
+        </div>
+
+      </div><!-- end panel-notifications -->
+
+      <!-- ─── SYSTEM ─── -->
+      <div class="settings-panel" id="panel-system">
+
+        <div class="s-card">
+          <div class="s-card-head">
+            <span class="s-card-ico">🖥️</span>
+            <div><h3>Thông tin máy chủ</h3><p>Trạng thái hệ thống realtime</p></div>
+          </div>
+          <div class="s-card-body">
+            <div class="sys-grid">
+              <div class="sys-item">
+                <div class="sys-item-label">🟢 Server Status</div>
+                <div class="sys-item-val green">RUNNING</div>
+              </div>
+              <div class="sys-item">
+                <div class="sys-item-label">🗄️ Database</div>
+                <div class="sys-item-val green">MySQL · Connected</div>
+              </div>
+              <div class="sys-item">
+                <div class="sys-item-label">🌐 API Endpoint</div>
+                <div class="sys-item-val" style="font-size:12.5px;">localhost:2704</div>
+              </div>
+              <div class="sys-item">
+                <div class="sys-item-label">⏱️ Uptime</div>
+                <div class="sys-item-val green" id="uptime">—</div>
+              </div>
+              <div class="sys-item">
+                <div class="sys-item-label">📅 Ngày khởi động</div>
+                <div class="sys-item-val" id="startTime" style="font-size:12px;">—</div>
+              </div>
+              <div class="sys-item">
+                <div class="sys-item-label">📦 Phiên bản</div>
+                <div class="sys-item-val">v1.0.0</div>
+              </div>
+            </div>
+            <div class="warn-box" style="margin-top:16px;">
+              <span class="warn-box-ico">⚠️</span>
+              <div class="warn-box-text">Thông tin hệ thống được hiển thị theo thời gian thực. Không tắt server khi đang có booking đang xử lý.</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="s-card">
+          <div class="s-card-head">
+            <span class="s-card-ico">📋</span>
+            <div><h3>System Log</h3><p>Nhật ký hoạt động gần nhất</p></div>
+          </div>
+          <div class="s-card-body">
+            <div class="log-list" id="logList"></div>
+            <div class="btn-wrap">
+              <button class="btn btn-secondary" onclick="refreshLogs()">🔄 Làm mới log</button>
+              <button class="btn btn-danger" onclick="clearLogs()">🗑️ Xóa log</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="s-card">
+          <div class="s-card-head">
+            <span class="s-card-ico">🗃️</span>
+            <div><h3>Quản lý dữ liệu</h3><p>Backup và xóa dữ liệu hệ thống</p></div>
+          </div>
+          <div class="s-card-body">
+            <div class="info-box">
+              <span class="info-box-ico">ℹ️</span>
+              <div class="info-box-text">Backup bao gồm toàn bộ dữ liệu: USER, BOOKING, TRIP, PAYMENT, REVIEW, AI_RECOMMENDATION và USER_BEHAVIOR.</div>
+            </div>
+            <div class="btn-wrap">
+              <button class="btn btn-save" onclick="backupDB()">💾 Backup database</button>
+              <button class="btn btn-secondary" onclick="exportData()">📥 Xuất dữ liệu JSON</button>
+              <button class="btn btn-danger" onclick="confirmPurge()">🗑️ Purge log cũ</button>
+            </div>
+          </div>
+        </div>
+
+      </div><!-- end panel-system -->
+
+    </div><!-- end settings-panels -->
+  </div><!-- end settings-layout -->
+</main>
+
+<script>
+/* ── Galaxy ── */
+(function(){
+  const cv=document.getElementById("gc"),ctx=cv.getContext("2d");
+  function mb32(s){s=s>>>0;return()=>{s+=0x6D2B79F5;let t=Math.imul(s^s>>>15,1|s);t^=t+Math.imul(t^t>>>7,61|t);return((t^t>>>14)>>>0)/4294967296;};}
+  function draw(){
+    cv.width=innerWidth;cv.height=innerHeight;
+    const g=ctx.createRadialGradient(cv.width*.5,cv.height*.3,0,cv.width*.5,cv.height*.3,cv.width*.85);
+    g.addColorStop(0,"#0c1830");g.addColorStop(.5,"#080f1c");g.addColorStop(1,"#04080f");
+    ctx.fillStyle=g;ctx.fillRect(0,0,cv.width,cv.height);
+    const rng=mb32(cv.width*cv.height+7);
+    const n=Math.min(340,Math.floor(cv.width*cv.height/4600));
+    for(let i=0;i<n;i++){
+      const x=rng()*cv.width,y=rng()*cv.height,r=rng()*1.4+.15,a=rng()*.7+.2;
+      const h=rng()<.11?180:rng()<.07?265:0;
+      ctx.beginPath();ctx.arc(x,y,r,0,Math.PI*2);
+      ctx.fillStyle=h===180?`rgba(0,255,224,${a*.5})`:h===265?`rgba(170,148,255,${a*.42})`:`rgba(255,255,255,${a})`;
+      ctx.fill();
+    }
+    [{x:.10,y:.18,r:.14,c:"rgba(0,190,255,0.055)"},{x:.78,y:.68,r:.14,c:"rgba(120,75,240,0.065)"}].forEach(s=>{
+      const ng=ctx.createRadialGradient(s.x*cv.width,s.y*cv.height,0,s.x*cv.width,s.y*cv.height,s.r*cv.width);
+      ng.addColorStop(0,s.c);ng.addColorStop(1,"transparent");ctx.fillStyle=ng;ctx.fillRect(0,0,cv.width,cv.height);
+    });
+  }
+  draw();let rt;window.addEventListener("resize",()=>{clearTimeout(rt);rt=setTimeout(draw,200);});
+})();
+
+/* Page transition */
+document.addEventListener("click",e=>{
+  const a=e.target.closest("a[href]");if(!a)return;
+  const h=a.getAttribute("href");if(!h||h==="#"||h.startsWith("http"))return;
+  e.preventDefault();
+  document.body.style.transition="opacity .2s";document.body.style.opacity="0";
+  setTimeout(()=>{window.location.href=h;},210);
+});
+
+function logout(){localStorage.clear();window.location.href="../auth/login.html";}
+
+/* Toast */
+function toast(msg,type="success"){
+  const w=document.getElementById("toastWrap");
+  const el=document.createElement("div");el.className=`toast ${type}`;
+  const ic={success:"✅",error:"❌",info:"ℹ️"};
+  el.innerHTML=`<span>${ic[type]}</span><span>${msg}</span>`;
+  w.appendChild(el);
+  setTimeout(()=>{el.style.animation="toastOut .3s ease forwards";setTimeout(()=>el.remove(),320);},3200);
+}
+
+/* Tab switch */
+function switchTab(tab){
+  document.querySelectorAll(".snav-item").forEach(el=>el.classList.remove("active"));
+  document.querySelectorAll(".settings-panel").forEach(el=>el.classList.remove("active"));
+  event.currentTarget.classList.add("active");
+  document.getElementById("panel-"+tab).classList.add("active");
+}
+
+/* Payment cards */
+function togglePayCard(m){
+  const cb=document.getElementById("pm_"+m);
+  cb.checked=!cb.checked;
+  document.getElementById("pc_"+m).classList.toggle("active",cb.checked);
+}
+function syncPayCard(m){
+  document.getElementById("pc_"+m).classList.toggle("active",document.getElementById("pm_"+m).checked);
+}
+
+/* Save section */
+function saveSection(section){
+  const labels={
+    general:"Cài đặt chung",payment:"Thanh toán",booking:"Đặt vé",
+    ai:"AI Engine",security:"Bảo mật",notifications:"Thông báo"
+  };
+  toast(`✅ Đã lưu: ${labels[section]||section}`);
+  document.getElementById("savedLabel").textContent="Đã lưu lúc "+new Date().toLocaleTimeString("vi-VN");
+  addLog("Cập nhật cấu hình: "+labels[section],"success");
+}
+
+function resetSection(section){
+  toast("Đã khôi phục cài đặt mặc định","info");
+}
+
+function retrain(){
+  toast("Đang khởi động retrain model...","info");
+  setTimeout(()=>toast("Retrain hoàn tất! Accuracy: 94.2%"),2000);
+  addLog("Admin yêu cầu retrain AI model","info");
+}
+
+function sendTestEmail(){
+  toast("Đã gửi email test đến "+document.getElementById("smtpFrom").value,"info");
+  addLog("Gửi email test thành công","success");
+}
+
+function backupDB(){
+  toast("Đang tạo backup database...","info");
+  setTimeout(()=>toast("Backup thành công: smartbus_backup_"+new Date().toISOString().slice(0,10)+".sql"),1800);
+  addLog("Admin tạo backup database","success");
+}
+
+function exportData(){
+  const d={exported_at:new Date().toISOString(),tables:["USER","BOOKING","TRIP","PAYMENT","REVIEW","AI_RECOMMENDATION","USER_BEHAVIOR"]};
+  const blob=new Blob([JSON.stringify(d,null,2)],{type:"application/json"});
+  const a=document.createElement("a");a.href=URL.createObjectURL(blob);a.download="smartbus_export.json";a.click();
+  toast("Đã xuất dữ liệu JSON!");
+}
+
+function confirmPurge(){
+  if(confirm("Xóa toàn bộ log cũ hơn 30 ngày?")){ clearLogs(); toast("Đã purge log cũ"); }}
+
+/* Log system */
+const LOGS=[
+  {t:"10:45:22",msg:"Server khởi động thành công tại port 2704",type:"success"},
+  {t:"10:45:23",msg:"MySQL Connected — smartbus_db",type:"success"},
+  {t:"10:46:01",msg:"User #42 đăng nhập: admin@smartbusai.vn",type:"info"},
+  {t:"10:47:15",msg:"BOOKING #1024 được tạo — status: PENDING",type:"info"},
+  {t:"10:47:30",msg:"PAYMENT #512 thành công — MoMo 185,000đ",type:"success"},
+  {t:"10:48:00",msg:"AI Engine cập nhật gợi ý cho 8 users",type:"info"},
+  {t:"10:50:11",msg:"Cảnh báo: TRIP #77 sắp đầy chỗ (2 ghế còn)",type:"warn"},
+  {t:"10:52:33",msg:"BOOKING #1025 bị hủy — user yêu cầu",type:"warn"},
+];
+let logData=[...LOGS];
+
+function renderLogs(){
+  const types={success:"log-success",info:"log-info",warn:"log-warn",error:"log-error"};
+  document.getElementById("logList").innerHTML=logData.map(l=>`
+    <div class="log-item">
+      <span class="log-time">${l.t}</span>
+      <span class="log-msg">${l.msg}</span>
+      <span class="log-type ${types[l.type]||"log-info"}">${l.type.toUpperCase()}</span>
+    </div>`).join("");
+}
+
+function addLog(msg,type="info"){
+  const now=new Date().toLocaleTimeString("vi-VN",{hour12:false});
+  logData.unshift({t:now,msg,type});
+  if(logData.length>50)logData.pop();
+  renderLogs();
+}
+
+function refreshLogs(){
+  logData=[...LOGS];renderLogs();toast("Đã làm mới log","info");
+}
+function clearLogs(){logData=[];renderLogs();}
+
+/* System uptime */
+const bootTime=new Date(Date.now()-Math.random()*86400000*3);
+document.getElementById("startTime").textContent=bootTime.toLocaleString("vi-VN");
+function updateUptime(){
+  const s=Math.floor((Date.now()-bootTime)/1000);
+  const h=Math.floor(s/3600),m=Math.floor((s%3600)/60),sec=s%60;
+  document.getElementById("uptime").textContent=`${h}h ${m}m ${sec}s`;
+}
+updateUptime();setInterval(updateUptime,1000);
+
+renderLogs();
+</script>
+</body>
+</html>

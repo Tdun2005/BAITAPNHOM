@@ -1,0 +1,569 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Nhà xe - SmartBusAI</title>
+<style>
+/* ── Base ── */
+:root{
+  --neon:#00ffe0; --neon2:#6c5ce7; --neon3:#00a8ff;
+  --glass:rgba(255,255,255,0.08);
+  --border:rgba(255,255,255,0.12);
+}
+*{ box-sizing:border-box; margin:0; padding:0; font-family:"Segoe UI",Arial,sans-serif; }
+html{ min-height:100vh; background:#060c18; }
+body{ color:#fff; overflow-x:hidden; animation:pageIn .32s ease; }
+@keyframes pageIn{ from{opacity:0} to{opacity:1} }
+
+/* ── Background ── */
+.nebula{
+  position:fixed; inset:0; z-index:-1; pointer-events:none;
+  background:
+    radial-gradient(ellipse at 10% 20%, rgba(0,255,224,0.07) 0%,transparent 42%),
+    radial-gradient(ellipse at 85% 75%, rgba(108,92,231,0.09) 0%,transparent 44%),
+    radial-gradient(ellipse at 55% 5%,  rgba(0,164,255,0.06) 0%,transparent 40%);
+}
+
+/* ── Header ── */
+header{
+  padding:14px 60px;
+  display:flex; justify-content:space-between; align-items:center;
+  background:rgba(6,10,22,0.78);
+  backdrop-filter:blur(14px); -webkit-backdrop-filter:blur(14px);
+  border-bottom:1px solid rgba(255,255,255,0.09);
+  box-shadow:0 2px 24px rgba(0,0,0,.50);
+  position:sticky; top:0; z-index:900;
+}
+.hdr-logo{
+  display:flex; align-items:center; gap:10px; text-decoration:none;
+  font-size:20px; font-weight:900; color:#fff;
+}
+.hdr-logo-icon{
+  width:38px; height:38px; border-radius:10px;
+  background:linear-gradient(135deg,#00ffe0,#00a8ff);
+  display:flex; align-items:center; justify-content:center;
+  font-size:20px; color:#040d18;
+  box-shadow:0 0 16px rgba(0,255,224,.45);
+}
+.hdr-logo span{ background:linear-gradient(90deg,#00ffe0,#00a8ff); -webkit-background-clip:text; -webkit-text-fill-color:transparent; }
+nav{ display:flex; gap:6px; align-items:center; flex-wrap:wrap; }
+nav a{
+  color:rgba(255,255,255,.75); text-decoration:none; padding:7px 14px;
+  border-radius:20px; font-size:13px; font-weight:600; transition:all .2s;
+}
+nav a:hover,nav a.active{ background:rgba(0,255,224,.12); color:#00ffe0; }
+.hdr-right{ display:flex; align-items:center; gap:10px; }
+.hdr-user-btn{
+  padding:7px 18px; border-radius:20px; border:none; cursor:pointer;
+  font-size:13px; font-weight:700; font-family:"Segoe UI",Arial,sans-serif; transition:all .2s;
+  background:linear-gradient(135deg,#00ffe0,#00a8ff); color:#040d18;
+}
+.hdr-user-btn:hover{ transform:translateY(-1px); box-shadow:0 0 14px rgba(0,255,224,.5); }
+
+/* ── Page wrapper ── */
+.page-wrap{ max-width:1200px; margin:0 auto; padding:32px 24px 60px; }
+
+/* ── Page title ── */
+.page-title{
+  margin-bottom:28px;
+  display:flex; align-items:center; gap:14px; flex-wrap:wrap;
+}
+.page-title h1{ font-size:28px; font-weight:900; }
+.page-title h1 span{ background:linear-gradient(90deg,#00ffe0,#00a8ff); -webkit-background-clip:text; -webkit-text-fill-color:transparent; }
+.page-title p{ color:#7ab5c8; font-size:14px; margin-top:4px; }
+
+/* ── Filter bar ── */
+.filter-bar{
+  display:flex; gap:10px; flex-wrap:wrap; align-items:center;
+  background:rgba(255,255,255,.04); border:1px solid var(--border);
+  border-radius:16px; padding:14px 18px; margin-bottom:28px;
+}
+.filter-bar input, .filter-bar select{
+  padding:8px 14px; border-radius:10px;
+  background:rgba(255,255,255,.07); border:1px solid rgba(255,255,255,.13);
+  color:#fff; font-size:13px; outline:none;
+  font-family:"Segoe UI",Arial,sans-serif; transition:border .2s;
+  min-width:160px;
+}
+.filter-bar input::placeholder{ color:#4a7a8a; }
+.filter-bar input:focus,.filter-bar select:focus{ border-color:rgba(0,255,224,.45); }
+.filter-bar select option{ background:#0d1e33; }
+.filter-btn{
+  padding:8px 20px; border-radius:10px; border:none; cursor:pointer;
+  background:linear-gradient(135deg,#00ffe0,#00a8ff); color:#040d18;
+  font-size:13px; font-weight:700; font-family:"Segoe UI",Arial,sans-serif;
+  transition:transform .2s,box-shadow .2s;
+}
+.filter-btn:hover{ transform:translateY(-2px); box-shadow:0 0 18px rgba(0,255,224,.4); }
+.stats-badge{
+  margin-left:auto; color:#7ab5c8; font-size:13px; font-weight:600; white-space:nowrap;
+}
+
+/* ── Operator grid ── */
+.op-grid{
+  display:grid; grid-template-columns:repeat(auto-fill,minmax(340px,1fr));
+  gap:22px;
+}
+
+/* ── Operator card ── */
+.op-card{
+  background:rgba(255,255,255,.04); border:1px solid var(--border);
+  border-radius:18px; overflow:hidden;
+  transition:transform .25s,box-shadow .25s,border-color .25s;
+  cursor:pointer;
+}
+.op-card:hover{
+  transform:translateY(-4px);
+  box-shadow:0 8px 40px rgba(0,0,0,.45), 0 0 0 1px rgba(0,255,224,.22);
+  border-color:rgba(0,255,224,.22);
+}
+.op-card-head{
+  padding:18px 20px 14px;
+  display:flex; align-items:flex-start; gap:14px;
+  border-bottom:1px solid rgba(255,255,255,.06);
+}
+.op-avatar{
+  width:52px; height:52px; border-radius:14px; flex-shrink:0;
+  background:linear-gradient(135deg,rgba(0,255,224,.18),rgba(0,168,255,.18));
+  border:1px solid rgba(0,255,224,.25);
+  display:flex; align-items:center; justify-content:center;
+  font-size:24px;
+}
+.op-name-wrap{ flex:1; min-width:0; }
+.op-name{ font-size:15px; font-weight:800; color:#fff; line-height:1.3; }
+.op-status{ display:inline-flex; align-items:center; gap:5px; font-size:11px; font-weight:700;
+  margin-top:4px; padding:2px 10px; border-radius:12px; }
+.op-status.active{ background:rgba(46,204,113,.12); color:#2ecc71; border:1px solid rgba(46,204,113,.25); }
+.op-status.inactive{ background:rgba(231,76,60,.1); color:#e74c3c; border:1px solid rgba(231,76,60,.2); }
+.op-rating{ text-align:right; flex-shrink:0; }
+.op-rating .stars{ color:#f1c40f; font-size:14px; font-weight:700; }
+.op-rating .rev{ font-size:10px; color:#7ab5c8; }
+
+.op-info{ padding:14px 20px; display:grid; grid-template-columns:1fr 1fr; gap:8px; }
+.op-info-item{ display:flex; flex-direction:column; gap:2px; }
+.op-info-item .lbl{ font-size:10px; color:#5a8498; font-weight:600; text-transform:uppercase; letter-spacing:.5px; }
+.op-info-item .val{ font-size:12.5px; color:#c8e8f0; font-weight:600; }
+.op-info-item.full{ grid-column:1/-1; }
+
+.op-card-foot{
+  padding:12px 20px;
+  display:flex; align-items:center; gap:8px;
+  border-top:1px solid rgba(255,255,255,.06);
+  background:rgba(0,255,224,.03);
+}
+.op-stat-chip{
+  padding:4px 10px; border-radius:20px; font-size:11px; font-weight:700;
+  background:rgba(0,255,224,.09); color:#00ffe0;
+  border:1px solid rgba(0,255,224,.18);
+}
+.op-view-btn{
+  margin-left:auto; padding:6px 16px; border-radius:10px; border:none; cursor:pointer;
+  background:linear-gradient(135deg,rgba(0,255,224,.18),rgba(0,168,255,.18));
+  color:#00ffe0; font-size:12px; font-weight:700;
+  font-family:"Segoe UI",Arial,sans-serif; transition:all .2s;
+  border:1px solid rgba(0,255,224,.22);
+}
+.op-view-btn:hover{ background:linear-gradient(135deg,rgba(0,255,224,.3),rgba(0,168,255,.3)); }
+
+/* ── MODAL overlay ── */
+.modal-overlay{
+  display:none; position:fixed; inset:0; z-index:2000;
+  background:rgba(3,8,20,.85); backdrop-filter:blur(6px);
+  align-items:flex-start; justify-content:center; overflow-y:auto; padding:40px 16px;
+}
+.modal-overlay.open{ display:flex; }
+.modal-box{
+  background:#0b1628; border:1px solid rgba(0,255,224,.2);
+  border-radius:22px; width:100%; max-width:820px;
+  box-shadow:0 20px 80px rgba(0,0,0,.7);
+  animation:modalIn .25s ease;
+  overflow:hidden;
+}
+@keyframes modalIn{ from{transform:translateY(24px);opacity:0} to{transform:none;opacity:1} }
+
+.modal-head{
+  padding:22px 28px 18px;
+  display:flex; align-items:flex-start; gap:16px;
+  border-bottom:1px solid rgba(255,255,255,.08);
+}
+.modal-avatar{
+  width:60px; height:60px; border-radius:16px; flex-shrink:0;
+  background:linear-gradient(135deg,rgba(0,255,224,.2),rgba(0,168,255,.2));
+  border:1px solid rgba(0,255,224,.3);
+  display:flex; align-items:center; justify-content:center; font-size:28px;
+}
+.modal-head-text{ flex:1; min-width:0; }
+.modal-head-text h2{ font-size:20px; font-weight:900; color:#fff; }
+.modal-head-text p{ font-size:13px; color:#7ab5c8; margin-top:4px; }
+.modal-close{
+  width:34px; height:34px; border-radius:50%; border:1px solid rgba(255,255,255,.15);
+  background:transparent; color:#7ab5c8; font-size:18px; cursor:pointer;
+  display:flex; align-items:center; justify-content:center; flex-shrink:0;
+  transition:all .2s;
+}
+.modal-close:hover{ background:rgba(255,255,255,.08); color:#fff; }
+
+.modal-body{ padding:22px 28px 28px; overflow-y:auto; }
+
+/* ── Operator detail info ── */
+.op-detail-grid{
+  display:grid; grid-template-columns:repeat(auto-fill,minmax(200px,1fr));
+  gap:12px; margin-bottom:24px;
+}
+.op-detail-item{
+  background:rgba(255,255,255,.04); border:1px solid var(--border);
+  border-radius:12px; padding:12px 16px;
+}
+.op-detail-item .lbl{ font-size:10.5px; color:#5a8498; font-weight:600; text-transform:uppercase; letter-spacing:.5px; margin-bottom:5px; }
+.op-detail-item .val{ font-size:13.5px; color:#c8e8f0; font-weight:700; }
+
+/* ── Trips section inside modal ── */
+.trips-section-title{
+  font-size:14px; font-weight:800; color:#00ffe0;
+  margin-bottom:14px; display:flex; align-items:center; gap:8px;
+}
+.trip-list{ display:flex; flex-direction:column; gap:10px; }
+.trip-row{
+  background:rgba(255,255,255,.04); border:1px solid rgba(255,255,255,.1);
+  border-radius:14px; padding:14px 18px;
+  display:flex; align-items:center; gap:14px; flex-wrap:wrap;
+  transition:border-color .2s,background .2s;
+}
+.trip-row:hover{ border-color:rgba(0,255,224,.22); background:rgba(0,255,224,.04); }
+.trip-route{ flex:1; min-width:160px; }
+.trip-route .from-to{ font-size:14px; font-weight:800; }
+.trip-route .distance{ font-size:11px; color:#7ab5c8; margin-top:2px; }
+.trip-time{ min-width:110px; }
+.trip-time .depart{ font-size:12.5px; font-weight:700; color:#00ffe0; }
+.trip-time .arrive{ font-size:11px; color:#7ab5c8; }
+.trip-price{ font-size:15px; font-weight:900; color:#fff; min-width:90px; text-align:right; }
+.trip-seats{ text-align:right; min-width:80px; }
+.trip-seats .seat-num{ font-size:12px; font-weight:700; color:#2ecc71; }
+.trip-seats .seat-lbl{ font-size:10px; color:#7ab5c8; }
+.trip-status-chip{
+  padding:3px 10px; border-radius:10px; font-size:11px; font-weight:700;
+}
+.trip-status-chip.OPEN{ background:rgba(46,204,113,.12); color:#2ecc71; border:1px solid rgba(46,204,113,.25); }
+.trip-status-chip.FULL{ background:rgba(231,76,60,.1); color:#e74c3c; border:1px solid rgba(231,76,60,.2); }
+.trip-status-chip.CANCELED{ background:rgba(108,92,231,.1); color:#6c5ce7; border:1px solid rgba(108,92,231,.25); }
+.trip-book-btn{
+  padding:7px 16px; border-radius:10px; border:none; cursor:pointer;
+  background:linear-gradient(135deg,#00ffe0,#00a8ff); color:#040d18;
+  font-size:12px; font-weight:800; font-family:"Segoe UI",Arial,sans-serif;
+  transition:transform .2s; white-space:nowrap;
+}
+.trip-book-btn:hover{ transform:translateY(-2px); box-shadow:0 0 14px rgba(0,255,224,.4); }
+.trip-book-btn:disabled{ opacity:.45; cursor:not-allowed; transform:none; background:#334; color:#778; }
+
+/* ── Loading / empty states ── */
+.loading-state, .empty-state{
+  text-align:center; padding:60px 20px; color:#7ab5c8;
+}
+.loading-state .spin{
+  width:42px; height:42px; border-radius:50%;
+  border:3px solid rgba(0,255,224,.18); border-top-color:#00ffe0;
+  animation:spin .8s linear infinite; margin:0 auto 16px;
+}
+@keyframes spin{ to{transform:rotate(360deg)} }
+.empty-state .icon{ font-size:48px; margin-bottom:12px; }
+.empty-state p{ font-size:15px; }
+
+/* ── Toast ── */
+.toast{
+  position:fixed; bottom:28px; right:28px; z-index:9999;
+  padding:12px 22px; border-radius:12px; font-size:13.5px; font-weight:700;
+  background:#1a2840; border:1px solid rgba(0,255,224,.3); color:#c8e8f0;
+  box-shadow:0 6px 30px rgba(0,0,0,.5);
+  transform:translateY(20px); opacity:0; transition:all .3s;
+}
+.toast.show{ transform:translateY(0); opacity:1; }
+.toast.success{ border-color:rgba(46,204,113,.4); color:#2ecc71; }
+.toast.error  { border-color:rgba(231,76,60,.4);  color:#e74c3c; }
+
+/* ── responsive ── */
+@media(max-width:700px){
+  header{ padding:12px 18px; }
+  .page-wrap{ padding:20px 14px 50px; }
+  .op-grid{ grid-template-columns:1fr; }
+  .modal-body{ padding:16px 16px 24px; }
+  .modal-head{ padding:16px; }
+  .trip-row{ gap:8px; }
+  .trip-price,.trip-seats{ min-width:unset; text-align:left; }
+}
+</style>
+</head>
+<body>
+<div class="nebula"></div>
+
+<!-- HEADER -->
+<header>
+  <a class="hdr-logo" href="index.html">
+    <div class="hdr-logo-icon">🚌</div>
+    <span>SmartBusAI</span>
+  </a>
+  <nav>
+    <a href="index.html">🏠 Trang chủ</a>
+    <a href="search.html">🔍 Tìm chuyến</a>
+    <a href="booking.html">🎫 Đặt vé</a>
+    <a href="nha-xe.html" class="active">🏢 Nhà xe</a>
+    <a href="profile.html">👤 Tài khoản</a>
+  </nav>
+  <div class="hdr-right">
+    <button class="hdr-user-btn" id="userBtn" onclick="window.location.href='../login.html'">Đăng nhập</button>
+  </div>
+</header>
+
+<!-- PAGE -->
+<div class="page-wrap">
+
+  <div class="page-title">
+    <div>
+      <h1>🏢 <span>Nhà xe</span></h1>
+      <p>Khám phá tất cả nhà xe & chuyến đi đang hoạt động</p>
+    </div>
+  </div>
+
+  <!-- Filter -->
+  <div class="filter-bar">
+    <input id="filterName" placeholder="🔍 Tìm theo tên nhà xe..." oninput="filterOperators()">
+    <select id="filterStatus" onchange="filterOperators()">
+      <option value="">Tất cả trạng thái</option>
+      <option value="ACTIVE">Đang hoạt động</option>
+      <option value="INACTIVE">Tạm dừng</option>
+    </select>
+    <button class="filter-btn" onclick="filterOperators()">Lọc</button>
+    <span class="stats-badge" id="statsLabel">Đang tải...</span>
+  </div>
+
+  <!-- Operator grid -->
+  <div class="op-grid" id="opGrid">
+    <div class="loading-state">
+      <div class="spin"></div>
+      <p>Đang tải danh sách nhà xe...</p>
+    </div>
+  </div>
+
+</div><!-- /page-wrap -->
+
+<!-- MODAL: Operator detail + trips -->
+<div class="modal-overlay" id="opModal" onclick="closeModal(event)">
+  <div class="modal-box" id="opModalBox">
+    <div class="modal-head">
+      <div class="modal-avatar" id="mAvatar">🏢</div>
+      <div class="modal-head-text">
+        <h2 id="mName">Nhà xe</h2>
+        <p id="mSub">Thông tin chi tiết</p>
+      </div>
+      <button class="modal-close" onclick="closeModal()">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="op-detail-grid" id="mDetailGrid"></div>
+      <div class="trips-section-title">🚌 Các chuyến xe đang quản lý</div>
+      <div class="trip-list" id="mTripList">
+        <div class="loading-state"><div class="spin"></div><p>Đang tải chuyến xe...</p></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- TOAST -->
+<div class="toast" id="toast"></div>
+
+<script>
+/* ── helpers ── */
+function fmt(n){ return new Intl.NumberFormat("vi-VN",{style:"currency",currency:"VND"}).format(Number(n)||0); }
+function fmtT(dt){
+  if(!dt) return "—";
+  const d=new Date(dt);
+  return d.toLocaleDateString("vi-VN",{day:"2-digit",month:"2-digit"})+" "+d.toLocaleTimeString("vi-VN",{hour:"2-digit",minute:"2-digit"});
+}
+function fmtDate(dt){
+  if(!dt) return "—";
+  return new Date(dt).toLocaleDateString("vi-VN",{day:"2-digit",month:"2-digit",year:"numeric"});
+}
+function showToast(msg, type="info"){
+  const t=document.getElementById("toast");
+  t.textContent=msg; t.className="toast show "+(type||"");
+  clearTimeout(t._t); t._t=setTimeout(()=>t.className="toast",2800);
+}
+
+/* ── User session ── */
+let currentUser=null;
+function initUser(){
+  const raw=localStorage.getItem("user");
+  try{ currentUser=raw?JSON.parse(raw):null; }catch{ currentUser=null; }
+  if(currentUser){
+    document.getElementById("userBtn").textContent=`👤 ${currentUser.full_name||currentUser.email||"Tài khoản"}`;
+    document.getElementById("userBtn").onclick=()=>window.location.href="profile.html";
+  }
+}
+
+/* ── Data ── */
+let allOperators=[];
+let filteredOperators=[];
+
+async function loadOperators(){
+  try{
+    const r=await fetch("/api/operators");
+    allOperators=await r.json();
+    if(!Array.isArray(allOperators)) allOperators=[];
+    filteredOperators=[...allOperators];
+    renderOperators();
+  }catch{
+    document.getElementById("opGrid").innerHTML=`<div class="empty-state"><div class="icon">⚠️</div><p>Lỗi tải dữ liệu nhà xe</p></div>`;
+  }
+}
+
+function filterOperators(){
+  const name=(document.getElementById("filterName").value||"").toLowerCase().trim();
+  const status=(document.getElementById("filterStatus").value||"").trim();
+  filteredOperators=allOperators.filter(op=>{
+    const nameMatch=!name||(op.name||"").toLowerCase().includes(name);
+    const statusMatch=!status||(op.status||"")==status;
+    return nameMatch&&statusMatch;
+  });
+  renderOperators();
+}
+
+function renderOperators(){
+  const grid=document.getElementById("opGrid");
+  const label=document.getElementById("statsLabel");
+  label.textContent=`${filteredOperators.length} nhà xe`;
+  if(!filteredOperators.length){
+    grid.innerHTML=`<div class="empty-state"><div class="icon">🚌</div><p>Không tìm thấy nhà xe phù hợp</p></div>`;
+    return;
+  }
+  grid.innerHTML=filteredOperators.map(op=>opCard(op)).join("");
+}
+
+function opCard(op){
+  const isActive=(op.status||"ACTIVE")==="ACTIVE";
+  const rating=op.avg_rating?Number(op.avg_rating).toFixed(1):"N/A";
+  const stars=op.avg_rating?("★".repeat(Math.round(op.avg_rating))+"☆".repeat(5-Math.round(op.avg_rating))):"—";
+  return `
+  <div class="op-card" onclick="openOperator(${op.operator_id})">
+    <div class="op-card-head">
+      <div class="op-avatar">🏢</div>
+      <div class="op-name-wrap">
+        <div class="op-name">${escHtml(op.name||"Nhà xe")}</div>
+        <div class="op-status ${isActive?"active":"inactive"}">
+          <span>${isActive?"●":"○"}</span>${isActive?"Đang hoạt động":"Tạm dừng"}
+        </div>
+      </div>
+      <div class="op-rating">
+        <div class="stars">${stars}</div>
+        <div class="rev">${rating} sao</div>
+      </div>
+    </div>
+    <div class="op-info">
+      <div class="op-info-item">
+        <span class="lbl">📞 Liên hệ</span>
+        <span class="val">${escHtml(op.phone||"—")}</span>
+      </div>
+      <div class="op-info-item">
+        <span class="lbl">✉️ Email</span>
+        <span class="val" style="word-break:break-all;">${escHtml(op.email||"—")}</span>
+      </div>
+      <div class="op-info-item full">
+        <span class="lbl">📍 Địa chỉ</span>
+        <span class="val">${escHtml(op.address||"—")}</span>
+      </div>
+      ${op.license_number?`
+      <div class="op-info-item full">
+        <span class="lbl">🪪 Giấy phép</span>
+        <span class="val">${escHtml(op.license_number)}</span>
+      </div>`:""}
+    </div>
+    <div class="op-card-foot">
+      ${op.bus_count?`<span class="op-stat-chip">🚌 ${op.bus_count} xe</span>`:""}
+      ${op.trip_count?`<span class="op-stat-chip">📋 ${op.trip_count} chuyến</span>`:""}
+      <button class="op-view-btn">Xem chi tiết →</button>
+    </div>
+  </div>`;
+}
+
+function escHtml(s){ return String(s||"").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;"); }
+
+/* ── Modal ── */
+async function openOperator(opId){
+  const op=allOperators.find(o=>o.operator_id===opId);
+  if(!op) return;
+  // Populate header
+  document.getElementById("mName").textContent=op.name||"Nhà xe";
+  document.getElementById("mSub").textContent=(op.status==="ACTIVE"?"✅ Đang hoạt động":"❌ Tạm dừng")+(op.avg_rating?` · ⭐ ${Number(op.avg_rating).toFixed(1)} sao`:"");
+  // Detail grid
+  const grid=document.getElementById("mDetailGrid");
+  grid.innerHTML=`
+    <div class="op-detail-item"><div class="lbl">📞 Điện thoại</div><div class="val">${escHtml(op.phone||"—")}</div></div>
+    <div class="op-detail-item"><div class="lbl">✉️ Email</div><div class="val" style="word-break:break-all;">${escHtml(op.email||"—")}</div></div>
+    <div class="op-detail-item"><div class="lbl">📍 Địa chỉ</div><div class="val">${escHtml(op.address||"—")}</div></div>
+    <div class="op-detail-item"><div class="lbl">🪪 Giấy phép KD</div><div class="val">${escHtml(op.license_number||"—")}</div></div>
+    <div class="op-detail-item"><div class="lbl">📅 Ngày tham gia</div><div class="val">${fmtDate(op.created_at)}</div></div>
+    <div class="op-detail-item"><div class="lbl">📊 Trạng thái</div><div class="val" style="color:${op.status==="ACTIVE"?"#2ecc71":"#e74c3c"}">${op.status||"ACTIVE"}</div></div>
+    ${op.bus_count?`<div class="op-detail-item"><div class="lbl">🚌 Số xe</div><div class="val">${op.bus_count}</div></div>`:""}
+    ${op.avg_rating?`<div class="op-detail-item"><div class="lbl">⭐ Đánh giá TB</div><div class="val">${Number(op.avg_rating).toFixed(2)} / 5</div></div>`:""}
+  `;
+  // Show modal
+  document.getElementById("opModal").classList.add("open");
+  document.body.style.overflow="hidden";
+  // Load trips
+  const tripList=document.getElementById("mTripList");
+  tripList.innerHTML=`<div class="loading-state"><div class="spin"></div><p>Đang tải chuyến xe...</p></div>`;
+  try{
+    const r=await fetch(`/api/trips?operator_id=${opId}`);
+    const trips=await r.json();
+    if(!Array.isArray(trips)||trips.length===0){
+      tripList.innerHTML=`<div class="empty-state"><div class="icon">📋</div><p>Nhà xe chưa có chuyến nào</p></div>`;
+      return;
+    }
+    tripList.innerHTML=trips.map(t=>tripRow(t)).join("");
+  }catch{
+    tripList.innerHTML=`<div class="empty-state"><div class="icon">⚠️</div><p>Lỗi tải chuyến xe</p></div>`;
+  }
+}
+
+function tripRow(t){
+  const canBook=t.status==="OPEN"&&Number(t.available_seats)>0&&currentUser;
+  const statusLabel={"OPEN":"Còn vé","FULL":"Hết vé","CANCELED":"Đã hủy"}[t.status]||t.status;
+  return `
+  <div class="trip-row">
+    <div class="trip-route">
+      <div class="from-to">${escHtml(t.origin||"—")} → ${escHtml(t.destination||"—")}</div>
+      <div class="distance">${t.distance_km?t.distance_km+"km · ":""} ${escHtml(t.bus_type||"NORMAL")} · ${escHtml(t.plate_number||"—")}</div>
+    </div>
+    <div class="trip-time">
+      <div class="depart">${fmtT(t.departure_time)}</div>
+      <div class="arrive">→ ${fmtT(t.arrival_time)}</div>
+    </div>
+    <div class="trip-seats">
+      <div class="seat-num">${t.available_seats}/${t.total_seats}</div>
+      <div class="seat-lbl">ghế trống</div>
+    </div>
+    <div class="trip-price">${fmt(t.base_price)}</div>
+    <span class="trip-status-chip ${t.status}">${statusLabel}</span>
+    <button class="trip-book-btn" ${canBook?"":"disabled"} onclick="bookTrip(${t.trip_id},event)">
+      ${currentUser?(canBook?"Đặt vé":"Hết vé"):"Đăng nhập"}
+    </button>
+  </div>`;
+}
+
+function bookTrip(tripId, e){
+  e&&e.stopPropagation();
+  if(!currentUser){ showToast("Bạn cần đăng nhập để đặt vé","error"); return; }
+  window.location.href=`booking.html?trip_id=${tripId}`;
+}
+
+function closeModal(e){
+  if(e&&e.target!==document.getElementById("opModal")) return;
+  document.getElementById("opModal").classList.remove("open");
+  document.body.style.overflow="";
+}
+document.addEventListener("keydown",e=>{ if(e.key==="Escape") closeModal(); });
+
+/* ── Init ── */
+initUser();
+loadOperators();
+</script>
+</body>
+</html>

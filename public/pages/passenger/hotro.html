@@ -1,0 +1,658 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Hỗ trợ & Trợ giúp — SmartBusAI</title>
+<style>
+:root{
+  --bg:#04080f; --neon:#00ffe0; --neon2:#00a8ff; --purple:#7c5ce7;
+  --amber:#f39c12; --green:#2ecc71; --red:#e74c3c; --pink:#fd79a8;
+  --glass:rgba(255,255,255,0.055); --glass2:rgba(255,255,255,0.10);
+  --border:rgba(255,255,255,0.09); --border2:rgba(255,255,255,0.16);
+  --hh:62px; --text:#e8f4f8; --text2:rgba(255,255,255,.52); --text3:rgba(255,255,255,.30);
+}
+*{box-sizing:border-box;margin:0;padding:0;font-family:"Segoe UI",Arial,sans-serif;}
+html{background:var(--bg);min-height:100vh;}
+body{color:var(--text);background:transparent;overflow-x:hidden;animation:pageIn .3s ease;}
+@keyframes pageIn{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}
+
+/* Galaxy */
+#gc{position:fixed;inset:0;z-index:-3;pointer-events:none;}
+.neb{position:fixed;inset:0;z-index:-2;pointer-events:none;
+  background:radial-gradient(ellipse at 10% 18%,rgba(0,255,224,.07) 0%,transparent 40%),
+    radial-gradient(ellipse at 88% 78%,rgba(124,92,231,.08) 0%,transparent 44%),
+    radial-gradient(ellipse at 52% 4%,rgba(0,164,255,.06) 0%,transparent 38%);}
+.pl1{position:fixed;width:100px;height:100px;top:80px;right:100px;border-radius:50%;z-index:-1;pointer-events:none;
+  background:radial-gradient(circle at 30% 30%,#d0c8ff,#7c5ce7 44%,#1a0a40 78%);
+  box-shadow:0 0 45px rgba(124,92,231,.45),0 0 90px rgba(124,92,231,.15);}
+.pl2{position:fixed;width:44px;height:44px;bottom:80px;left:90px;border-radius:50%;z-index:-1;pointer-events:none;
+  background:radial-gradient(circle at 38% 38%,#fff,#00d4ff 52%,#001a33 82%);
+  box-shadow:0 0 28px rgba(0,212,255,.5);animation:pfloat 12s ease-in-out infinite;}
+@keyframes pfloat{0%,100%{transform:translateY(0)}50%{transform:translateY(-12px)}}
+.mt{position:fixed;width:2px;height:48px;pointer-events:none;z-index:-1;
+  background:linear-gradient(rgba(255,255,255,.8),transparent);transform:rotate(42deg);animation:mt linear infinite;}
+.mt:nth-child(1){top:8%;left:15%;animation-duration:18s;}
+.mt:nth-child(2){top:40%;left:60%;animation-duration:24s;animation-delay:6s;}
+@keyframes mt{0%{opacity:1;transform:translate3d(0,0,0) rotate(42deg)}100%{opacity:0;transform:translate3d(560px,560px,0) rotate(42deg)}}
+
+/* ── HEADER ── */
+.hdr{position:sticky;top:0;z-index:3000;height:var(--hh);display:flex;align-items:center;
+  background:rgba(4,8,15,0.82);backdrop-filter:blur(18px);border-bottom:1px solid var(--border);padding:0 32px;}
+.hdr-logo{display:flex;align-items:center;gap:10px;text-decoration:none;flex-shrink:0;}
+.hdr-logo-ic{width:34px;height:34px;border-radius:9px;font-size:18px;
+  background:linear-gradient(135deg,#00ffe0,#00a8ff);display:flex;align-items:center;justify-content:center;
+  box-shadow:0 0 14px rgba(0,255,224,.38);}
+.hdr-logo-tx{font-size:16px;font-weight:800;background:linear-gradient(90deg,#00ffe0,#7eb8ff);
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;}
+.hdr-nav{display:flex;align-items:center;gap:4px;margin-left:auto;}
+.hdr-nav a{text-decoration:none;color:var(--text2);font-size:12.5px;font-weight:600;padding:7px 12px;
+  border-radius:8px;border:1px solid transparent;transition:all .2s;white-space:nowrap;}
+.hdr-nav a:hover{color:var(--neon);background:rgba(0,255,224,.08);border-color:rgba(0,255,224,.20);}
+.hdr-nav a.active{color:#5dc8ff;background:rgba(0,168,255,.10);border-color:rgba(0,168,255,.25);}
+.hdr-actions{display:flex;align-items:center;gap:8px;margin-left:16px;flex-shrink:0;}
+.user-chip{display:flex;align-items:center;gap:7px;background:var(--glass);border:1px solid var(--border);
+  border-radius:20px;padding:5px 12px 5px 6px;}
+.user-av{width:26px;height:26px;border-radius:50%;background:linear-gradient(135deg,#00a8ff,#00ffe0);
+  display:flex;align-items:center;justify-content:center;font-size:13px;}
+.user-nm{font-size:12px;font-weight:600;}
+.btn-logout{background:rgba(231,76,60,.12);border:1px solid rgba(231,76,60,.28);color:#e74c3c;
+  padding:7px 14px;border-radius:9px;font-size:12px;font-weight:700;cursor:pointer;
+  font-family:"Segoe UI",Arial,sans-serif;transition:all .2s;}
+.btn-logout:hover{background:rgba(231,76,60,.26);color:#fff;}
+
+/* ── MAIN ── */
+.main{max-width:860px;margin:0 auto;padding:36px 24px 80px;}
+
+/* Page hero */
+.page-hero{display:flex;align-items:center;gap:18px;margin-bottom:32px;
+  background:linear-gradient(135deg,rgba(0,168,255,.08),rgba(0,255,224,.04));
+  border:1px solid rgba(0,168,255,.2);border-radius:20px;padding:24px 28px;}
+.hero-icon-wrap{width:58px;height:58px;border-radius:16px;flex-shrink:0;
+  background:linear-gradient(135deg,rgba(0,168,255,.2),rgba(0,255,224,.1));
+  border:1px solid rgba(0,168,255,.3);display:flex;align-items:center;justify-content:center;font-size:28px;}
+.hero-title{font-size:22px;font-weight:800;color:var(--text);}
+.hero-sub{font-size:13px;color:var(--text2);margin-top:4px;}
+
+/* Back link */
+.back-link{display:inline-flex;align-items:center;gap:6px;color:var(--text2);text-decoration:none;
+  font-size:13px;font-weight:600;margin-bottom:20px;transition:color .2s;}
+.back-link:hover{color:var(--neon);}
+
+/* ── TABS ── */
+.tabs-bar{display:flex;background:var(--glass);border:1px solid var(--border);
+  border-radius:16px;padding:5px;margin-bottom:28px;gap:4px;}
+.tab-btn{flex:1;padding:11px 14px;border-radius:12px;border:none;background:transparent;
+  color:var(--text2);font-size:13px;font-weight:600;cursor:pointer;
+  font-family:"Segoe UI",Arial,sans-serif;transition:all .22s;display:flex;align-items:center;justify-content:center;gap:7px;white-space:nowrap;}
+.tab-btn:hover{color:var(--text);background:rgba(255,255,255,.06);}
+.tab-btn.active{background:rgba(0,168,255,.15);color:#5dc8ff;border:1px solid rgba(0,168,255,.28);
+  box-shadow:0 2px 12px rgba(0,168,255,.15);}
+.tab-badge{background:rgba(0,168,255,.25);color:#5dc8ff;font-size:10.5px;font-weight:800;
+  padding:1px 7px;border-radius:10px;}
+
+/* ── TAB PANELS ── */
+.tab-panel{display:none;}
+.tab-panel.active{display:block;}
+
+/* ── SEND REQUEST FORM ── */
+.form-card{background:var(--glass);border:1px solid var(--border);border-radius:18px;overflow:hidden;}
+.form-card-head{padding:20px 24px 16px;border-bottom:1px solid var(--border);
+  display:flex;align-items:center;gap:10px;}
+.form-card-head h3{font-size:15px;font-weight:800;}
+.form-card-body{padding:24px;}
+
+.form-group{display:flex;flex-direction:column;gap:7px;margin-bottom:18px;}
+.form-group:last-child{margin-bottom:0;}
+.form-group label{font-size:12px;font-weight:700;color:var(--text2);}
+.form-group label .req{color:#e74c3c;margin-left:2px;}
+.form-control{padding:11px 14px;border-radius:12px;background:rgba(255,255,255,.07);
+  border:1px solid var(--border2);color:var(--text);font-size:13.5px;
+  font-family:"Segoe UI",Arial,sans-serif;outline:none;transition:border .2s,box-shadow .2s;}
+.form-control::placeholder{color:var(--text3);}
+.form-control:focus{border-color:rgba(0,168,255,.5);box-shadow:0 0 0 3px rgba(0,168,255,.10);}
+select.form-control{cursor:pointer;}
+select.form-control option{background:#0d1827;}
+textarea.form-control{resize:vertical;min-height:130px;line-height:1.6;}
+
+/* Note box */
+.note-box{display:flex;align-items:flex-start;gap:10px;background:rgba(243,156,18,.07);
+  border:1px solid rgba(243,156,18,.2);border-radius:12px;padding:13px 15px;margin-bottom:18px;}
+.note-box-ico{font-size:18px;flex-shrink:0;margin-top:1px;}
+.note-box-text{font-size:12.5px;color:rgba(243,156,18,.9);line-height:1.6;}
+.note-box-text b{color:#f9c858;}
+
+/* Submit button */
+.btn-submit{width:100%;padding:13px;border-radius:13px;border:none;cursor:pointer;
+  font-family:"Segoe UI",Arial,sans-serif;font-size:14px;font-weight:800;
+  background:linear-gradient(135deg,#00a8ff,#0078d4);color:#fff;
+  box-shadow:0 0 22px rgba(0,168,255,.35);transition:all .22s;
+  display:flex;align-items:center;justify-content:center;gap:9px;}
+.btn-submit:hover{transform:translateY(-2px);box-shadow:0 4px 28px rgba(0,168,255,.55);}
+.btn-submit:active{transform:translateY(0);}
+
+/* ── MY REQUESTS ── */
+.req-empty{text-align:center;padding:52px 20px;}
+.req-empty .ei{font-size:52px;margin-bottom:14px;opacity:.35;}
+.req-empty h3{font-size:16px;font-weight:700;color:var(--text);margin-bottom:8px;}
+.req-empty p{font-size:13px;color:var(--text2);}
+
+.req-list{display:flex;flex-direction:column;gap:12px;}
+.req-card{background:var(--glass);border:1px solid var(--border);border-radius:16px;padding:18px 20px;
+  transition:border .2s,box-shadow .2s;cursor:default;}
+.req-card:hover{border-color:var(--border2);box-shadow:0 4px 20px rgba(0,0,0,.3);}
+.req-card-top{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:10px;gap:12px;}
+.req-card-title{font-size:14px;font-weight:700;color:var(--text);}
+.req-card-id{font-size:11px;color:var(--text3);margin-top:2px;}
+.req-status{display:inline-flex;align-items:center;gap:5px;padding:4px 10px;
+  border-radius:20px;font-size:11px;font-weight:700;flex-shrink:0;}
+.req-status.pending{background:rgba(243,156,18,.14);color:#f9c858;border:1px solid rgba(243,156,18,.25);}
+.req-status.processing{background:rgba(0,168,255,.14);color:#5dc8ff;border:1px solid rgba(0,168,255,.25);}
+.req-status.resolved{background:rgba(46,204,113,.14);color:#2ecc71;border:1px solid rgba(46,204,113,.25);}
+.req-status.closed{background:rgba(255,255,255,.07);color:var(--text3);border:1px solid var(--border);}
+.req-meta{display:flex;align-items:center;gap:14px;font-size:12px;color:var(--text3);flex-wrap:wrap;}
+.req-body{font-size:13px;color:var(--text2);line-height:1.6;margin-top:8px;
+  padding-top:10px;border-top:1px solid rgba(255,255,255,.05);}
+
+/* ── FAQ ── */
+.faq-search-wrap{position:relative;margin-bottom:20px;}
+.faq-search-ico{position:absolute;left:14px;top:50%;transform:translateY(-50%);font-size:15px;color:var(--text3);pointer-events:none;}
+.faq-search{width:100%;padding:12px 14px 12px 40px;border-radius:13px;
+  background:rgba(255,255,255,.07);border:1px solid var(--border2);
+  color:var(--text);font-size:13.5px;font-family:"Segoe UI",Arial,sans-serif;outline:none;transition:border .2s;}
+.faq-search::placeholder{color:var(--text3);}
+.faq-search:focus{border-color:rgba(0,168,255,.45);box-shadow:0 0 0 3px rgba(0,168,255,.08);}
+
+.faq-cats{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:20px;}
+.faq-cat{padding:5px 14px;border-radius:20px;font-size:12px;font-weight:600;cursor:pointer;
+  border:1px solid var(--border);color:var(--text2);background:var(--glass);transition:all .2s;}
+.faq-cat:hover,.faq-cat.active{color:var(--neon);background:rgba(0,255,224,.08);border-color:rgba(0,255,224,.25);}
+
+.faq-group{margin-bottom:20px;}
+.faq-group-title{font-size:11px;font-weight:700;color:var(--text3);text-transform:uppercase;
+  letter-spacing:.8px;margin-bottom:10px;display:flex;align-items:center;gap:8px;}
+.faq-group-title::after{content:"";flex:1;height:1px;background:var(--border);}
+
+.faq-item{background:var(--glass);border:1px solid var(--border);border-radius:14px;
+  overflow:hidden;margin-bottom:8px;transition:border .2s;}
+.faq-item.open{border-color:rgba(0,168,255,.25);}
+.faq-q{display:flex;align-items:center;justify-content:space-between;padding:15px 18px;
+  cursor:pointer;font-size:13.5px;font-weight:600;color:var(--text);user-select:none;transition:background .18s;}
+.faq-q:hover{background:rgba(255,255,255,.04);}
+.faq-q-text{flex:1;padding-right:12px;}
+.faq-chevron{font-size:14px;color:var(--text3);transition:transform .25s;flex-shrink:0;}
+.faq-item.open .faq-chevron{transform:rotate(180deg);color:#5dc8ff;}
+.faq-a{max-height:0;overflow:hidden;transition:max-height .32s ease,padding .22s;
+  font-size:13px;color:var(--text2);line-height:1.7;padding:0 18px;}
+.faq-item.open .faq-a{max-height:400px;padding:0 18px 16px;}
+.faq-a a{color:#5dc8ff;text-decoration:none;}
+.faq-a a:hover{text-decoration:underline;}
+
+/* Hotline card */
+.hotline-card{background:linear-gradient(135deg,rgba(0,168,255,.08),rgba(0,255,224,.04));
+  border:1px solid rgba(0,168,255,.2);border-radius:16px;padding:20px 22px;
+  display:flex;align-items:center;gap:16px;margin-top:22px;}
+.hotline-ico{font-size:32px;flex-shrink:0;}
+.hotline-title{font-size:14px;font-weight:800;color:var(--text);}
+.hotline-sub{font-size:12.5px;color:var(--text2);margin-top:3px;}
+.hotline-nums{display:flex;gap:14px;flex-wrap:wrap;margin-top:8px;}
+.hotline-num{font-size:15px;font-weight:800;color:var(--neon);}
+
+/* Toast */
+.toast-wrap{position:fixed;top:80px;right:24px;z-index:9999;display:flex;flex-direction:column;gap:10px;}
+.toast{padding:12px 16px;border-radius:12px;font-size:13px;font-weight:600;backdrop-filter:blur(12px);
+  box-shadow:0 8px 30px rgba(0,0,0,.4);display:flex;align-items:center;gap:8px;
+  animation:toastIn .3s cubic-bezier(.22,.61,.36,1);min-width:240px;}
+@keyframes toastIn{from{opacity:0;transform:translateX(30px)}to{opacity:1;transform:translateX(0)}}
+@keyframes toastOut{from{opacity:1;transform:translateX(0)}to{opacity:0;transform:translateX(30px)}}
+.toast.success{background:rgba(46,204,113,.16);border:1px solid rgba(46,204,113,.35);color:#2ecc71;}
+.toast.error{background:rgba(231,76,60,.16);border:1px solid rgba(231,76,60,.35);color:#e74c3c;}
+.toast.info{background:rgba(0,168,255,.16);border:1px solid rgba(0,168,255,.35);color:#5dc8ff;}
+</style>
+<script src="/js/api.js"></script>
+</head>
+<body>
+
+<canvas id="gc"></canvas>
+<div class="neb"></div>
+<div class="pl1"></div>
+<div class="pl2"></div>
+<div class="mt"></div><div class="mt"></div>
+<div class="toast-wrap" id="toastWrap"></div>
+
+<!-- HEADER -->
+<header class="hdr">
+  <a class="hdr-logo" href="index.html">
+    <div class="hdr-logo-ic">🚌</div>
+    <div class="hdr-logo-tx">SmartBusAI</div>
+  </a>
+  <nav class="hdr-nav">
+    <a href="index.html">Trang chủ</a>
+    <a href="booking.html">Vé của tôi</a>
+    <a href="profile.html">Tài khoản</a>
+    <a href="hotro.html" class="active">🛟 Hỗ trợ</a>
+  </nav>
+  <div class="hdr-actions">
+    <div class="user-chip">
+      <div class="user-av">👤</div>
+      <span class="user-nm" id="userNameChip">Khách</span>
+    </div>
+    <button class="btn-logout" onclick="logout()">🚪 Đăng xuất</button>
+  </div>
+</header>
+
+<main class="main">
+
+  <!-- Back link -->
+  <a class="back-link" href="index.html">← Quay lại</a>
+
+  <!-- Page hero -->
+  <div class="page-hero">
+    <div class="hero-icon-wrap">🛟</div>
+    <div>
+      <div class="hero-title">Hỗ trợ & Trợ giúp</div>
+      <div class="hero-sub">Chúng tôi luôn sẵn sàng hỗ trợ bạn · Phản hồi trong vòng 24 giờ làm việc</div>
+    </div>
+  </div>
+
+  <!-- Tabs -->
+  <div class="tabs-bar">
+    <button class="tab-btn active" onclick="switchTab('send',this)">
+      <span>📨</span> Gửi yêu cầu
+    </button>
+    <button class="tab-btn" onclick="switchTab('mine',this)">
+      <span>💬</span> Yêu cầu của tôi
+      <span class="tab-badge" id="myReqBadge">0</span>
+    </button>
+    <button class="tab-btn" onclick="switchTab('faq',this)">
+      <span>❓</span> Câu hỏi thường gặp
+    </button>
+  </div>
+
+  <!-- ═══ TAB 1: GỬI YÊU CẦU ═══ -->
+  <div class="tab-panel active" id="panel-send">
+    <div class="form-card">
+      <div class="form-card-head">
+        <span style="font-size:20px;">📨</span>
+        <h3>Gửi yêu cầu hỗ trợ mới</h3>
+      </div>
+      <div class="form-card-body">
+
+        <div class="form-group">
+          <label>Loại yêu cầu <span class="req">*</span></label>
+          <select class="form-control" id="reqType">
+            <option value="">Chọn loại yêu cầu</option>
+            <option value="general">❓ Thắc mắc chung</option>
+            <option value="booking">🎫 Vấn đề đặt vé</option>
+            <option value="payment">💳 Vấn đề thanh toán</option>
+            <option value="refund">💰 Hoàn tiền / Hủy vé</option>
+            <option value="technical">🔧 Lỗi kỹ thuật</option>
+            <option value="complaint">⚠️ Khiếu nại dịch vụ</option>
+            <option value="other">📝 Khác</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label>Tiêu đề <span class="req">*</span></label>
+          <input class="form-control" id="reqTitle" type="text" placeholder="Nhập tiêu đề yêu cầu của bạn...">
+        </div>
+
+        <div class="form-group">
+          <label>Mã vé liên quan (nếu có)</label>
+          <input class="form-control" id="reqBookingId" type="text" placeholder="VD: BK123456">
+        </div>
+
+        <div class="form-group">
+          <label>Nội dung chi tiết <span class="req">*</span></label>
+          <textarea class="form-control" id="reqContent" placeholder="Mô tả chi tiết vấn đề của bạn...&#10;&#10;Vui lòng cung cấp:&#10;• Thời gian xảy ra&#10;• Chuyến xe liên quan&#10;• Các bước bạn đã thực hiện"></textarea>
+        </div>
+
+        <div class="note-box">
+          <span class="note-box-ico">💡</span>
+          <div class="note-box-text">
+            <b>Lưu ý:</b> Yêu cầu của bạn sẽ được chuyển đến bộ phận hỗ trợ. Chúng tôi sẽ phản hồi trong vòng <b>24 giờ làm việc</b>.
+          </div>
+        </div>
+
+        <button class="btn-submit" onclick="submitRequest()">
+          <span>📨</span> Gửi yêu cầu hỗ trợ
+        </button>
+
+      </div>
+    </div>
+
+    <!-- Hotline -->
+    <div class="hotline-card" style="margin-top:16px;">
+      <div class="hotline-ico">📞</div>
+      <div style="flex:1;">
+        <div class="hotline-title">Cần hỗ trợ khẩn cấp?</div>
+        <div class="hotline-sub">Liên hệ trực tiếp qua hotline hoặc email</div>
+        <div class="hotline-nums">
+          <span class="hotline-num">1900 6789</span>
+          <span style="color:var(--text3);font-size:13px;">·</span>
+          <span style="font-size:13.5px;color:var(--text2);"><a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="ef9c9a9f9f809d9baf9c828e9d9b8d9a9c8e86c19981">[email&#160;protected]</a></span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══ TAB 2: YÊU CẦU CỦA TÔI ═══ -->
+  <div class="tab-panel" id="panel-mine">
+    <div id="myReqList"></div>
+  </div>
+
+  <!-- ═══ TAB 3: FAQ ═══ -->
+  <div class="tab-panel" id="panel-faq">
+
+    <!-- Search -->
+    <div class="faq-search-wrap">
+      <span class="faq-search-ico">🔍</span>
+      <input class="faq-search" id="faqSearch" placeholder="Tìm câu hỏi..." oninput="filterFaq()">
+    </div>
+
+    <!-- Category chips -->
+    <div class="faq-cats">
+      <div class="faq-cat active" onclick="setFaqCat('',this)">Tất cả</div>
+      <div class="faq-cat" onclick="setFaqCat('booking',this)">🎫 Đặt vé</div>
+      <div class="faq-cat" onclick="setFaqCat('payment',this)">💳 Thanh toán</div>
+      <div class="faq-cat" onclick="setFaqCat('refund',this)">💰 Hoàn tiền</div>
+      <div class="faq-cat" onclick="setFaqCat('account',this)">👤 Tài khoản</div>
+      <div class="faq-cat" onclick="setFaqCat('technical',this)">🔧 Kỹ thuật</div>
+    </div>
+
+    <!-- FAQ items -->
+    <div id="faqContainer"></div>
+
+    <!-- Hotline -->
+    <div class="hotline-card">
+      <div class="hotline-ico">🤝</div>
+      <div>
+        <div class="hotline-title">Không tìm thấy câu trả lời?</div>
+        <div class="hotline-sub">Liên hệ trực tiếp hoặc gửi yêu cầu hỗ trợ</div>
+        <div class="hotline-nums" style="margin-top:10px;">
+          <button onclick="switchTab('send',null)" style="background:rgba(0,168,255,.15);border:1px solid rgba(0,168,255,.3);
+            color:#5dc8ff;padding:7px 16px;border-radius:10px;font-size:12.5px;font-weight:700;cursor:pointer;
+            font-family:"Segoe UI",Arial,sans-serif;transition:all .2s;">📨 Gửi yêu cầu</button>
+          <span style="color:var(--text2);font-size:13px;line-height:32px;">Hotline: <b style="color:var(--neon);">1900 6789</b></span>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</main>
+
+<script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script>
+/* ── Galaxy Canvas ── */
+(function(){
+  const cv=document.getElementById("gc"),ctx=cv.getContext("2d");
+  function mb32(s){s=s>>>0;return()=>{s+=0x6D2B79F5;let t=Math.imul(s^s>>>15,1|s);t^=t+Math.imul(t^t>>>7,61|t);return((t^t>>>14)>>>0)/4294967296;};}
+  function draw(){
+    cv.width=innerWidth;cv.height=innerHeight;
+    const g=ctx.createRadialGradient(cv.width*.5,cv.height*.3,0,cv.width*.5,cv.height*.3,cv.width*.85);
+    g.addColorStop(0,"#0c1830");g.addColorStop(.5,"#080f1c");g.addColorStop(1,"#04080f");
+    ctx.fillStyle=g;ctx.fillRect(0,0,cv.width,cv.height);
+    const rng=mb32(cv.width*cv.height+13);
+    const n=Math.min(320,Math.floor(cv.width*cv.height/5000));
+    for(let i=0;i<n;i++){
+      const x=rng()*cv.width,y=rng()*cv.height,r=rng()*1.4+.15,a=rng()*.7+.2;
+      const h=rng()<.11?180:rng()<.07?265:0;
+      ctx.beginPath();ctx.arc(x,y,r,0,Math.PI*2);
+      ctx.fillStyle=h===180?`rgba(0,255,224,${a*.5})`:h===265?`rgba(170,148,255,${a*.42})`:`rgba(255,255,255,${a})`;ctx.fill();
+    }
+    [{x:.10,y:.18,r:.14,c:"rgba(0,190,255,0.055)"},{x:.78,y:.68,r:.14,c:"rgba(120,75,240,0.065)"}].forEach(s=>{
+      const ng=ctx.createRadialGradient(s.x*cv.width,s.y*cv.height,0,s.x*cv.width,s.y*cv.height,s.r*cv.width);
+      ng.addColorStop(0,s.c);ng.addColorStop(1,"transparent");ctx.fillStyle=ng;ctx.fillRect(0,0,cv.width,cv.height);
+    });
+  }
+  draw();let rt;window.addEventListener("resize",()=>{clearTimeout(rt);rt=setTimeout(draw,200);});
+})();
+
+document.addEventListener("click",e=>{
+  const a=e.target.closest("a[href]");if(!a)return;
+  const h=a.getAttribute("href");if(!h||h==="#"||h.startsWith("http"))return;
+  e.preventDefault();
+  document.body.style.transition="opacity .2s";document.body.style.opacity="0";
+  setTimeout(()=>{window.location.href=h;},210);
+});
+
+const API="/api";
+function logout(){localStorage.clear();window.location.href="../auth/login.html";}
+
+function toast(msg,type="info"){
+  const w=document.getElementById("toastWrap");
+  const el=document.createElement("div");el.className=`toast ${type}`;
+  el.innerHTML=`<span>${{success:"✅",error:"❌",info:"ℹ️"}[type]}</span><span>${msg}</span>`;
+  w.appendChild(el);
+  setTimeout(()=>{el.style.animation="toastOut .3s ease forwards";setTimeout(()=>el.remove(),320);},4000);
+}
+
+/* ── User init ── */
+(function(){
+  try{
+    const u=JSON.parse(localStorage.getItem("user")||"{}");
+    if(u?.full_name)document.getElementById("userNameChip").textContent=u.full_name;
+  }catch{}
+})();
+
+/* ── Tabs ── */
+function switchTab(name,btn){
+  document.querySelectorAll(".tab-panel").forEach(p=>p.classList.remove("active"));
+  document.querySelectorAll(".tab-btn").forEach(b=>b.classList.remove("active"));
+  document.getElementById("panel-"+name).classList.add("active");
+  if(btn)btn.classList.add("active");
+  else{
+    const btns=document.querySelectorAll(".tab-btn");
+    if(name==="send")btns[0].classList.add("active");
+    else if(name==="mine")btns[1].classList.add("active");
+    else btns[2].classList.add("active");
+  }
+  // Luôn load từ server khi mở tab "mine"
+  if(name==="mine") loadMyRequests();
+  if(name==="faq") renderFaq();
+}
+
+/* ── Submit request ── */
+let myRequests=[];
+
+async function submitRequest(){
+  const type=document.getElementById("reqType").value;
+  const title=document.getElementById("reqTitle").value.trim();
+  const content=document.getElementById("reqContent").value.trim();
+  const bookingId=document.getElementById("reqBookingId").value.trim();
+
+  if(!type){toast("Vui lòng chọn loại yêu cầu","error");return;}
+  if(!title){toast("Vui lòng nhập tiêu đề yêu cầu","error");return;}
+  if(!content){toast("Vui lòng nhập nội dung chi tiết","error");return;}
+
+  // Kiểm tra đăng nhập
+  let user=null;
+  try{user=JSON.parse(localStorage.getItem("user"));}catch{}
+  if(!user?.user_id){
+    toast("Bạn cần đăng nhập để gửi yêu cầu","error");
+    setTimeout(()=>{window.location.href="../auth/login.html";},1500);
+    return;
+  }
+
+  // Map type → ENUM của server (GENERAL,BOOKING,PAYMENT,REFUND,TECHNICAL,COMPLAINT,OTHER)
+  const TYPE_MAP={
+    general:"GENERAL",booking:"BOOKING",payment:"PAYMENT",
+    refund:"REFUND",technical:"TECHNICAL",complaint:"COMPLAINT",other:"OTHER"
+  };
+
+  const payload={
+    user_id: user.user_id,
+    booking_id: bookingId ? (parseInt(bookingId.replace(/\D/g,""))||null) : null,
+    type: TYPE_MAP[type] || type.toUpperCase(),
+    title,
+    content
+  };
+
+  // Disable button tránh double-submit
+  const submitBtn=document.querySelector(".btn-submit");
+  if(submitBtn){submitBtn.disabled=true;submitBtn.innerHTML="⏳ Đang gửi...";}
+
+  try{
+    const res=await fetch(`${API}/support/requests`,{
+      method:"POST",
+      headers:{"Content-Type":"application/json"},
+      body:JSON.stringify(payload),
+      signal:AbortSignal.timeout(8000)
+    });
+    const data=await res.json();
+    if(!res.ok) throw new Error(data.message||`HTTP ${res.status}`);
+
+    // Thêm vào local cache để hiện ngay
+    myRequests.unshift({
+      id: data.request_id ? `REQ${data.request_id}` : `REQ${Date.now()}`,
+      type, title, content,
+      booking_id: bookingId||null,
+      status:"pending",
+      created_at:new Date().toISOString(),
+    });
+    document.getElementById("myReqBadge").textContent=myRequests.length;
+
+    // Clear form
+    document.getElementById("reqType").value="";
+    document.getElementById("reqTitle").value="";
+    document.getElementById("reqContent").value="";
+    document.getElementById("reqBookingId").value="";
+
+    toast("Đã gửi yêu cầu hỗ trợ thành công 🙏","success");
+    setTimeout(()=>switchTab("mine",null),1200);
+
+  }catch(err){
+    console.error("[submitRequest]",err);
+    toast("Không gửi được: "+err.message,"error");
+  }finally{
+    if(submitBtn){submitBtn.disabled=false;submitBtn.innerHTML="<span>📨</span> Gửi yêu cầu hỗ trợ";}
+  }
+}
+
+/* ── My requests — load từ server ── */
+const TYPE_LABELS={
+  general:"❓ Thắc mắc chung",booking:"🎫 Đặt vé",payment:"💳 Thanh toán",
+  refund:"💰 Hoàn tiền",technical:"🔧 Kỹ thuật",complaint:"⚠️ Khiếu nại",other:"📝 Khác"
+};
+const STATUS_MAP={
+  pending:{cls:"pending",label:"⏳ Chờ xử lý"},
+  processing:{cls:"processing",label:"🔄 Đang xử lý"},
+  resolved:{cls:"resolved",label:"✅ Đã giải quyết"},
+  closed:{cls:"closed",label:"🔒 Đã đóng"},
+};
+function fmtDate(s){try{return new Date(s).toLocaleString("vi-VN",{day:"2-digit",month:"2-digit",year:"numeric",hour:"2-digit",minute:"2-digit"});}catch{return s;}}
+
+async function loadMyRequests(){
+  let user=null;
+  try{user=JSON.parse(localStorage.getItem("user"));}catch{}
+  if(!user?.user_id){renderMyRequests();return;}
+  try{
+    const res=await fetch(`${API}/support/user/${user.user_id}`,{signal:AbortSignal.timeout(5000)});
+    if(!res.ok)throw new Error();
+    const data=await res.json();
+    myRequests=Array.isArray(data)?data:[];
+  }catch{
+    // Giữ nguyên local cache nếu server fail
+  }
+  renderMyRequests();
+}
+
+function renderMyRequests(){
+  const container=document.getElementById("myReqList");
+  document.getElementById("myReqBadge").textContent=myRequests.length;
+  if(!myRequests.length){
+    container.innerHTML=`<div class="req-empty">
+      <div class="ei">💬</div>
+      <h3>Chưa có yêu cầu nào</h3>
+      <p>Hãy gửi yêu cầu hỗ trợ nếu bạn gặp vấn đề</p>
+    </div>`;return;
+  }
+  container.innerHTML=`<div class="req-list">${myRequests.map(r=>{
+    const st=STATUS_MAP[(r.status||"").toLowerCase()]||STATUS_MAP.pending;
+    const typeKey=(r.type||"").toLowerCase();
+    return`<div class="req-card">
+      <div class="req-card-top">
+        <div>
+          <div class="req-card-title">${r.title||"—"}</div>
+          <div class="req-card-id">${r.id||""} · ${TYPE_LABELS[typeKey]||r.type||"—"}</div>
+        </div>
+        <span class="req-status ${st.cls}">${st.label}</span>
+      </div>
+      <div class="req-meta">
+        <span>📅 ${fmtDate(r.created_at)}</span>
+        ${r.booking_id?`<span>🎫 ${r.booking_id}</span>`:""}
+      </div>
+      ${r.content?`<div class="req-body">${r.content.slice(0,200)}${r.content.length>200?"…":""}</div>`:""}
+      ${r.admin_reply?`<div style="margin-top:10px;padding:10px 12px;background:rgba(46,204,113,.07);border:1px solid rgba(46,204,113,.2);border-radius:10px;font-size:12.5px;color:#2ecc71;"><b>💬 Phản hồi:</b> ${r.admin_reply}</div>`:""}
+    </div>`;
+  }).join("")}</div>`;
+}
+
+/* ── FAQ Data ── */
+const FAQ_DATA=[
+  {cat:"booking",q:"Làm thế nào để đặt vé xe?",a:"Bạn nhập điểm đi, điểm đến và ngày muốn đi tại trang chủ, sau đó chọn chuyến xe và ghế phù hợp. Tiếp theo tiến hành thanh toán để hoàn tất đặt vé."},
+  {cat:"booking",q:"Tôi có thể đặt vé trước bao nhiêu ngày?",a:"Bạn có thể đặt vé trước tối đa 30 ngày so với ngày khởi hành. Ghế được giữ trong 15 phút sau khi chọn, nếu chưa thanh toán hệ thống sẽ tự động hủy."},
+  {cat:"booking",q:"Số lượng vé tối đa mỗi lần đặt là bao nhiêu?",a:"Mỗi lần đặt bạn có thể chọn tối đa 4 ghế. Nếu cần đặt nhiều hơn, vui lòng thực hiện thêm giao dịch."},
+  {cat:"payment",q:"Hệ thống hỗ trợ những phương thức thanh toán nào?",a:"SmartBusAI hỗ trợ thanh toán qua: MoMo, ZaloPay và chuyển khoản ngân hàng (BANK). Tất cả giao dịch được mã hóa an toàn."},
+  {cat:"payment",q:"Thanh toán thất bại thì ghế có bị mất không?",a:"Nếu thanh toán thất bại, ghế sẽ được giải phóng sau khoảng 10 phút. Bạn có thể thực hiện lại giao dịch hoặc thử phương thức thanh toán khác."},
+  {cat:"payment",q:"Tôi có nhận được xác nhận sau khi thanh toán không?",a:"Có, sau khi thanh toán thành công hệ thống sẽ gửi email xác nhận kèm mã vé đến địa chỉ email đăng ký tài khoản của bạn."},
+  {cat:"refund",q:"Tôi có thể hủy vé và hoàn tiền không?",a:"Bạn có thể hủy vé trước 24 giờ so với giờ khởi hành. Chính sách hoàn tiền: hủy trước 48h — hoàn 100%; hủy từ 24–48h — hoàn 70%; hủy dưới 24h — không hoàn tiền."},
+  {cat:"refund",q:"Tiền hoàn sẽ được trả về đâu và trong bao lâu?",a:"Tiền sẽ được hoàn về phương thức thanh toán ban đầu trong vòng 3–7 ngày làm việc tùy ngân hàng/ví điện tử."},
+  {cat:"refund",q:"Chuyến xe bị hủy thì tôi có được hoàn tiền không?",a:"Có, nếu nhà xe hủy chuyến, bạn sẽ được hoàn 100% và nhận thông báo qua email ngay khi chuyến bị hủy."},
+  {cat:"account",q:"Tôi quên mật khẩu thì làm sao?",a:'Tại trang đăng nhập, nhấn <a href="../auth/login.html">Quên mật khẩu</a> và nhập email đã đăng ký. Hệ thống sẽ gửi link đặt lại mật khẩu.'},
+  {cat:"account",q:"Làm thế nào để cập nhật thông tin cá nhân?",a:'Đăng nhập rồi vào mục <a href="profile.html">Tài khoản</a>, chọn tab Thông tin cá nhân và cập nhật thông tin bạn muốn thay đổi.'},
+  {cat:"technical",q:"Ứng dụng bị lỗi không tải được chuyến xe?",a:"Bạn thử: (1) Làm mới trang (Ctrl+F5), (2) Xóa cache trình duyệt, (3) Thử trình duyệt khác. Nếu vẫn lỗi, hãy gửi yêu cầu hỗ trợ kèm mô tả lỗi chi tiết."},
+  {cat:"technical",q:"Tại sao trang thanh toán bị lỗi?",a:"Lỗi thanh toán thường do kết nối mạng không ổn định hoặc thẻ/ví hết hạn. Kiểm tra kết nối mạng và thử lại. Nếu vẫn lỗi hãy liên hệ hotline 1900 6789."},
+];
+
+let faqCat="", faqQuery="";
+
+function setFaqCat(cat,el){
+  faqCat=cat;
+  document.querySelectorAll(".faq-cat").forEach(c=>c.classList.remove("active"));
+  el.classList.add("active");
+  renderFaq();
+}
+function filterFaq(){faqQuery=document.getElementById("faqSearch").value.toLowerCase();renderFaq();}
+
+function renderFaq(){
+  const filtered=FAQ_DATA.filter(f=>
+    (!faqCat||f.cat===faqCat)&&
+    (!faqQuery||f.q.toLowerCase().includes(faqQuery)||f.a.toLowerCase().includes(faqQuery))
+  );
+
+  // Group by cat
+  const catNames={booking:"🎫 Đặt vé",payment:"💳 Thanh toán",refund:"💰 Hoàn tiền & Hủy vé",account:"👤 Tài khoản",technical:"🔧 Kỹ thuật"};
+  const groups={};
+  filtered.forEach(f=>{if(!groups[f.cat])groups[f.cat]=[];groups[f.cat].push(f);});
+
+  const container=document.getElementById("faqContainer");
+  if(!filtered.length){
+    container.innerHTML=`<div style="text-align:center;padding:40px 20px;color:var(--text3);">
+      <div style="font-size:36px;margin-bottom:12px;opacity:.4;">🔍</div>
+      <div>Không tìm thấy câu hỏi phù hợp</div></div>`;return;
+  }
+
+  container.innerHTML=Object.entries(groups).map(([cat,items])=>`
+    <div class="faq-group">
+      <div class="faq-group-title">${catNames[cat]||cat}</div>
+      ${items.map((f,i)=>`
+        <div class="faq-item" id="faq-${cat}-${i}">
+          <div class="faq-q" onclick="toggleFaq('faq-${cat}-${i}')">
+            <span class="faq-q-text">${f.q}</span>
+            <span class="faq-chevron">▼</span>
+          </div>
+          <div class="faq-a">${f.a}</div>
+        </div>`).join("")}
+    </div>`).join("");
+}
+
+function toggleFaq(id){
+  document.getElementById(id)?.classList.toggle("open");
+}
+
+/* ── Init ── */
+document.getElementById("myReqBadge").textContent=myRequests.length;
+renderFaq();
+</script>
+</body>
+</html>
